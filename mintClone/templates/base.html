@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% import "macros.html" as macros with context %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="static/favicon.svg" type="image/x-icon"/>
+  <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" rel="stylesheet">
+  <script crossorigin="anonymous" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script crossorigin="anonymous" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a href="{{ url_for('index') }}" class="navbar-brand">
+    {{ macros.navbar_icon(color='lightgray') }}
+  </a>
+  <button data-toggle="collapse" data-target="#nav_content" class="navbar-toggler" type="button">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="nav_content">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href=""></a>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link" href="" data-toggle="dropdown">
+          {{ macros.user_icon(color='lightgray') }}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+          {% call macros.link(class='dropdown-item', modal_id='login') %}Log-In{% endcall %}
+          {% call macros.link(class='dropdown-item', modal_id='signup') %}Sign-Up{% endcall %}
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+{% call macros.modal('login') %}
+{{ macros.paragraph('Log In', class='text-center m-3', size=3) }}
+{{ macros.login_form() }}
+{% endcall %}
+
+{% call macros.modal('signup') %}
+{{ macros.paragraph('Sign Up', class='text-center m-3', size=3) }}
+{{ macros.user_add_form() }}
+{% endcall %}
+<div class="container">
+  {% block body %}
+  {% endblock %}
+</div>
+</html>
