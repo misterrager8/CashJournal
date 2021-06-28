@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block body %}
+<title>Account</title>
+<div class="text-center m-3">
+  {{ macros.paragraph(account.name, class='mb-0', size=3) }}
+  {% call macros.link(modal_id='edit_account') %}{{ macros.edit_icon(size=30) }}{% endcall %}
+  {% call macros.link(modal_id='add_txn') %}{{ macros.add_icon(size=30) }}{% endcall %}
+</div>
+
+{% for i in account.txns %}
+{{ macros.txn_list_item(i) }}
+{% endfor %}
+
+{% call macros.modal('edit_account') %}
+{{ macros.paragraph('Edit Account', class='text-center m-3', size=3) }}
+{{ macros.account_edit_form(account) }}
+{% endcall %}
+
+{% call macros.modal('add_txn') %}
+{{ macros.paragraph('Add Transaction', class='text-center m-3', size=3) }}
+{{ macros.txn_add_form(account) }}
+{% endcall %}
+
+{% endblock %}
