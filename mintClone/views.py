@@ -11,8 +11,8 @@ def index():
 
 @app.route("/login")
 def login():
-    # username = request.form["username"]
-    # password = request.form["password"]
+    username = request.form["username"]
+    password = request.form["password"]
 
     return redirect(url_for("index"))
 
