@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block body %}
+<title>Profile</title>
+<div class="text-center m-3">
+  {{ macros.paragraph(current_user.full_name, class='mb-0', size=3) }}
+  {% call macros.link(modal_id='edit_user') %}{{ macros.edit_icon(size=30) }}{% endcall %}
+</div>
+
+{% call macros.modal('edit_user') %}
+{{ macros.paragraph('Edit Profile', class='text-center m-3', size=3) }}
+{{ macros.user_edit_form(current_user) }}
+{% endcall %}
+
+{% endblock %}
