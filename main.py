@@ -1,4 +1,7 @@
-from mintClone import views
+import config
+from mintClone import create_app
+
+app = create_app(config)
 
 if __name__ == "__main__":
-    views.app.run(debug=True)
+    app.run()

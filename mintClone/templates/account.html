@@ -3,24 +3,19 @@
 
 {% block body %}
 <title>Account</title>
-<div class="text-center m-3">
-  {{ macros.paragraph(account.name, class='mb-0', size=3) }}
-  {% call macros.link(modal_id='edit_account') %}{{ macros.edit_icon(size=30) }}{% endcall %}
-  {% call macros.link(modal_id='add_txn') %}{{ macros.add_icon(size=30) }}{% endcall %}
+<div id="txns">
+  <div class="text-center">
+    <p class="h1" contenteditable="true">{{ account.name }}</p>
+    <p class="h3" contenteditable="true">{{ '${:,.2f}'.format(account.balance) }}</p>
+    <p class="h5" contenteditable="true">{{ account.type }}</p>
+    <span id="progress" style="display:none"></span>
+  </div>
+  <a class="badge badge-custom link" onclick="toggleDiv('txnCreateForm')">+ New Transaction</a>
+  <div id="txnCreateForm" class="pt-2" style="display:none">{{ macros.txn_create_form(account) }}</div>
+  <div class="row">
+    {% for i in account.txns %}
+    {{ macros.txn_card(i) }}
+    {% endfor %}
+  </div>
 </div>
-
-{% for i in account.txns %}
-{{ macros.txn_list_item(i) }}
-{% endfor %}
-
-{% call macros.modal('edit_account') %}
-{{ macros.paragraph('Edit Account', class='text-center m-3', size=3) }}
-{{ macros.account_edit_form(account) }}
-{% endcall %}
-
-{% call macros.modal('add_txn') %}
-{{ macros.paragraph('Add Transaction', class='text-center m-3', size=3) }}
-{{ macros.txn_add_form(account) }}
-{% endcall %}
-
 {% endblock %}

@@ -1,10 +1,23 @@
 {% extends "base.html" %}
-{% import "macros.html" as macros %}
+{% import "macros.html" as macros with context %}
 
 {% block body %}
-<title>Home</title>
-<div>
-  {{ macros.paragraph('Home', class='text-center m-3', size=3) }}
+<title>mintClone</title>
 
+{% if not current_user.is_anonymous %}
+<a class="link badge badge-custom" onclick="toggleDiv('accountCreateForm')">+ New Account</a>
+<div style="display:none" id="accountCreateForm" class="pt-2">{{ macros.account_create_form() }}</div>
+
+<div id="accounts" class="row">
+  {% for i in current_user.accounts %}
+  {{ macros.account_card(i) }}
+  {% endfor %}
 </div>
+{% else %}
+<div class="text-center opacity-25">
+  {{ macros.user_icon(size=200) }}
+  <p class="h1">Not Signed In</p>
+</div>
+{% endif %}
+
 {% endblock %}

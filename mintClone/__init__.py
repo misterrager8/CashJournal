@@ -1,20 +1,23 @@
-import os
-
-import dotenv
+import pymysql
 from flask import Flask
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+pymysql.install_as_MySQLdb()
 
-dotenv.load_dotenv()
+db = SQLAlchemy()
+login_manager = LoginManager()
 
-db_host = os.getenv("host")
-db_user = os.getenv("user")
-db_pass = os.getenv("passwd")
-db_name = os.getenv("db")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{db_user}:{db_pass}@{db_host}/{db_name}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280}
+def create_app(config):
+    app = Flask(__name__)
+    app.config.from_object(config)
+    db.init_app(app)
+    login_manager.init_app(app)
 
-db = SQLAlchemy(app)
+    with app.app_context():
+        from . import views
+
+        # db.drop_all()
+        db.create_all()
+        return app

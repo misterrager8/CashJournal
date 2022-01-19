@@ -1,173 +1,93 @@
-{% macro paragraph(txt, class='', color='black', size=1) %}
-<p class="{{ class }}" style="color:{{ color }}; font-size:{{ size }}em">{{ txt }}</p>
+<!--ICONS-->
+
+{% macro logo(size=30, color='currentcolor', class='') %}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-coin {{ class }}" viewBox="0 0 16 16">
+  <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518l.087.02z"/>
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+  <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11zm0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/>
+</svg>
 {% endmacro %}
 
-{% macro modal(id, class='', lg=false) %}
-<div class="modal" id="{{ id }}">
-  <div class="modal-dialog {{ class }} {% if lg %}modal-lg{% endif %}">
-    <div class="modal-content p-3">
-      {{ caller() }}
+{% macro user_icon(size=20, color='currentcolor', class='') %}
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-person-fill {{ class }}" viewBox="0 0 20 20">
+  <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+</svg>
+{% endmacro %}
+
+<!--CARDS-->
+
+{% macro account_card(account) %}
+<div class="card col-xl-4">
+  <div class="card-body">
+    <a class="link text-center" href="{{ url_for('account', id_=account.id) }}">
+      <span class="d-block h2">{{ '${:,.2f}'.format(account.balance) }}</span>
+      <span class="d-block h4">{{ account.name }}</span>
+    </a>
+    <span class="small d-block fw-bold">{{ account.type }}</span>
+    <span class="small d-block fst-italic">{{ 'Added %s' % account.date_added.strftime('%B %d, %Y') }}</span>
+    <a class="link badge bg-danger" onclick="toggleDiv('delete' + {{ account.id }})">Delete</a>
+    <a style="display:none" class="link badge text-danger" onclick="accountDelete({{ account.id }})" id="delete{{ account.id }}">Delete?</a>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro txn_card(txn) %}
+<div class="card col-xl-12">
+  <div class="card-body">
+    {% if txn.amount > 0.00 %}<span class="h1 text-danger me-3">{{ '- ${:,.2f}'.format(txn.amount) }}</span>{% else %}<span class="h1 text-success me-3">{{ '+ ${:,.2f}'.format(txn.amount) }}</span>{% endif %}
+    <span class="h3 me-3">{{ txn.recipient }}</span>
+    <span class="h5 me-3">{{ txn.description or '' }}</span>
+    <span class="h6 me-3">{{ txn.timestamp.strftime('%B %d, %Y') }}</span>
+    <div class="float-end">
+      <a class="link badge bg-danger" onclick="toggleDiv('delete' + {{ txn.id }})">Delete</a>
+      <a style="display:none" class="link badge text-danger" onclick="txnDelete({{ txn.id }})" id="delete{{ txn.id }}">Delete?</a>
     </div>
   </div>
 </div>
 {% endmacro %}
 
-{% macro link(class='', newtab=false, modal_id='', color='black', href='') %}
-<!--suppress HtmlUnknownAttribute -->
-<a class="{{ class }}"
-   {% if newtab %}target="_blank" {% endif %}
-   {% if modal_id %} data-toggle="modal" data-target="#{{ modal_id }}" {% endif %}
-   style="color:{{ color }};text-decoration:none" href="{{ href }}">
-  {{ caller() }}
-</a>
+<!--FORMS-->
+
+{% macro account_create_form() %}
+<form onsubmit="event.preventDefault(); accountCreate(); this.reset();" class="input-group">
+  <input placeholder="Account Name" id="name" class="form-control" autocomplete="off">
+  <input placeholder="Balance" id="balance" value="0.00" class="form-control" autocomplete="off" type="number" step="0.01">
+  <select id="type_" class="form-control">
+    <option>Account Type</option>
+    <option value="Checking">Checking</option>
+    <option value="Saving">Saving</option>
+    <option value="Credit">Credit</option>
+    <option value="Other">Other</option>
+  </select>
+  <button class="btn btn-custom">Create Account</button>
+</form>
 {% endmacro %}
 
-{% macro text_field(placeholder='', class='', value='', name='') %}
-<input name="{{ name }}" type="text" placeholder="{{ placeholder }}" autocomplete="off" class="form-control {{ class }}" value="{{ value }}">
-{% endmacro %}
-
-{% macro button(txt, bg_color='black', txt_color='white') %}
-<button type="submit" class="btn btn-lg w-100" style="background-color:{{ bg_color }}; color:{{ txt_color }}">{{ txt }}</button>
-{% endmacro %}
-
-{% macro navbar_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-currency-dollar" viewBox="0 0 16 16">
-  <path d="M4 10.781c.148 1.667 1.513 2.85 3.591 3.003V15h1.043v-1.216c2.27-.179 3.678-1.438 3.678-3.3 0-1.59-.947-2.51-2.956-3.028l-.722-.187V3.467c1.122.11 1.879.714 2.07 1.616h1.47c-.166-1.6-1.54-2.748-3.54-2.875V1H7.591v1.233c-1.939.23-3.27 1.472-3.27 3.156 0 1.454.966 2.483 2.661 2.917l.61.162v4.031c-1.149-.17-1.94-.8-2.131-1.718H4zm3.391-3.836c-1.043-.263-1.6-.825-1.6-1.616 0-.944.704-1.641 1.8-1.828v3.495l-.2-.05zm1.591 1.872c1.287.323 1.852.859 1.852 1.769 0 1.097-.826 1.828-2.2 1.939V8.73l.348.086z"/>
-</svg>
-{% endmacro %}
-
-{% macro edit_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-pencil-square" viewBox="0 0 16 16">
-  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-</svg>
-{% endmacro %}
-
-{% macro user_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-person-square" viewBox="0 0 16 16">
-  <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1v-1c0-1-1-4-6-4s-6 3-6 4v1a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12z"/>
-</svg>
-{% endmacro %}
-
-{% macro delete_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-x-square" viewBox="0 0 16 16">
-  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-</svg>
-{% endmacro %}
-
-{% macro add_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-plus-square" viewBox="0 0 16 16">
-  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
-  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-</svg>
-{% endmacro %}
-
-{% macro import_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-upload" viewBox="0 0 16 16">
-  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-  <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
-</svg>
-{% endmacro %}
-
-{% macro export_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-download" viewBox="0 0 16 16">
-  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-</svg>
-{% endmacro %}
-
-{% macro transfer_icon(size=20, color='black') %}
-<svg xmlns="http://www.w3.org/2000/svg" width="{{ size }}" height="{{ size }}" fill="{{ color }}" class="bi bi-arrow-left-right" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/>
-</svg>
+{% macro txn_create_form(account) %}
+<form onsubmit="event.preventDefault(); txnCreate({{ account.id }}); this.reset();" class="input-group">
+  <input placeholder="Recipient" id="recipient" class="form-control" autocomplete="off">
+  <input placeholder="Amount" id="amount" value="0.00" class="form-control" autocomplete="off" type="number" step="0.01">
+  <input placeholder="Description" id="description" class="form-control" autocomplete="off">
+  <input type="datetime-local" id="timestamp" class="form-control" autocomplete="off">
+  <button class="btn btn-custom">Create Account</button>
+</form>
 {% endmacro %}
 
 {% macro login_form() %}
-<form class="form-group" method="POST" action="{{ url_for('login') }}">
-  {{ text_field(placeholder='Username', name='username', class='mb-2') }}
-  <input name="password" type="password" placeholder="Password" autocomplete="off" class="form-control mb-2">
-  {{ button('Enter') }}
+<form method="POST" action="{{ url_for('login') }}">
+  <input name="email" class="form-control mb-2" autocomplete="off" placeholder="E-mail">
+  <input type="password" name="password" class="form-control mb-2" autocomplete="off" placeholder="Password">
+  <button class="btn btn-custom w-100">Log In</button>
 </form>
 {% endmacro %}
 
-{% macro user_add_form() %}
-<form class="form-group" method="POST" action="{{ url_for('user_add') }}">
-  {{ text_field(placeholder='Full Name', name='full_name', class='mb-2') }}
-  {{ text_field(placeholder='E-Mail Address', name='email', class='mb-2') }}
-  {{ text_field(placeholder='Username', name='username', class='mb-2') }}
-  <input name="password" type="password" placeholder="Password" autocomplete="off" class="form-control mb-2">
-  <input name="dob" type="date" autocomplete="off" class="form-control mb-2">
-  {{ button('Enter') }}
-</form>
-{% endmacro %}
-
-{% macro user_edit_form(user) %}
-<form class="form-group" method="POST" action="{{ url_for('user_edit', id_=user.id) }}">
-  {{ text_field(placeholder='Full Name', name='full_name', class='mb-2') }}
-  {{ text_field(placeholder='E-Mail Address', name='email', class='mb-2') }}
-  {{ text_field(placeholder='Username', name='username', class='mb-2') }}
-  <input name="password" type="password" placeholder="Password" autocomplete="off" class="form-control mb-2">
-  <input name="dob" type="date" autocomplete="off" class="form-control mb-2">
-  {{ button('Enter') }}
-</form>
-{% endmacro %}
-
-{% macro account_add_form(user) %}
-<form class="form-group" method="POST" action="{{ url_for('account_add', id_=user.id) }}">
-  {{ text_field(placeholder='Account Name', name='acc_name', class='mb-2') }}
-  <select name="type" class="form-control mb-2">
-    <option selected>Account Type</option>
-    <option value="Checkings">Checkings</option>
-    <option value="Savings">Savings</option>
-    <option value="Credit">Credit</option>
-  </select>
-  <input name="balance" type="number" autocomplete="off" class="form-control mb-2" placeholder="Amount">
-  {{ button('Enter') }}
-</form>
-{% endmacro %}
-
-{% macro account_edit_form(account) %}
-<form class="form-group" method="POST" action="{{ url_for('account_edit', id_=account.id) }}">
-  {{ text_field(placeholder='Account Name', name='acc_name', class='mb-2') }}
-  <select name="type" class="form-control mb-2">
-    <option selected>Account Type</option>
-    <option value="Checkings">Checkings</option>
-    <option value="Savings">Savings</option>
-    <option value="Credit">Credit</option>
-  </select>
-  <input name="balance" type="number" autocomplete="off" class="form-control mb-2" placeholder="Amount">
-  {{ button('Enter') }}
-</form>
-{% endmacro %}
-
-{% macro txn_add_form(account) %}
-<form class="form-group" method="POST" action="{{ url_for('txn_add', id_=account.id) }}">
-  <input name="balance" type="number" autocomplete="off" class="form-control mb-2" placeholder="Amount">
-  {{ text_field(placeholder='Recipient', name='recipient', class='mb-2') }}
-  <select class="form-control mb-2" name="account_used">
-    <option value="one">one</option>
-    <option value="two">two</option>
-    <option value="three">three</option>
-  </select>
-  {{ text_field(placeholder='Description', name='description', class='mb-2') }}
-  <input name="timestamp" type="datetime-local" autocomplete="off" class="form-control mb-2">
-  {{ button('Enter') }}
-</form>
-{% endmacro %}
-
-{% macro txn_edit_form(txn) %}
-<form class="form-group" method="POST" action="{{ url_for('txn_edit', id_=txn.id) }}">
-  <input name="balance" type="number" autocomplete="off" class="form-control mb-2" placeholder="Amount">
-  {{ text_field(placeholder='Recipient', name='recipient', class='mb-2') }}
-  <select class="form-control mb-2" name="account_used">
-    <option value="one">one</option>
-    <option value="two">two</option>
-    <option value="three">three</option>
-  </select>
-  {{ text_field(placeholder='Description', name='description', class='mb-2') }}
-  <input name="timestamp" type="datetime-local" autocomplete="off" class="form-control mb-2">
-  {{ button('Enter') }}
+{% macro signup_form() %}
+<form method="POST" action="{{ url_for('signup') }}">
+  <input name="first_name" class="form-control mb-2" autocomplete="off" placeholder="First Name">
+  <input name="last_name" class="form-control mb-2" autocomplete="off" placeholder="Last Name">
+  <input name="email" class="form-control mb-2" autocomplete="off" placeholder="E=mail">
+  <input type="date" name="dob" class="form-control mb-2" autocomplete="off" placeholder="Date Of Birth">
+  <input type="password" name="password" class="form-control mb-2" autocomplete="off" placeholder="Password">
+  <button class="btn btn-custom w-100">Sign Up</button>
 </form>
 {% endmacro %}
