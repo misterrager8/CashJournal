@@ -8,11 +8,18 @@
 <a class="link badge badge-custom" onclick="toggleDiv('accountCreateForm')">+ New Account</a>
 <div style="display:none" id="accountCreateForm" class="pt-2">{{ macros.account_create_form() }}</div>
 
-<div id="accounts" class="row">
-  {% for i in current_user.accounts %}
+<div class="row">
+  {% for i in current_user.get_accounts() %}
   {{ macros.account_card(i) }}
   {% endfor %}
 </div>
+<a class="link badge" href="{{ url_for('account_export') }}" download="accounts.csv">Export Accounts</a>
+<div class="pt-4">
+  {% for i in current_user.get_txns()[:10] %}
+  {{ macros.txn_card(i) }}
+  {% endfor %}
+</div>
+<a class="link badge" href="{{ url_for('txn_export') }}" download="txns.csv">Export Transactions</a>
 {% else %}
 <div class="text-center opacity-25">
   {{ macros.user_icon(size=200) }}

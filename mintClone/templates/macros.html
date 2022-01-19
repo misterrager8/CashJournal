@@ -1,3 +1,4 @@
+<!--suppress ALL-->
 <!--ICONS-->
 
 {% macro logo(size=30, color='currentcolor', class='') %}
@@ -32,15 +33,15 @@
 {% endmacro %}
 
 {% macro txn_card(txn) %}
-<div class="card col-xl-12">
-  <div class="card-body">
-    {% if txn.amount > 0.00 %}<span class="h1 text-danger me-3">{{ '- ${:,.2f}'.format(txn.amount) }}</span>{% else %}<span class="h1 text-success me-3">{{ '+ ${:,.2f}'.format(txn.amount) }}</span>{% endif %}
-    <span class="h3 me-3">{{ txn.recipient }}</span>
-    <span class="h5 me-3">{{ txn.description or '' }}</span>
-    <span class="h6 me-3">{{ txn.timestamp.strftime('%B %d, %Y') }}</span>
+<div class="row txn-card">
+  {% if txn.amount > 0.00 %}<span class="col text-success fw-bold">{{ '${:,.2f}'.format(txn.amount) }}</span>{% else %}<span class="col text-danger fw-bold">{{ '${:,.2f}'.format(txn.amount) }}</span>{% endif %}
+  <span class="col text-truncate fst-italic">{{ txn.recipient }}</span>
+  <span class="col text-truncate fw-bold">{{ txn.accounts.name }}</span>
+  <span class="col text-truncate small">{{ txn.timestamp.strftime('%B %d, %Y %I:%M %p') }}</span>
+  <div class="col text-truncate">
     <div class="float-end">
-      <a class="link badge bg-danger" onclick="toggleDiv('delete' + {{ txn.id }})">Delete</a>
       <a style="display:none" class="link badge text-danger" onclick="txnDelete({{ txn.id }})" id="delete{{ txn.id }}">Delete?</a>
+      <a class="link badge bg-danger" onclick="toggleDiv('delete' + {{ txn.id }})">Delete</a>
     </div>
   </div>
 </div>
@@ -63,13 +64,34 @@
 </form>
 {% endmacro %}
 
+{% macro account_update_form(account) %}
+{% set account_types = ['Checking', 'Saving', 'Credit', 'Other'] %}
+<form onsubmit="event.preventDefault(); accountUpdate({{ account.id }});" class="input-group">
+  <input placeholder="Account Name" id="name" class="form-control" autocomplete="off" value="{{ account.name }}" onchange="accountUpdate({{ account.id }})">
+  <input placeholder="Balance" id="balance" value="{{ account.balance }}" class="form-control" autocomplete="off" type="number" step="0.01" onchange="accountUpdate({{ account.id }})">
+  <select id="type_" class="form-control" onchange="accountUpdate({{ account.id }})">
+    <option>Account Type</option>
+    {% for i in account_types %}
+    <option value="{{ i }}" {% if i== account.type %}selected{% endif %}>{{ i }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-custom">Edit Account</button>
+</form>
+{% endmacro %}
+
 {% macro txn_create_form(account) %}
 <form onsubmit="event.preventDefault(); txnCreate({{ account.id }}); this.reset();" class="input-group">
+  <div class="btn-group">
+    <input type="radio" name="txn_type" value="+" class="btn-check" id="plus">
+    <label for="plus" class="btn btn-outline-success">+</label>
+    <input type="radio" name="txn_type" value="-" checked class="btn-check" id="minus">
+    <label for="minus" class="btn btn-outline-danger">-</label>
+  </div>
+  <input placeholder="Amount" id="amount" min="0.00" value="0.00" class="form-control" autocomplete="off" type="number" step="0.01">
   <input placeholder="Recipient" id="recipient" class="form-control" autocomplete="off">
-  <input placeholder="Amount" id="amount" value="0.00" class="form-control" autocomplete="off" type="number" step="0.01">
   <input placeholder="Description" id="description" class="form-control" autocomplete="off">
   <input type="datetime-local" id="timestamp" class="form-control" autocomplete="off">
-  <button class="btn btn-custom">Create Account</button>
+  <button class="btn btn-custom">Create Transaction</button>
 </form>
 {% endmacro %}
 
@@ -85,7 +107,7 @@
 <form method="POST" action="{{ url_for('signup') }}">
   <input name="first_name" class="form-control mb-2" autocomplete="off" placeholder="First Name">
   <input name="last_name" class="form-control mb-2" autocomplete="off" placeholder="Last Name">
-  <input name="email" class="form-control mb-2" autocomplete="off" placeholder="E=mail">
+  <input name="email" class="form-control mb-2" autocomplete="off" placeholder="E-mail">
   <input type="date" name="dob" class="form-control mb-2" autocomplete="off" placeholder="Date Of Birth">
   <input type="password" name="password" class="form-control mb-2" autocomplete="off" placeholder="Password">
   <button class="btn btn-custom w-100">Sign Up</button>

@@ -42,6 +42,18 @@ def account():
     return render_template("account.html", account=_)
 
 
+@current_app.route("/account_update", methods=["POST"])
+@login_required
+def account_update():
+    account_: Account = database.get(Account, int(request.form["id_"]))
+    account_.name = request.form["name"]
+    account_.balance = float(request.form["balance"])
+    account_.type = request.form["type"]
+
+    database.update()
+    return redirect(request.referrer)
+
+
 @current_app.route("/account_delete")
 @login_required
 def account_delete():
@@ -52,19 +64,29 @@ def account_delete():
     return redirect(url_for("index"))
 
 
+@current_app.route("/account_export")
+@login_required
+def account_export():
+    return "\n".join(["%s,%s,%s,%s" % (i.balance,
+                                       i.date_added,
+                                       i.name,
+                                       i.type) for i in current_user.accounts])
+
+
 @current_app.route("/txn_create", methods=["POST"])
 @login_required
 def txn_create():
     account_: Account = database.get(Account, int(request.form["id_"]))
     _ = Transaction(recipient=request.form["recipient"],
-                    amount=float(request.form["amount"]),
+                    amount=0 - float(request.form["amount"]) if request.form["txn_type"] == "-" else float(
+                        request.form["amount"]),
                     description=request.form["description"],
                     timestamp=request.form["timestamp"],
                     account_used=account_.id,
                     user_id=current_user.id)
     database.create(_)
 
-    account_.balance -= _.amount
+    account_.balance += _.amount
     database.update()
     return redirect(request.referrer)
 
@@ -75,11 +97,21 @@ def txn_delete():
     _: Transaction = database.get(Transaction, int(request.args.get("id_")))
     account_: Account = database.get(Account, _.account_used)
 
-    account_.balance += _.amount
+    account_.balance -= _.amount
     database.update()
     database.delete(_)
 
     return redirect(request.referrer)
+
+
+@current_app.route("/txn_export")
+@login_required
+def txn_export():
+    return "\n".join(["%s,%s,%s,%s,%s" % (i.amount,
+                                          i.recipient,
+                                          i.accounts.name,
+                                          i.description,
+                                          i.timestamp) for i in current_user.txns])
 
 
 @current_app.route("/login", methods=["POST"])

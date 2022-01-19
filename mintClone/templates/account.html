@@ -3,17 +3,21 @@
 
 {% block body %}
 <title>Account</title>
-<div id="txns">
+<div>
   <div class="text-center">
-    <p class="h1" contenteditable="true">{{ account.name }}</p>
-    <p class="h3" contenteditable="true">{{ '${:,.2f}'.format(account.balance) }}</p>
-    <p class="h5" contenteditable="true">{{ account.type }}</p>
-    <span id="progress" style="display:none"></span>
+    <div>
+      <p class="h1">{{ account.name }}</p>
+      <p class="h3">{{ '${:,.2f}'.format(account.balance) }}</p>
+      <p class="h5">{{ account.type }}</p>
+      <span id="progress" style="display:none"></span>
+    </div>
+    <a class="badge badge-custom link" onclick="toggleDiv('accountUpdateForm')">Edit</a>
   </div>
+  <div id="accountUpdateForm" style="display:none" class="pt-2">{{ macros.account_update_form(account) }}</div>
   <a class="badge badge-custom link" onclick="toggleDiv('txnCreateForm')">+ New Transaction</a>
   <div id="txnCreateForm" class="pt-2" style="display:none">{{ macros.txn_create_form(account) }}</div>
-  <div class="row">
-    {% for i in account.txns %}
+  <div class="list-group pt-4">
+    {% for i in account.get_txns() %}
     {{ macros.txn_card(i) }}
     {% endfor %}
   </div>

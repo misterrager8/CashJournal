@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, Text, Date, ForeignKey, Numeric, DateTime
+from sqlalchemy import Column, Integer, Text, Date, ForeignKey, Numeric, DateTime, text
 from sqlalchemy.orm import relationship
 
 from mintClone import db
@@ -21,6 +21,12 @@ class User(UserMixin, db.Model):
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
 
+    def get_accounts(self, order_by: str = "date_added desc"):
+        return self.accounts.order_by(text(order_by))
+
+    def get_txns(self, order_by: str = "timestamp desc"):
+        return self.txns.order_by(text(order_by))
+
 
 class Account(db.Model):
     __tablename__ = "accounts"
@@ -30,11 +36,14 @@ class Account(db.Model):
     name = Column(Text)
     type = Column(Text)
     owner = Column(Integer, ForeignKey("users.id"))
-    txns = relationship("Transaction", backref="accounts", lazy="subquery")
+    txns = relationship("Transaction", backref="accounts", lazy="dynamic")
     id = Column(Integer, primary_key=True)
 
     def __init__(self, **kwargs):
         super(Account, self).__init__(**kwargs)
+
+    def get_txns(self, order_by: str = "timestamp desc"):
+        return self.txns.order_by(text(order_by))
 
 
 class Transaction(db.Model):

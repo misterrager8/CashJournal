@@ -5,9 +5,14 @@
     --body-txt: #315C2B;
 }
 
-.navbar, .btn-custom, .badge-custom, .dropdown-item:hover {
+.navbar, .btn-custom, .badge-custom, .dropdown-item:hover, .txn-card:hover {
     background-color: var(--navbar-bg) !important;
     color: var(--navbar-txt) !important;
+}
+
+.txn-card {
+    padding: 4px;
+    border-top: 1px solid var(--body-txt);
 }
 
 .navbar-brand {
@@ -29,7 +34,7 @@ body, .form-control, .dropdown-menu, .modal-content, .card {
     margin-top: 25px;
 }
 
-a:hover {
+a:hover, .txn-card:hover {
     cursor: pointer;
 }
 
