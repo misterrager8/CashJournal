@@ -1,10 +1,5 @@
-$(document).ready(function() {
-//    localStorage.setItem('mintClone-theme', 'default');
-    var currentTheme = localStorage.getItem('mintClone-theme');
-});
-
 function toggleDiv(divId) {
-    $('#' + divId).toggle();
+    $('#' + divId).fadeToggle(150);
 }
 
 function refreshDiv() {
@@ -12,6 +7,7 @@ function refreshDiv() {
 }
 
 function accountCreate() {
+    $('#spinner').show();
     $.post('account_create', {
         name: $('#name').val(),
         balance: $('#balance').val(),
@@ -22,6 +18,7 @@ function accountCreate() {
 }
 
 function accountUpdate(accountId) {
+    $('#spinner').show();
     $.post('account_update', {
         id_: accountId,
         name: $('#name').val(),
@@ -33,6 +30,7 @@ function accountUpdate(accountId) {
 }
 
 function accountDelete(accountId) {
+    $('#spinner').show();
     $.get('account_delete', {
         id_: accountId
     }, function(data) {
@@ -41,6 +39,7 @@ function accountDelete(accountId) {
 }
 
 function txnCreate(accountId) {
+    $('#spinner').show();
     $.post('txn_create', {
         id_: accountId,
         txn_type: $('input[name="txn_type"]:checked').val(),
@@ -54,6 +53,7 @@ function txnCreate(accountId) {
 }
 
 function txnDelete(txnId) {
+    $('#spinner').show();
     $.get('txn_delete', {
         id_: txnId
     }, function(data) {
