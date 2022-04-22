@@ -1,6 +1,7 @@
 import pymysql
 from flask import Flask
 from flask_login import LoginManager
+from flask_scss import Scss
 from flask_sqlalchemy import SQLAlchemy
 
 pymysql.install_as_MySQLdb()
@@ -13,6 +14,7 @@ def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
     db.init_app(app)
+    Scss(app, asset_dir="mintClone/static")
     login_manager.init_app(app)
 
     with app.app_context():
