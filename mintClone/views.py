@@ -25,11 +25,13 @@ def index():
 @current_app.route("/account_create", methods=["POST"])
 @login_required
 def account_create():
-    _ = Account(name=request.form["name"],
-                balance=float(request.form["balance"]),
-                type=request.form["type"],
-                date_added=date.today(),
-                owner=current_user.id)
+    _ = Account(
+        name=request.form["name"],
+        balance=float(request.form["balance"]),
+        type=request.form["type"],
+        date_added=date.today(),
+        owner=current_user.id,
+    )
 
     database.create(_)
     return redirect(request.referrer)
@@ -59,7 +61,8 @@ def account_update():
 def account_delete():
     _: Account = database.get(Account, int(request.args.get("id_")))
 
-    for i in _.txns: database.delete(i)
+    for i in _.txns:
+        database.delete(i)
     database.delete(_)
     return redirect(url_for("index"))
 
@@ -67,23 +70,28 @@ def account_delete():
 @current_app.route("/account_export")
 @login_required
 def account_export():
-    return "\n".join(["%s,%s,%s,%s" % (i.balance,
-                                       i.date_added,
-                                       i.name,
-                                       i.type) for i in current_user.accounts])
+    return "\n".join(
+        [
+            "%s,%s,%s,%s" % (i.balance, i.date_added, i.name, i.type)
+            for i in current_user.accounts
+        ]
+    )
 
 
 @current_app.route("/txn_create", methods=["POST"])
 @login_required
 def txn_create():
     account_: Account = database.get(Account, int(request.form["id_"]))
-    _ = Transaction(recipient=request.form["recipient"],
-                    amount=0 - float(request.form["amount"]) if request.form["txn_type"] == "-" else float(
-                        request.form["amount"]),
-                    description=request.form["description"],
-                    timestamp=request.form["timestamp"],
-                    account_used=account_.id,
-                    user_id=current_user.id)
+    _ = Transaction(
+        recipient=request.form["recipient"],
+        amount=0 - float(request.form["amount"])
+        if request.form["txn_type"] == "-"
+        else float(request.form["amount"]),
+        description=request.form["description"],
+        timestamp=request.form["timestamp"],
+        account_used=account_.id,
+        user_id=current_user.id,
+    )
     database.create(_)
 
     account_.balance += _.amount
@@ -107,11 +115,13 @@ def txn_delete():
 @current_app.route("/txn_export")
 @login_required
 def txn_export():
-    return "\n".join(["%s,%s,%s,%s,%s" % (i.amount,
-                                          i.recipient,
-                                          i.accounts.name,
-                                          i.description,
-                                          i.timestamp) for i in current_user.txns])
+    return "\n".join(
+        [
+            "%s,%s,%s,%s,%s"
+            % (i.amount, i.recipient, i.accounts.name, i.description, i.timestamp)
+            for i in current_user.txns
+        ]
+    )
 
 
 @current_app.route("/login", methods=["POST"])
@@ -136,12 +146,14 @@ def logout():
 
 @current_app.route("/signup", methods=["POST"])
 def signup():
-    _ = User(first_name=request.form["first_name"],
-             last_name=request.form["last_name"],
-             email=request.form["email"],
-             password=generate_password_hash(request.form["password"]),
-             date_joined=date.today(),
-             dob=datetime.strptime(request.form["dob"], "%Y-%m-%d").date())
+    _ = User(
+        first_name=request.form["first_name"],
+        last_name=request.form["last_name"],
+        email=request.form["email"],
+        password=generate_password_hash(request.form["password"]),
+        date_joined=date.today(),
+        dob=datetime.strptime(request.form["dob"], "%Y-%m-%d").date(),
+    )
 
     database.create(_)
     login_user(_)
