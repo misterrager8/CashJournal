@@ -12,33 +12,36 @@
 </head>
 <nav class="navbar navbar-expand-xl">
   <div class="container-fluid">
-    <a href="{{ url_for('index') }}" class="navbar-brand"><i class="bi bi-coin" style="font-size:1.25em"></i></a>
-    <ul class="navbar-nav me-auto">
-      <li class="nav-item"><a class="nav-link"></a></li>
-    </ul>
-    <ul class="navbar-nav ms-auto">
-    <li class="nav-item dropdown">
-        <a data-bs-toggle="dropdown" data-bs-target="#themes" class="me-3"><i class="bi bi-circle-half"></i></a>
-        <div class="dropdown-menu dropdown-menu-end text-center" id="themes">
-            <a class="dropdown-item" onclick="changeTheme('light')">Light</a>
-            <a class="dropdown-item" onclick="changeTheme('dark')">Dark</a>
-        </div>
-    </li>
-      <li class="nav-item dropdown">
-        <a class="dropdown-toggle" data-bs-target="#userDD" data-bs-toggle="dropdown">
-          {% if not current_user.is_anonymous %}<span class="me-2">{{ current_user.first_name }}</span>{% endif %}
-          <i class="bi bi-person-fill"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-end text-center font-custom" id="userDD">
-          {% if current_user.is_anonymous %}
-          <a data-bs-target="#loginModal" data-bs-toggle="modal" class="dropdown-item">Log In</a>
-          <a data-bs-target="#signupModal" data-bs-toggle="modal" class="dropdown-item">Sign Up</a>
-          {% else %}
-          <a href="{{ url_for('logout') }}" class="dropdown-item">Log Out</a>
-          {% endif %}
-        </div>
-      </li>
-    </ul>
+    <a href="{{ url_for('index') }}" class="navbar-brand"><i class="bi bi-coin" style=""></i></a>
+    <a class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navContent"><i class="bi bi-list"></i></a>
+      <div class="collapse navbar-collapse" id="navContent">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link"></a></li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+            <a data-bs-toggle="dropdown" data-bs-target="#themes" class="me-3"><i class="bi bi-circle-half"></i></a>
+            <div class="dropdown-menu dropdown-menu-end text-center" id="themes">
+                <a class="dropdown-item" onclick="changeTheme('light')">Light</a>
+                <a class="dropdown-item" onclick="changeTheme('dark')">Dark</a>
+            </div>
+        </li>
+          <li class="nav-item dropdown">
+            <a class="dropdown-toggle" data-bs-target="#userDD" data-bs-toggle="dropdown">
+              {% if not current_user.is_anonymous %}<span class="me-2">{{ current_user.first_name }}</span>{% endif %}
+              <i class="bi bi-person-fill"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end text-center font-custom" id="userDD">
+              {% if current_user.is_anonymous %}
+              <a data-bs-target="#loginModal" data-bs-toggle="modal" class="dropdown-item">Log In</a>
+              <a data-bs-target="#signupModal" data-bs-toggle="modal" class="dropdown-item">Sign Up</a>
+              {% else %}
+              <a href="{{ url_for('logout') }}" class="dropdown-item">Log Out</a>
+              {% endif %}
+            </div>
+          </li>
+        </ul>
+      </div>
   </div>
 
   <div class="modal" id="loginModal">

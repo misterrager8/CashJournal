@@ -25,17 +25,17 @@
 {% endmacro %}
 
 {% macro txn_card(txn) %}
-<div class="row txn-card">
-  {% if txn.amount > 0.00 %}<span class="col text-success fw-bold">{{ '${:,.2f}'.format(txn.amount) }}</span>{% else %}<span class="col text-danger fw-bold">{{ '${:,.2f}'.format(txn.amount) }}</span>{% endif %}
-  <span class="col text-truncate fst-italic">{{ txn.recipient }}</span>
-  <span class="col text-truncate fw-bold">{{ txn.accounts.name }}</span>
-  <span class="col text-truncate small">{{ txn.timestamp.strftime('%B %d, %Y %I:%M %p') }}</span>
-  <div class="col text-truncate">
-    <div class="float-end">
-      <a style="display:none" class="font-custom text-danger" onclick="txnDelete({{ txn.id }})" id="delete{{ txn.id }}">Delete?</a>
-      <a class="text-danger" onclick="toggleDiv('delete' + {{ txn.id }})"><i class="bi bi-trash3"></i></a>
-    </div>
-  </div>
+<div class="row">
+  <span class="col text-{% if txn.amount > 0.00 %}success{% else %}danger{% endif %} fw-bold">{{ '${:,.2f}'.format(txn.amount) }}</span>
+  <span class="col d-none d-md-inline text-truncate fst-italic">{{ txn.recipient }}</span>
+  <span class="col d-none d-md-inline text-truncate fw-bold">{{ txn.accounts.name }}</span>
+  <span class="col text-truncate small">{{ txn.timestamp.strftime('%-m-%-d-%y %I:%M %p') }}</span>
+  <span class="col d-none d-md-inline text-truncate">
+      <div class="float-end">
+          <a style="display:none" class="font-custom text-danger" onclick="txnDelete({{ txn.id }})" id="delete{{ txn.id }}">Delete?</a>
+          <a class="text-danger" onclick="toggleDiv('delete' + {{ txn.id }})"><i class="bi bi-trash3"></i></a>
+      </div>
+  </span>
 </div>
 {% endmacro %}
 
