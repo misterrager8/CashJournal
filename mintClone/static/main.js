@@ -1,3 +1,12 @@
+$(document).ready(function() {
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('mintClone'));
+});
+
+function changeTheme(theme) {
+    localStorage.setItem('mintClone', theme);
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('mintClone'));
+}
+
 function toggleDiv(divId) {
     $('#' + divId).fadeToggle(150);
 }

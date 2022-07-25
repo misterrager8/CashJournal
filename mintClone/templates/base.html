@@ -17,6 +17,13 @@
       <li class="nav-item"><a class="nav-link"></a></li>
     </ul>
     <ul class="navbar-nav ms-auto">
+    <li class="nav-item dropdown">
+        <a data-bs-toggle="dropdown" data-bs-target="#themes" class="me-3"><i class="bi bi-circle-half"></i></a>
+        <div class="dropdown-menu dropdown-menu-end text-center" id="themes">
+            <a class="dropdown-item" onclick="changeTheme('light')">Light</a>
+            <a class="dropdown-item" onclick="changeTheme('dark')">Dark</a>
+        </div>
+    </li>
       <li class="nav-item dropdown">
         <a class="dropdown-toggle" data-bs-target="#userDD" data-bs-toggle="dropdown">
           {% if not current_user.is_anonymous %}<span class="me-2">{{ current_user.first_name }}</span>{% endif %}
