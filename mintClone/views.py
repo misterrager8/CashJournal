@@ -67,6 +67,16 @@ def account_delete():
     return redirect(url_for("index"))
 
 
+@current_app.route("/account_toggle")
+@login_required
+def account_toggle():
+    _: Account = database.get(Account, int(request.args.get("id_")))
+
+    _.hidden = not _.hidden
+    database.update()
+    return redirect(url_for("index"))
+
+
 @current_app.route("/account_export")
 @login_required
 def account_export():

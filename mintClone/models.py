@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
         super(User, self).__init__(**kwargs)
 
     def get_accounts(self, order_by: str = "date_added desc"):
-        return self.accounts.order_by(text(order_by))
+        return self.accounts.order_by(text("hidden"), text(order_by))
 
     def get_txns(self, order_by: str = "timestamp desc"):
         return self.txns.order_by(text(order_by))
@@ -34,6 +34,7 @@ class Account(db.Model):
     balance = Column(Numeric(10, 2))
     date_added = Column(Date)
     name = Column(Text)
+    hidden = Column(db.Boolean, default=False)
     type = Column(Text)
     owner = Column(Integer, ForeignKey("users.id"))
     txns = relationship("Transaction", backref="accounts", lazy="dynamic")
