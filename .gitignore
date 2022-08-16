@@ -1,0 +1,7 @@
+.sh
+mintclone.sql
+.DS_Store
+.env
+.sql
+__pycache__/
+mintClone/__pycache__/

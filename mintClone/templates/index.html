@@ -5,7 +5,7 @@
 <title>mintClone</title>
 
 {% if not current_user.is_anonymous %}
-<a class="btn-custom" onclick="toggleDiv('accountCreateForm')"><i class="bi bi-plus-lg"></i> New Account</a>
+<a class="btn btn-sm btn-outline-success" onclick="toggleDiv('accountCreateForm')"><i class="bi bi-plus-lg"></i> New Account</a>
 <div style="display:none" id="accountCreateForm" class="mt-3">{{ macros.account_create_form() }}</div>
 
 <div class="row my-3">
@@ -13,19 +13,19 @@
   {{ macros.account_card(i) }}
   {% endfor %}
 </div>
-<a class="btn-custom" href="{{ url_for('account_export') }}" download="accounts.csv"><i class="bi bi-download"></i> Export Accounts</a>
+<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('accounts_.account_export') }}" download="accounts.csv"><i class="bi bi-download"></i> Export Accounts</a>
 <div class="my-3">
   {% for i in current_user.get_txns()[:10] %}
   {{ macros.txn_card(i) }}
   {% endfor %}
 </div>
-<a class="btn-custom" href="{{ url_for('txn_export') }}" download="txns.csv"><i class="bi bi-download"></i> Export Transactions</a>
+<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('txns.txn_export') }}" download="txns.csv"><i class="bi bi-download"></i> Export Transactions</a>
 {% else %}
 <div class="text-center opacity-25">
   <div class="bi bi-person-fill" style="font-size:5em"></div>
   <span class="h4">
-    <a data-bs-toggle="modal" data-bs-target="#loginModal" class="font-custom text-decoration-underline">Log in</a> or
-    <a data-bs-toggle="modal" data-bs-target="#signupModal" class="font-custom text-decoration-underline">sign up</a>
+    <a data-bs-toggle="modal" data-bs-target="#loginModal" class=" text-decoration-underline">Log in</a> or
+    <a data-bs-toggle="modal" data-bs-target="#signupModal" class=" text-decoration-underline">sign up</a>
   </span>
 </div>
 {% endif %}

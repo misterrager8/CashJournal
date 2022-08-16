@@ -16,7 +16,11 @@ def create_app(config):
     login_manager.init_app(app)
 
     with app.app_context():
-        from . import views
+        from mintClone.views.accounts import accounts_
+        from mintClone.views.txns import txns
+
+        app.register_blueprint(accounts_)
+        app.register_blueprint(txns)
 
         # db.drop_all()
         db.create_all()
