@@ -4,4 +4,4 @@ mintclone.sql
 .env
 .sql
 __pycache__/
-mintClone/__pycache__/
+CashJournal/__pycache__/

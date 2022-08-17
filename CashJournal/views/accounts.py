@@ -4,8 +4,8 @@ from flask import Blueprint, render_template, request, url_for
 from flask_login import current_user, login_required
 from werkzeug.utils import redirect
 
-from mintClone import db
-from mintClone.models import Account
+from CashJournal import db
+from CashJournal.models import Account
 
 accounts_ = Blueprint("accounts_", __name__)
 

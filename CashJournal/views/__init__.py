@@ -5,8 +5,8 @@ from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import redirect
 
-from mintClone import db, login_manager
-from mintClone.models import User
+from CashJournal import db, login_manager
+from CashJournal.models import User
 
 
 @login_manager.user_loader

@@ -1,10 +1,10 @@
 $(document).ready(function() {
-    document.documentElement.setAttribute('data-theme', localStorage.getItem('mintClone'));
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('CashJournal'));
 });
 
 function changeTheme(theme) {
-    localStorage.setItem('mintClone', theme);
-    document.documentElement.setAttribute('data-theme', localStorage.getItem('mintClone'));
+    localStorage.setItem('CashJournal', theme);
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('CashJournal'));
 }
 
 function toggleDiv(divId) {

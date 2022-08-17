@@ -16,8 +16,8 @@ def create_app(config):
     login_manager.init_app(app)
 
     with app.app_context():
-        from mintClone.views.accounts import accounts_
-        from mintClone.views.txns import txns
+        from CashJournal.views.accounts import accounts_
+        from CashJournal.views.txns import txns
 
         app.register_blueprint(accounts_)
         app.register_blueprint(txns)

@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 
-from mintClone import db
+from CashJournal import db
 
 
 class User(UserMixin, db.Model):

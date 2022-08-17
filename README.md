@@ -1,6 +1,6 @@
-### mintClone
+### CashJournal
 
-Simple budget tracking and expenses site, modeled after Mint, hence the name
+Simple budget tracking and expenses site, modeled after Mint
 
 ##### Features
 - Save expenses data as a csv

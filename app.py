@@ -1,5 +1,5 @@
 import config
-from mintClone import create_app
+from CashJournal import create_app
 
 app = create_app(config)
 

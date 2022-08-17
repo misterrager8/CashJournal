@@ -2,8 +2,8 @@ from flask import Blueprint, request
 from flask_login import current_user, login_required
 from werkzeug.utils import redirect
 
-from mintClone import db
-from mintClone.models import Account, Transaction
+from CashJournal import db
+from CashJournal.models import Account, Transaction
 
 txns = Blueprint("txns", __name__)
 
