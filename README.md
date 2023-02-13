@@ -1,15 +1,12 @@
-### CashJournal
+# CashJournal
+---
 
-Simple budget tracking and expenses site, modeled after Mint
+Budgeting and money management app, modeled after Mint
 
-##### Features
-- Save expenses data as a csv
-- See all accounts and transactions at a glance
+## Author
 
-##### Contributing
-Please create a pull request and I'll get back to you shortly.
+[C.N. Joseph (misterrager8)](https://github.com/misterrager8)
 
-##### Tags
-flask, python, mysql, sqlalchemy, budget, money, finances, transactions, css,
+## License
 
-
+MIT License
