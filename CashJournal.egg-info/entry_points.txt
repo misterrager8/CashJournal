@@ -1,2 +1,0 @@
-[console_scripts]
-cash = cash_journal.__main__:cli

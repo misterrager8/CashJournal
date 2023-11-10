@@ -1,0 +1,64 @@
+:root,
+html[data-theme="light"] {
+  --primary-bg: #cccccc;
+  --primary-txt: #1a1a1a;
+  --btn-bg: #1a1a1a;
+  --btn-hover: #cccccc;
+}
+
+html[data-theme="dark"] {
+  --primary-bg: #1a1a1a;
+  --primary-txt: #cccccc;
+  --btn-bg: #cccccc;
+  --btn-hover: #1a1a1a;
+}
+
+body,
+.form-control,
+.form-control:focus,
+.dropdown-menu,
+.dropdown-item {
+  background-color: var(--primary-bg);
+  color: var(--primary-txt);
+}
+
+.btn {
+  border-color: var(--btn-bg);
+  color: var(--btn-bg);
+}
+
+.btn:hover {
+  border-color: var(--btn-bg);
+  background-color: var(--btn-bg);
+  color: var(--btn-hover);
+}
+
+.form-control {
+  border-color: var(--primary-txt);
+}
+
+::placeholder {
+  opacity: 50% !important;
+  color: var(--primary-txt) !important;
+}
+
+.btn,
+::placeholder,
+.font-custom,
+.dropdown-item {
+  letter-spacing: 2px;
+}
+
+.btn,
+::placeholder,
+.dropdown-item {
+  font-size: 0.9rem;
+}
+
+.positive {
+  color: #4e9e4e;
+}
+
+.negative {
+  color: #c36c09;
+}
