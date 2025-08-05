@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 pymysql.install_as_MySQLdb()
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="", static_folder="../frontend/build")
 db = SQLAlchemy()
 login_manager = LoginManager()
 
@@ -19,6 +19,7 @@ def create_app(config):
     with app.app_context():
         from . import routes
 
+        # db.drop_all()
         db.create_all()
 
         return app

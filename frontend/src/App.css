@@ -1,0 +1,265 @@
+@import "./colors.css";
+
+body {
+  background-color: var(--primary-bg);
+  color: var(--primary-txt);
+}
+
+.dropdown-menu,
+.dropdown-item {
+  background-color: var(--primary-bg);
+  color: var(--primary-txt);
+}
+
+.dropdown-item {
+  font-size: small;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  border-color: var(--btn-color);
+}
+
+.btn {
+  background-color: transparent;
+  color: var(--btn-color);
+  border-color: var(--btn-color);
+  letter-spacing: 2px;
+}
+
+.btn:hover,
+.btn.active,
+.dropdown-item:hover,
+.dropdown-item.active {
+  background-color: var(--btn-color);
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+}
+
+.form-control,
+.form-control:focus,
+.form-control:disabled {
+  background-color: transparent;
+  color: var(--primary-txt);
+  border-color: var(--primary-txt);
+  border-width: 0.5px;
+}
+
+::placeholder {
+  color: var(--primary-txt) !important;
+  letter-spacing: 2px !important;
+  opacity: 50% !important;
+}
+
+.badge {
+  background-color: transparent;
+  border: 1px solid var(--btn-color);
+  color: var(--btn-color);
+  font-weight: normal;
+  letter-spacing: 1px;
+  padding: 3px 15px;
+}
+
+a,
+a:hover {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.spinner-border {
+  color: var(--btn-color);
+}
+
+.btn.red {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.btn.orange {
+  color: var(--orange);
+  border-color: var(--orange);
+}
+
+.btn.green {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.btn.blue {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+
+.btn.purple {
+  color: var(--purple);
+  border-color: var(--purple);
+}
+
+/*  */
+
+.btn.red:hover,
+.btn.red.active {
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+  background-color: var(--red);
+}
+
+.btn.orange:hover,
+.btn.orange.active {
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+  background-color: var(--orange);
+}
+
+.btn.green:hover,
+.btn.green.active {
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+  background-color: var(--green);
+}
+
+.btn.blue:hover,
+.btn.blue.active {
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+  background-color: var(--blue);
+}
+
+.btn.purple:hover,
+.btn.purple.active {
+  color: var(--btn-hover-txt);
+  border-color: transparent;
+  background-color: var(--purple);
+}
+
+.nav-custom {
+  z-index: 1;
+  width: 90px;
+  border-right: 0.5px dotted var(--primary-txt);
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  background-color: var(--primary-bg);
+  height: 100vh;
+  transition: width 0.5s;
+}
+
+.nav-custom.show {
+  opacity: 100%;
+  width: 300px;
+  visibility: unset;
+}
+
+.bottom {
+  bottom: 0;
+  display: flex;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+}
+
+body {
+  margin-left: 90px;
+}
+
+::-webkit-scrollbar {
+  background-color: var(--primary-bg);
+  width: 2px;
+  height: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--btn-color);
+}
+
+.border-bottom {
+  border-bottom: 0.5px dotted var(--btn-color) !important;
+}
+
+.border-start {
+  border-left: 0.5px dotted var(--btn-color) !important;
+}
+
+.between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.month {
+  width: 191px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.weekday {
+  width: 26px;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+.day {
+  width: 20px;
+  height: 20px;
+  background-color: var(--secondary-bg);
+  margin: 2px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.selected-day {
+  border: 2px solid blue;
+}
+
+.hovered-day {
+  border: 2px solid red;
+}
+
+.today {
+  border: 2px solid var(--primary-txt);
+}
+
+.filler {
+  cursor: unset;
+  background-color: var(--primary-bg);
+}
+
+.filled {
+  background-color: var(--btn-color);
+  color: var(--btn-hover-txt);
+}
+
+.green-text {
+  color: var(--green);
+}
+
+.red-text {
+  color: var(--red);
+}
+
+.cursor {
+  cursor: pointer;
+}
+
+.bought {
+  text-decoration: line-through;
+}
+
+.item:hover,
+.item.active {
+  border-bottom: 0.5px solid var(--btn-color);
+}
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: small;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
