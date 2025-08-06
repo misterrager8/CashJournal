@@ -39,9 +39,9 @@ body {
 .form-control,
 .form-control:focus,
 .form-control:disabled {
-  background-color: transparent;
+  background-color: var(--secondary-bg);
   color: var(--primary-txt);
-  border-color: var(--primary-txt);
+  border-color: var(--secondary-bg);
   border-width: 0.5px;
 }
 

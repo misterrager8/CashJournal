@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { api } from "../util";
 import Button from "./Button";
 import { v4 as uuidv4 } from "uuid";
+import { MultiContext } from "../MultiContext";
 
 const weekdays = ["S", "M", "T", "W", "Th", "F", "S"];
 
 export default function Calendar({ className = "" }) {
+  const multiCtx = useContext(MultiContext);
+
   const [selectedDay, setSelectedDay] = useState(null);
   const [hoveredDay, setHoveredDay] = useState(null);
   const [days, setDays] = useState([]);
@@ -71,6 +74,7 @@ export default function Calendar({ className = "" }) {
   }, [currentMonth]);
 
   const getCalendar = () => {
+    multiCtx.setLoading(true);
     api(
       "get_calendar",
       {
@@ -89,6 +93,7 @@ export default function Calendar({ className = "" }) {
         days_ = days_.concat(fillerEnd);
 
         setDays(offset + 1 < 7 ? filler.concat(days_) : days_);
+        multiCtx.setLoading(false);
       }
     );
   };

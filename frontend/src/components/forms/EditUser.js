@@ -63,9 +63,8 @@ export default function EditUser({ className = "" }) {
       />
       <Button
         className="w-100"
-        border={false}
         text="Save Changes"
-        icon="record"
+        icon="save2"
         type_="submit"
       />
     </form>

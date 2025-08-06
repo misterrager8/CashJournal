@@ -13,10 +13,6 @@ export default function Bills() {
 
   return (
     <div>
-      <div className="mb-4">
-        <NewBill />
-      </div>
-
       <div className="row w-50 m-auto">
         <div className="col">
           <Calendar />
@@ -32,6 +28,10 @@ export default function Bills() {
             })}
           </div>
         </div>
+      </div>
+
+      <div className="d-flex my-4">
+        <NewBill className="m-auto w-50" />
       </div>
 
       <div

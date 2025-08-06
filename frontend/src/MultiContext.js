@@ -11,27 +11,39 @@ export default function MultiProvider({ children }) {
   const [txns, setTxns] = useState([]);
   const [bills, setBills] = useState([]);
   const [shoppingList, setShoppingList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(
     localStorage.getItem("cash-journal-last-page") || "accounts"
   );
 
   const addAccount = (e, name, balance) => {
+    setLoading(true);
     e.preventDefault();
     api("add_account", { name: name, balance: balance }, (data) => {
       setAccounts(data.accounts);
+      setLoading(false);
     });
   };
 
   const getAccounts = () => {
-    api("get_accounts", {}, (data) => setAccounts(data.accounts));
+    setLoading(true);
+    api("get_accounts", {}, (data) => {
+      setAccounts(data.accounts);
+      setLoading(false);
+    });
   };
 
   const deleteAccount = (id) => {
-    api("delete_account", { id: id }, (data) => setAccounts(data.accounts));
+    setLoading(true);
+    api("delete_account", { id: id }, (data) => {
+      setAccounts(data.accounts);
+      setLoading(false);
+    });
   };
 
   const addTxn = (e, amount, merchant, accountId, isCharge) => {
+    setLoading(true);
     e.preventDefault();
     api(
       "add_txn",
@@ -39,46 +51,87 @@ export default function MultiProvider({ children }) {
       (data) => {
         setAccounts(data.accounts);
         setTxns(data.txns);
+        setLoading(false);
       }
     );
   };
 
   const getTxns = (id) => {
+    setLoading(true);
     api("get_txns", { id: id }, (data) => {
       setTxns(data.txns);
+      setLoading(false);
     });
   };
 
   const getShoppingList = () => {
-    api("get_shopping_list", {}, (data) => setShoppingList(data.shoppingList));
+    setLoading(true);
+    api("get_shopping_list", {}, (data) => {
+      setShoppingList(data.shoppingList);
+      setLoading(false);
+    });
   };
 
   const addSli = (e, estimate, name) => {
+    setLoading(true);
     e.preventDefault();
     api("add_shopping_item", { estimate: estimate, name: name }, (data) => {
       setShoppingList(data.slis);
+      setLoading(false);
     });
   };
 
   const deleteSli = (id) => {
+    setLoading(true);
     api("delete_shopping_item", { id: id }, (data) => {
       setShoppingList(data.shoppingList);
+      setLoading(false);
     });
   };
 
-  const addBill = (e, name, amount, day_of_month) => {
+  const addBill = (e, name, amount, day_of_month, accountId) => {
+    setLoading(true);
     e.preventDefault();
     api(
       "add_bill",
-      { name: name, amount: amount, day_of_month: day_of_month },
+      {
+        name: name,
+        amount: amount,
+        day_of_month: day_of_month,
+        accountId: accountId,
+      },
       (data) => {
         setBills(data.bills);
+        setLoading(false);
+      }
+    );
+  };
+
+  const editBill = (e, id, name, amount, day_of_month, accountId) => {
+    setLoading(true);
+    e.preventDefault();
+    api(
+      "edit_bill",
+      {
+        id: id,
+        name: name,
+        amount: amount,
+        day_of_month: day_of_month,
+        accountId: accountId,
+      },
+      (data) => {
+        // setBills(data.bills);
+        setLoading(false);
       }
     );
   };
 
   const getBills = () => {
-    api("get_bills", {}, (data) => setBills(data.bills));
+    setLoading(true);
+    api("get_bills", {}, (data) => {
+      setBills(data.bills);
+      setAccounts(data.accounts);
+    });
   };
 
   const deleteBill = (id) => {
@@ -102,6 +155,7 @@ export default function MultiProvider({ children }) {
     bills: bills,
     setBills: setBills,
     addBill: addBill,
+    editBill: editBill,
     getBills: getBills,
     deleteBill: deleteBill,
 
@@ -115,6 +169,9 @@ export default function MultiProvider({ children }) {
     getShoppingList: getShoppingList,
     addSli: addSli,
     deleteSli: deleteSli,
+
+    loading: loading,
+    setLoading: setLoading,
   };
 
   return (

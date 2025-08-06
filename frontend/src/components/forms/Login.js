@@ -29,13 +29,7 @@ export default function Login({ className = "" }) {
         value={password}
         placeholder="Password"
       />
-      <Button
-        className="w-100"
-        border={false}
-        text="Log In"
-        icon="record"
-        type_="submit"
-      />
+      <Button className="w-100" border={false} text="Log In" type_="submit" />
     </form>
   );
 }

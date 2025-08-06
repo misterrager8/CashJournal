@@ -7,6 +7,7 @@ import Bills from "./components/pages/Bills";
 import ShoppingList from "./components/pages/ShoppingList";
 import Users from "./components/pages/Users";
 import { AuthContext } from "./AuthContext";
+import Spinner from "./components/Spinner";
 
 export default function Container() {
   const multiCtx = useContext(MultiContext);
@@ -24,12 +25,16 @@ export default function Container() {
   return (
     <div className="p-4">
       <div className="nav-custom">
-        <Button
-          className="nav-toggle w-100"
-          size={"sm"}
-          icon="coin"
-          border={false}
-        />
+        {multiCtx.loading ? (
+          <Spinner className="mx-3" />
+        ) : (
+          <Button
+            className="nav-toggle w-100"
+            size={"sm"}
+            icon="coin"
+            border={false}
+          />
+        )}
         <hr className="my-2" />
 
         <Button

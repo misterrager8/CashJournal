@@ -11,7 +11,7 @@ export default function EditAccount({ className = "" }) {
 
   const [name, setName] = useState(accountCtx.selectedAccount?.name || "");
   const [balance, setBalance] = useState(
-    accountCtx.selectedAccount?.balance || 0.0
+    accountCtx.selectedAccount?.balance || 0.01
   );
 
   const onChangeName = (e) => setName(e.target.value);
@@ -43,7 +43,6 @@ export default function EditAccount({ className = "" }) {
       <input
         style={{ fontSize: "6rem" }}
         autoComplete="off"
-        required
         onChange={onChangeBalance}
         type="number"
         step={0.01}

@@ -239,7 +239,11 @@ def add_bill():
         amount = float(request.json.get("amount"))
 
         new_bill = Bill(
-            name=name, day_of_month=day_of_month, amount=amount, user=current_user.id
+            name=name,
+            day_of_month=day_of_month,
+            amount=amount,
+            user=current_user.id,
+            account=int(request.json.get("accountId")),
         )
         new_bill.create()
 
@@ -264,9 +268,11 @@ def get_bills():
     msg = ""
 
     bills = []
+    accounts = []
 
     try:
         bills = [i.to_dict() for i in current_user.bills]
+        accounts = [i.to_dict() for i in current_user.accounts]
 
     except Exception as e:
         success = False
@@ -275,6 +281,7 @@ def get_bills():
         "success": success,
         "msg": msg,
         "bills": bills,
+        "accounts": accounts,
     }
 
 
@@ -292,7 +299,8 @@ def edit_bill():
 
         bill.name = request.json.get("name")
         bill.day_of_month = int(request.json.get("day_of_month"))
-        bill.amount = int(request.json.get("amount"))
+        bill.amount = float(request.json.get("amount"))
+        bill.account = int(request.json.get("accountId"))
 
         bill.edit()
 

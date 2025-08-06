@@ -6,7 +6,7 @@ import { MultiContext } from "../../MultiContext";
 export default function NewShoppingItem({ className = "" }) {
   const multiCtx = useContext(MultiContext);
 
-  const [estimate, setEstimate] = useState(0.0);
+  const [estimate, setEstimate] = useState(0.01);
   const [name, setName] = useState("");
 
   const onChangeEstimate = (e) => setEstimate(e.target.value);
@@ -16,14 +16,18 @@ export default function NewShoppingItem({ className = "" }) {
     <form
       onSubmit={(e) => {
         multiCtx.addSli(e, estimate, name);
-        setEstimate(0.0);
+        setEstimate(0.01);
         setName("");
       }}
       className={className + " input-group input-group-sm"}>
-      <Input onChange={onChangeName} value={name} placeholder="New Item" />
+      <Input
+        className="me-1"
+        onChange={onChangeName}
+        value={name}
+        placeholder="New Item"
+      />
       <input
         autoComplete="off"
-        required
         onChange={onChangeEstimate}
         type="number"
         step={0.01}

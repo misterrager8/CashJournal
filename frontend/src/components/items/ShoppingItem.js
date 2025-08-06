@@ -43,7 +43,9 @@ export default function ShoppingItem({ item, className = "" }) {
     <form
       onSubmit={(e) => editShoppingItem(e)}
       className={
-        className + " between item" + (item.bought ? " opacity-50 bought" : "")
+        className +
+        " between item mb-1" +
+        (item.bought ? " opacity-50 bought" : "")
       }>
       <div className="d-flex">
         <Button onClick={() => toggleBought()} border={false} icon="check-lg" />
@@ -56,11 +58,10 @@ export default function ShoppingItem({ item, className = "" }) {
         <input
           disabled={item.bought}
           autoComplete="off"
-          required
           onChange={onChangeEstimate}
           type="number"
           step={0.01}
-          className="form-control border-0 w-50"
+          className="form-control border-0 w-50 mx-1"
           defaultValue={estimate}
         />
         {taxCtx.includeTax && (

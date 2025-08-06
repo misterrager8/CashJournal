@@ -14,9 +14,13 @@ class User(UserMixin, db.Model):
     password = db.Column(db.Text)
     email = db.Column(db.Text)
     accounts = db.relationship("Account", lazy="dynamic")
-    txns = db.relationship("Transaction", lazy="dynamic")
-    bills = db.relationship("Bill", lazy="dynamic")
-    shopping_list = db.relationship("ShoppingListItem", lazy="dynamic")
+    txns = db.relationship(
+        "Transaction", lazy="dynamic", order_by="desc(Transaction.timestamp)"
+    )
+    bills = db.relationship("Bill", lazy="dynamic", order_by="Bill.day_of_month")
+    shopping_list = db.relationship(
+        "ShoppingListItem", lazy="dynamic", order_by="ShoppingListItem.bought"
+    )
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -63,7 +67,10 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
     balance = db.Column(db.Numeric(10, 2))
-    transactions = db.relationship("Transaction", lazy="dynamic")
+    transactions = db.relationship(
+        "Transaction", lazy="dynamic", order_by="desc(Transaction.timestamp)"
+    )
+    bills = db.relationship("Bill", lazy="dynamic")
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __init__(self, **kwargs):
@@ -175,6 +182,7 @@ class Bill(db.Model):
     day_of_month = db.Column(db.Integer)
     amount = db.Column(db.Numeric(10, 2))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
+    account = db.Column(db.Integer, db.ForeignKey("accounts.id"))
 
     def __init__(self, **kwargs):
         super(Bill, self).__init__(**kwargs)
@@ -227,6 +235,8 @@ class Bill(db.Model):
     def to_dict(self):
         return {
             "id": self.id,
+            "accountName": Account.get(self.account).name if self.account else "",
+            "accountId": self.account,
             "name": self.name,
             "day_of_month": str(self.day_of_month),
             "amount": str(self.amount),

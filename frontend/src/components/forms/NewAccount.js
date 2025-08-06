@@ -7,7 +7,7 @@ export default function NewAccount({ className = "" }) {
   const multiCtx = useContext(MultiContext);
 
   const [name, setName] = useState("");
-  const [balance, setBalance] = useState(0.0);
+  const [balance, setBalance] = useState(0.01);
 
   const onChangeName = (e) => setName(e.target.value);
   const onChangeBalance = (e) => setBalance(e.target.value);
@@ -17,13 +17,18 @@ export default function NewAccount({ className = "" }) {
       onSubmit={(e) => {
         multiCtx.addAccount(e, name, balance);
         setName("");
-        setBalance(0.0);
+        setBalance(0.01);
       }}
-      className={className + " input-group input-group-sm"}>
-      <Input onChange={onChangeName} value={name} placeholder="New Account" />
+      className={className + " d-flex"}>
+      <Input
+        className="me-2"
+        onChange={onChangeName}
+        value={name}
+        placeholder="New Account"
+      />
       <input
+        style={{ width: "75px" }}
         autoComplete="off"
-        required
         onChange={onChangeBalance}
         type="number"
         step={0.01}

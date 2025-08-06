@@ -49,13 +49,7 @@ export default function Signup({ className = "" }) {
         value={passwordConfirm}
         placeholder="Password Confirmed"
       />
-      <Button
-        className="w-100"
-        border={false}
-        text="Sign Up"
-        icon="record"
-        type_="submit"
-      />
+      <Button className="w-100" border={false} text="Sign Up" type_="submit" />
     </form>
   );
 }

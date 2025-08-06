@@ -40,29 +40,26 @@ export default function TxnItem({ item, className = "" }) {
   };
 
   return (
-    <form
-      onSubmit={(e) => editTxn(e)}
-      className={className + " item input-group input-group-sm p-1"}>
+    <form onSubmit={(e) => editTxn(e)} className={className + " item d-flex my-1"}>
       <Input
-        className="border-0"
+        className="border-0 me-1"
         onChange={onChangeMerchant}
         value={merchant}
         placeholder="Merchant Name"
       />
       <input
         autoComplete="off"
-        required
         onChange={onChangeAmount}
         type="number"
         step={0.01}
         className={
-          "form-control border-0" +
+          "form-control border-0 me-1" +
           (parseFloat(amount) < 0 ? " red-text" : " green-text")
         }
         defaultValue={amount}
       />
       <select
-        className="form-control border-0"
+        className="form-control border-0 me-1"
         value={accountId}
         onChange={onChangeAccountId}
         required>

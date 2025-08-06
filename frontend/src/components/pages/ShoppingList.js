@@ -21,9 +21,6 @@ export default function ShoppingList() {
 
   return (
     <div>
-      <div className="mb-5">
-        <NewShoppingItem />
-      </div>
       <div className="text-center" style={{ fontSize: "5rem" }}>
         <div className="h3">Total</div>
         <div>
@@ -39,7 +36,9 @@ export default function ShoppingList() {
             currency: "USD",
           })}
         </div>
-
+        <div className="d-flex my-3">
+          <NewShoppingItem className="w-50 m-auto" />
+        </div>{" "}
         <Button
           className=""
           active={includeTax}
@@ -49,7 +48,7 @@ export default function ShoppingList() {
       </div>
 
       <TaxContext.Provider value={contextValue}>
-        <div className="mt-5">
+        <div className="mt-3">
           <div className="between border-bottom py-2 fw-bold">
             <span className="col">Name</span>
             <span className="col">

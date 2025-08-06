@@ -7,9 +7,11 @@ export default function Button({
   className = "",
   size = "sm",
   style = null,
+  required = true,
 }) {
   return (
     <input
+      required={required}
       style={style}
       disabled={disabled}
       autoComplete="off"
