@@ -7,6 +7,7 @@ export default function Button({
   onClick,
   className = "",
   active = false,
+  children,
 }) {
   return (
     <button
@@ -25,7 +26,8 @@ export default function Button({
             className + (" bi bi-" + icon) + (text ? " me-2" : "")
           }></i>
       )}
-      {text}
+      <span>{text}</span>
+      {children}
     </button>
   );
 }

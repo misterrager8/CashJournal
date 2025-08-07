@@ -8,6 +8,7 @@ import ShoppingList from "./components/pages/ShoppingList";
 import Users from "./components/pages/Users";
 import { AuthContext } from "./AuthContext";
 import Spinner from "./components/Spinner";
+import Badge from "./components/Badge";
 
 export default function Container() {
   const multiCtx = useContext(MultiContext);
@@ -66,10 +67,14 @@ export default function Container() {
                 size={null}
                 active={multiCtx.currentPage === "shopping-list"}
                 onClick={() => multiCtx.setCurrentPage("shopping-list")}
-                className=" mx-1"
+                className=""
                 icon="cart4"
-                border={false}
-              />
+                border={false}>
+                {/* <Badge className=" border-0" text={multiCtx.shoppingList.length} /> */}
+                <span className="small ms-2">
+                  {multiCtx.shoppingList.filter((x) => !x.bought).length}
+                </span>
+              </Button>
             </>
           )}
         </div>
