@@ -59,7 +59,7 @@ export default function Accounts() {
                 <h5>
                   {selectedAccount ? selectedAccount?.name : "All Accounts"}
                 </h5>
-                <div style={{ fontSize: "6rem" }}>
+                <div style={{ fontSize: "4rem" }}>
                   {parseFloat(
                     selectedAccount
                       ? selectedAccount?.balance

@@ -31,7 +31,7 @@ export default function Bills() {
       </div>
 
       <div className="d-flex my-4">
-        <NewBill className="m-auto w-50" />
+        <NewBill className="m w-100" />
       </div>
 
       <div
