@@ -62,7 +62,7 @@ export default function ShoppingItem({ item, className = "" }) {
           type="number"
           step={0.01}
           className="form-control border-0 w-50 mx-1"
-          defaultValue={estimate}
+          value={estimate}
         />
         {taxCtx.includeTax && (
           <span className="small p-2">

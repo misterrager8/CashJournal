@@ -27,13 +27,13 @@ export default function NewAccount({ className = "" }) {
         placeholder="New Account"
       />
       <input
-        style={{ width: "75px" }}
+        style={{ width: "100px" }}
         autoComplete="off"
         onChange={onChangeBalance}
         type="number"
         step={0.01}
         className="form-control"
-        defaultValue={balance}
+        value={balance}
       />
       <Button
         className="d-none"

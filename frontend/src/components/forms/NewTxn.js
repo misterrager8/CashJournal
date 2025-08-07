@@ -40,7 +40,7 @@ export default function NewTxn({ className = "" }) {
         border={false}
       />
       <input
-        style={{ width: "75px" }}
+        style={{ width: "100px" }}
         placeholder="Amount"
         autoComplete="off"
         required
@@ -48,7 +48,7 @@ export default function NewTxn({ className = "" }) {
         type="number"
         step={0.01}
         className="form-control"
-        defaultValue={amount}
+        value={amount}
       />
       <Input
         className="mx-1"
@@ -57,7 +57,7 @@ export default function NewTxn({ className = "" }) {
         placeholder="Merchant Name"
       />
 
-      <Dropdown size={null} text={getAccount()?.name}>
+      <Dropdown icon="piggy-bank-fill" size={null} text={getAccount()?.name}>
         {multiCtx.accounts.map((x) => (
           <div
             className="dropdown-item"

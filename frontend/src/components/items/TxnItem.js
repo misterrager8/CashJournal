@@ -56,7 +56,7 @@ export default function TxnItem({ item, className = "" }) {
           "form-control border-0 me-1" +
           (parseFloat(amount) < 0 ? " red-text" : " green-text")
         }
-        defaultValue={amount}
+        value={amount}
       />
       <select
         className="form-control border-0 me-1"

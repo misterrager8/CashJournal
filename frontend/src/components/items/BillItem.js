@@ -37,7 +37,7 @@ export default function BillItem({ item, className = "" }) {
         type="number"
         step={1}
         className="form-control me-1"
-        defaultValue={dayOfMonth}
+        value={dayOfMonth}
       />
       <input
         autoComplete="off"
@@ -45,7 +45,7 @@ export default function BillItem({ item, className = "" }) {
         type="number"
         step={0.01}
         className="form-control me-1"
-        defaultValue={amount}
+        value={amount}
       />
       <select
         className="form-control"

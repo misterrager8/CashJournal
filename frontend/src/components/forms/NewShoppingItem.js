@@ -32,7 +32,7 @@ export default function NewShoppingItem({ className = "" }) {
         type="number"
         step={0.01}
         className="form-control"
-        defaultValue={estimate}
+        value={estimate}
       />
       <Button
         className="d-none"

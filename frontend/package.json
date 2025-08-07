@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "dev": "concurrently \"python3 ../server.py\" \"react-scripts start\" ",
+    "dev": "concurrently \"python3 ../app.py\" \"react-scripts start\" ",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

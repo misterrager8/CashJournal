@@ -40,16 +40,16 @@ export default function NewBill({ className = "" }) {
         placeholder="New Bill"
       />
       <input
-        style={{ width: "75px" }}
+        style={{ width: "100px" }}
         autoComplete="off"
         onChange={onChangeAmount}
         type="number"
         step={0.01}
         className="form-control mx-1"
-        defaultValue={amount}
+        value={amount}
       />
       <input
-        style={{ width: "75px" }}
+        style={{ width: "100px" }}
         autoComplete="off"
         max={31}
         min={1}
@@ -57,9 +57,9 @@ export default function NewBill({ className = "" }) {
         type="number"
         step={1}
         className="form-control me-1"
-        defaultValue={dayOfMonth}
+        value={dayOfMonth}
       />
-      <Dropdown size={null} text={getAccount()?.name}>
+      <Dropdown icon="piggy-bank-fill" size={null} text={getAccount()?.name}>
         {multiCtx.accounts.map((x) => (
           <div
             className="dropdown-item"

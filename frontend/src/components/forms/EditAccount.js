@@ -47,7 +47,7 @@ export default function EditAccount({ className = "" }) {
         type="number"
         step={0.01}
         className="form-control text-center border-0"
-        defaultValue={balance}
+        value={balance}
       />
       <Button className="d-none" icon="plus-lg" type_="submit" />
     </form>

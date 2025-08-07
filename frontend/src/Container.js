@@ -26,41 +26,45 @@ export default function Container() {
     <div className="p-4">
       <div className="nav-custom">
         {multiCtx.loading ? (
-          <Spinner className="mx-3" />
+          <Spinner className="mx-2" />
         ) : (
           <Button
             className="nav-toggle w-100"
-            size={"sm"}
-            icon="coin"
+            size={null}
+            icon="currency-dollar"
             border={false}
           />
         )}
         <hr className="my-2" />
 
         <Button
+          size={null}
           active={multiCtx.currentPage === "users"}
           onClick={() => multiCtx.setCurrentPage("users")}
           className="w-100 my-2"
-          icon="person-fill"
+          icon="person-circle"
           border={false}
         />
         {authCtx.username && authCtx.email && (
           <>
             <Button
+              size={null}
               active={multiCtx.currentPage === "accounts"}
               onClick={() => multiCtx.setCurrentPage("accounts")}
               className="w-100 my-2"
-              icon="bank2"
+              icon="piggy-bank-fill"
               border={false}
             />
             <Button
+              size={null}
               active={multiCtx.currentPage === "bills"}
               onClick={() => multiCtx.setCurrentPage("bills")}
               className="w-100 my-2"
-              icon="receipt"
+              icon="calendar3"
               border={false}
             />
             <Button
+              size={null}
               active={multiCtx.currentPage === "shopping-list"}
               onClick={() => multiCtx.setCurrentPage("shopping-list")}
               className="w-100 my-2"
@@ -72,7 +76,7 @@ export default function Container() {
         <div className="bottom">
           <Button
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            size={"sm"}
+            size={null}
             className=" text-capitalize w-100"
             icon={theme === "light" ? "sun-fill" : "moon-fill"}
             border={false}
