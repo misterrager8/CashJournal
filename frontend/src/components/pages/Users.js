@@ -11,7 +11,7 @@ export default function Users() {
   return (
     <div>
       {!authCtx.username && !authCtx.email ? (
-        <div className="row" style={{ height: "90vh" }}>
+        <div className="row" style={{ height: "81vh" }}>
           <div className="col d-flex">
             <Login className="m-auto w-50" />
           </div>
@@ -20,7 +20,7 @@ export default function Users() {
           </div>
         </div>
       ) : (
-        <div className="d-flex " style={{ height: "93vh" }}>
+        <div className="d-flex " style={{ height: "81vh" }}>
           <div className="m-auto w-50">
             <Button onClick={() => authCtx.logout()} text="Logout" />
             <div className="mt-4">

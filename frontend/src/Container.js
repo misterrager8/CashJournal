@@ -25,63 +25,61 @@ export default function Container() {
   return (
     <div className="p-4">
       <div className="nav-custom">
-        {multiCtx.loading ? (
-          <Spinner className="mx-2" />
-        ) : (
+        <div>
+          {multiCtx.loading ? (
+            <Spinner className="" />
+          ) : (
+            <Button
+              className="nav-toggle "
+              size={null}
+              icon="currency-dollar"
+              border={false}
+            />
+          )}
           <Button
-            className="nav-toggle w-100"
             size={null}
-            icon="currency-dollar"
+            active={multiCtx.currentPage === "users"}
+            onClick={() => multiCtx.setCurrentPage("users")}
+            className=" mx-1"
+            icon="person-circle"
             border={false}
           />
-        )}
-        <hr className="my-2" />
-
+          {authCtx.username && authCtx.email && (
+            <>
+              <Button
+                size={null}
+                active={multiCtx.currentPage === "accounts"}
+                onClick={() => multiCtx.setCurrentPage("accounts")}
+                className=" mx-1"
+                icon="piggy-bank-fill"
+                border={false}
+              />
+              <Button
+                size={null}
+                active={multiCtx.currentPage === "bills"}
+                onClick={() => multiCtx.setCurrentPage("bills")}
+                className=" mx-1"
+                icon="calendar3"
+                border={false}
+              />
+              <Button
+                size={null}
+                active={multiCtx.currentPage === "shopping-list"}
+                onClick={() => multiCtx.setCurrentPage("shopping-list")}
+                className=" mx-1"
+                icon="cart4"
+                border={false}
+              />
+            </>
+          )}
+        </div>
         <Button
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           size={null}
-          active={multiCtx.currentPage === "users"}
-          onClick={() => multiCtx.setCurrentPage("users")}
-          className="w-100 my-2"
-          icon="person-circle"
+          className=" text-capitalize"
+          icon={theme === "light" ? "sun-fill" : "moon-fill"}
           border={false}
         />
-        {authCtx.username && authCtx.email && (
-          <>
-            <Button
-              size={null}
-              active={multiCtx.currentPage === "accounts"}
-              onClick={() => multiCtx.setCurrentPage("accounts")}
-              className="w-100 my-2"
-              icon="piggy-bank-fill"
-              border={false}
-            />
-            <Button
-              size={null}
-              active={multiCtx.currentPage === "bills"}
-              onClick={() => multiCtx.setCurrentPage("bills")}
-              className="w-100 my-2"
-              icon="calendar3"
-              border={false}
-            />
-            <Button
-              size={null}
-              active={multiCtx.currentPage === "shopping-list"}
-              onClick={() => multiCtx.setCurrentPage("shopping-list")}
-              className="w-100 my-2"
-              icon="cart4"
-              border={false}
-            />
-          </>
-        )}
-        <div className="bottom">
-          <Button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            size={null}
-            className=" text-capitalize w-100"
-            icon={theme === "light" ? "sun-fill" : "moon-fill"}
-            border={false}
-          />
-        </div>
       </div>
       {multiCtx.currentPage === "accounts" ? (
         <Accounts />

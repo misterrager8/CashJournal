@@ -135,15 +135,17 @@ a:hover {
 
 .nav-custom {
   z-index: 1;
-  width: 90px;
-  border-right: 0.5px dotted var(--primary-txt);
+  width: 98%;
+  border-bottom: 0.5px dotted var(--primary-txt);
   position: absolute;
   top: 0;
-  left: 0;
+  /* left: 0; */
   padding: 20px;
   background-color: var(--primary-bg);
-  height: 100vh;
+  height: 90x;
   transition: width 0.5s;
+  display: flex;
+  justify-content: space-between;
 }
 
 .nav-custom.show {
@@ -162,7 +164,7 @@ a:hover {
 }
 
 body {
-  margin-left: 90px;
+  margin-top: 90px;
 }
 
 ::-webkit-scrollbar {

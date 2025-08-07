@@ -48,7 +48,7 @@ export default function ShoppingList() {
       </div>
 
       <TaxContext.Provider value={contextValue}>
-        <div className="mt-3">
+        <div className="mt-3" style={{ height: "33vh", overflow: "auto" }}>
           <div className="between border-bottom py-2 fw-bold">
             <span className="col">Name</span>
             <span className="col">

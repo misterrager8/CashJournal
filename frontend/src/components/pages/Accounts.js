@@ -30,7 +30,7 @@ export default function Accounts() {
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <div className="row border-bottom" style={{ height: "93vh" }}>
+      <div className="row border-bottom" style={{ height: "81vh" }}>
         <div className="col-md-4 px-4">
           <NewAccount className="mb-4" />
           {multiCtx.accounts.map((x) => (
@@ -107,7 +107,7 @@ export default function Accounts() {
           {multiCtx.accounts.length > 0 && <NewTxn className="mb-3" />}
           <div
             // className=" border-bottom"
-            style={{ height: "40vh", overflowY: "auto" }}>
+            style={{ height: "36vh", overflowY: "auto" }}>
             {multiCtx.txns.length > 0 && (
               <div className="between small border-bottom pb-2 fw-bold">
                 <span>Merchant</span>

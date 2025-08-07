@@ -36,7 +36,7 @@ export default function Bills() {
 
       <div
         className=" border-bottom mt-4"
-        style={{ height: "45vh", overflowY: "auto" }}>
+        style={{ height: "36vh", overflowY: "auto" }}>
         <div className="row border-bottom py-2 fw-bold">
           <span className="col">Merchant</span>
           <span className="col">Day of Month</span>
