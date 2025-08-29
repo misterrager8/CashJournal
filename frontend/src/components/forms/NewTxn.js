@@ -3,9 +3,11 @@ import Button from "../Button";
 import Input from "../Input";
 import { MultiContext } from "../../MultiContext";
 import Dropdown from "../Dropdown";
+import { AccountContext } from "../pages/Accounts";
 
 export default function NewTxn({ className = "" }) {
   const multiCtx = useContext(MultiContext);
+  const accountCtx = useContext(AccountContext);
 
   const [amount, setAmount] = useState(0.01);
   const [merchant, setMerchant] = useState("");
@@ -14,15 +16,18 @@ export default function NewTxn({ className = "" }) {
 
   const onChangeAmount = (e) => setAmount(e.target.value);
   const onChangeMerchant = (e) => setMerchant(e.target.value);
-  // const onChangeAccountId = (e) => setAccountId(e.target.value);
-
-  useEffect(() => {
-    setAccountId(multiCtx.accounts?.[0]?.id);
-  }, [multiCtx.accounts]);
 
   const getAccount = () => {
     return multiCtx.accounts.find((x) => x.id == accountId);
   };
+
+  useEffect(() => {
+    setAccountId(
+      accountCtx.selectedAccount
+        ? accountCtx.selectedAccount?.id
+        : multiCtx.accounts?.[0]?.id
+    );
+  }, [accountCtx.selectedAccount]);
 
   return (
     <form
@@ -32,24 +37,26 @@ export default function NewTxn({ className = "" }) {
         setMerchant("");
         setAccountId("");
       }}
-      className={className + " d-flex"}>
-      <Button
-        className={isCharge ? "red" : "green"}
-        onClick={() => setIsCharge(!isCharge)}
-        icon={isCharge ? "dash-lg" : "plus-lg"}
-        border={false}
-      />
-      <input
-        style={{ width: "100px" }}
-        placeholder="Amount"
-        autoComplete="off"
-        required
-        onChange={onChangeAmount}
-        type="number"
-        step={0.01}
-        className="form-control"
-        value={amount}
-      />
+      className={className + " d-sm-flex"}>
+      <div className="d-flex">
+        <Button
+          className={isCharge ? "red" : "green"}
+          onClick={() => setIsCharge(!isCharge)}
+          icon={isCharge ? "dash-lg" : "plus-lg"}
+          border={false}
+        />
+        <input
+          style={{ width: "100px" }}
+          placeholder="Amount"
+          autoComplete="off"
+          required
+          onChange={onChangeAmount}
+          type="number"
+          step={0.01}
+          className="form-control"
+          value={amount}
+        />
+      </div>
       <Input
         className="mx-1"
         onChange={onChangeMerchant}

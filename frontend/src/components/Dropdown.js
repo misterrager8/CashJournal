@@ -6,9 +6,10 @@ export default function Dropdown({
   children,
   classNameBtn = "",
   classNameMenu = "",
+  className = "",
 }) {
   return (
-    <>
+    <div className={className}>
       <a
         data-bs-target={"#" + target}
         data-bs-toggle="dropdown"
@@ -21,6 +22,6 @@ export default function Dropdown({
       <div id={target} className={classNameMenu + " dropdown-menu"}>
         {children}
       </div>
-    </>
+    </div>
   );
 }
