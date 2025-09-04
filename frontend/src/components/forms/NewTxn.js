@@ -37,8 +37,8 @@ export default function NewTxn({ className = "" }) {
         setMerchant("");
         setAccountId("");
       }}
-      className={className + " d-sm-flex"}>
-      <div className="d-flex">
+      className={className + " row m-0"}>
+      <div className="col-sm d-flex">
         <Button
           className={isCharge ? "red" : "green"}
           onClick={() => setIsCharge(!isCharge)}
@@ -46,7 +46,7 @@ export default function NewTxn({ className = "" }) {
           border={false}
         />
         <input
-          style={{ width: "100px" }}
+          // style={{ width: "100px" }}
           placeholder="Amount"
           autoComplete="off"
           required
@@ -58,22 +58,27 @@ export default function NewTxn({ className = "" }) {
         />
       </div>
       <Input
-        className="mx-1"
+        className="col-sm "
         onChange={onChangeMerchant}
         value={merchant}
         placeholder="Merchant Name"
       />
-
-      <Dropdown icon="piggy-bank-fill" size={null} text={getAccount()?.name}>
-        {multiCtx.accounts.map((x) => (
-          <div
-            className="dropdown-item"
-            key={x.id}
-            onClick={() => setAccountId(x.id)}>
-            {x.name}
-          </div>
-        ))}
-      </Dropdown>
+      <div className="col-sm">
+        <Dropdown
+          classNameBtn="w-100"
+          icon="piggy-bank-fill"
+          size={null}
+          text={getAccount()?.name}>
+          {multiCtx.accounts.map((x) => (
+            <div
+              className="dropdown-item"
+              key={x.id}
+              onClick={() => setAccountId(x.id)}>
+              {x.name}
+            </div>
+          ))}
+        </Dropdown>
+      </div>
       <Button
         className="d-none"
         border={false}

@@ -40,26 +40,30 @@ export default function TxnItem({ item, className = "" }) {
   };
 
   return (
-    <form onSubmit={(e) => editTxn(e)} className={className + " item d-flex my-1"}>
-      <Input
-        className="border-0 me-1"
-        onChange={onChangeMerchant}
-        value={merchant}
-        placeholder="Merchant Name"
-      />
-      <input
-        autoComplete="off"
-        onChange={onChangeAmount}
-        type="number"
-        step={0.01}
-        className={
-          "form-control border-0 me-1" +
-          (parseFloat(amount) < 0 ? " red-text" : " green-text")
-        }
-        value={amount}
-      />
+    <form onSubmit={(e) => editTxn(e)} className={className + "  row m-0"}>
+      <div className="col-sm p-0">
+        <Input
+          className="border-0"
+          onChange={onChangeMerchant}
+          value={merchant}
+          placeholder="Merchant Name"
+        />
+      </div>
+      <div className="col-sm p-0">
+        <input
+          autoComplete="off"
+          onChange={onChangeAmount}
+          type="number"
+          step={0.01}
+          className={
+            "form-control border-0" +
+            (parseFloat(amount) < 0 ? " red-text" : " green-text")
+          }
+          value={amount}
+        />
+      </div>
       <select
-        className="form-control border-0 me-1"
+        className="form-control border-0 col-sm"
         value={accountId}
         onChange={onChangeAccountId}
         required>
@@ -71,24 +75,26 @@ export default function TxnItem({ item, className = "" }) {
       </select>
       <input
         onChange={onChangeTimestamp}
-        className="form-control border-0"
+        className="form-control border-0 col-sm"
         type="datetime-local"
         value={timestamp}
       />
-      {deleting && (
+      <div className="col-sm">
+        {deleting && (
+          <Button
+            className="red"
+            onClick={() => deleteTxn()}
+            border={false}
+            icon="question-lg"
+          />
+        )}
         <Button
           className="red"
-          onClick={() => deleteTxn()}
+          onClick={() => setDeleting(!deleting)}
           border={false}
-          icon="question-lg"
+          icon="x-lg"
         />
-      )}
-      <Button
-        className="red"
-        onClick={() => setDeleting(!deleting)}
-        border={false}
-        icon="x-lg"
-      />
+      </div>
       <Button className="d-none" icon="plus-lg" type_="submit" />
     </form>
   );
