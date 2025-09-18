@@ -33,12 +33,14 @@ export default function Container() {
           {multiCtx.loading ? (
             <Spinner className="" />
           ) : (
-            <Button
-              className="nav-toggle "
-              size={null}
-              icon="currency-dollar"
-              border={false}
-            />
+            <Link to="/accounts">
+              <Button
+                className="nav-toggle "
+                size={null}
+                icon="currency-dollar"
+                border={false}
+              />
+            </Link>
           )}
           <Link to="/users">
             <Button
