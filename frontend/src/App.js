@@ -19,7 +19,7 @@ function App() {
       <AuthProvider>
         <MultiProvider>
           <Routes>
-            <Route path="/accounts" element={<Container />}>
+            <Route path="/" element={<Container />}>
               <Route path="accounts" element={<Accounts />} />
               <Route path="bills" element={<Bills />} />
               <Route path="shopping" element={<ShoppingList />} />
