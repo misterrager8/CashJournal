@@ -42,15 +42,15 @@ export default function AuthProvider({ children }) {
     });
   };
 
-  // useEffect(() => {
-  //   if (username && email) {
-  //     localStorage.setItem("cashjournal-user", username);
-  //     localStorage.setItem("cashjournal-email", email);
-  //   } else {
-  //     localStorage.removeItem("cashjournal-user");
-  //     localStorage.removeItem("cashjournal-email");
-  //   }
-  // }, [username, email]);
+  useEffect(() => {
+    if (username && email) {
+      localStorage.setItem("cashjournal-user", username);
+      localStorage.setItem("cashjournal-email", email);
+    } else {
+      localStorage.removeItem("cashjournal-user");
+      localStorage.removeItem("cashjournal-email");
+    }
+  }, [username, email]);
 
   const contextValue = {
     username: username,
