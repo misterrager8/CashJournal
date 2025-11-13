@@ -1,101 +1,67 @@
 import { useContext, useState } from "react";
-import Button from "../Button";
-import Input from "../Input";
-import { MultiContext } from "../../MultiContext";
+import Input from "../atoms/Input";
+import Button from "../atoms/Button";
 import { api } from "../../util";
+import { Context } from "../../Context";
+import { AccountContext } from "../pages/Accounts";
 
 export default function TxnItem({ item, className = "" }) {
-  const multiCtx = useContext(MultiContext);
-  const [deleting, setDeleting] = useState(false);
+  const ctx = useContext(Context);
+  const accountCtx = useContext(AccountContext);
+
+  const [merchant, setMerchant] = useState(item.merchant);
+  const onChangeMerchant = (e) => setMerchant(e.target.value);
 
   const [amount, setAmount] = useState(item.amount);
-  const [merchant, setMerchant] = useState(item.merchant);
-  const [accountId, setAccountId] = useState(item.accountId);
-  const [timestamp, setTimestamp] = useState(item.timestamp);
-
   const onChangeAmount = (e) => setAmount(e.target.value);
-  const onChangeMerchant = (e) => setMerchant(e.target.value);
-  const onChangeAccountId = (e) => setAccountId(e.target.value);
+
+  const [accountName, setAccountName] = useState(item.accountName);
+  const onChangeAccountName = (e) => setAccountName(e.target.value);
+
+  const [timestamp, setTimestamp] = useState(item.timestamp);
   const onChangeTimestamp = (e) => setTimestamp(e.target.value);
+
+  const [deleting, setDeleting] = useState(false);
 
   const deleteTxn = () => {
     api("delete_txn", { id: item.id }, (data) => {
-      multiCtx.setTxns(data.txns);
-      multiCtx.setAccounts(data.accounts);
+      accountCtx.setTxns(data.txns);
+      accountCtx.setAccounts(data.accounts);
     });
     setDeleting(false);
   };
 
-  const editTxn = (e) => {
-    e.preventDefault();
-    api(
-      "edit_txn",
-      { id: item.id, amount: amount, merchant: merchant, timestamp: timestamp },
-      (data) => {
-        multiCtx.setAccounts(data.accounts);
-        multiCtx.setTxns(data.txns);
-      }
-    );
-    setDeleting(false);
-  };
-
   return (
-    <form onSubmit={(e) => editTxn(e)} className={className + "  row m-0"}>
-      <div className="col-sm p-0">
-        <Input
-          className="border-0"
-          onChange={onChangeMerchant}
-          value={merchant}
-          placeholder="Merchant Name"
-        />
-      </div>
-      <div className="col-sm p-0">
-        <input
-          autoComplete="off"
-          onChange={onChangeAmount}
-          type="number"
-          step={0.01}
-          className={
-            "form-control border-0" +
-            (parseFloat(amount) < 0 ? " red-text" : " green-text")
-          }
-          value={amount}
-        />
-      </div>
-      <select
-        className="form-control border-0 col-sm"
-        value={accountId}
-        onChange={onChangeAccountId}
-        required>
-        {multiCtx.accounts.map((x) => (
-          <option key={x.id} value={x.id}>
-            {x.name}
-          </option>
-        ))}
-      </select>
+    <div className={className + " txn-item"}>
+      <Input className="fw-bold" value={merchant} onChange={onChangeMerchant} />
       <input
-        onChange={onChangeTimestamp}
-        className="form-control border-0 col-sm"
-        type="datetime-local"
-        value={timestamp}
+        type="number"
+        step={0.01}
+        autoComplete="off"
+        value={amount}
+        onChange={onChangeAmount}
+        className={
+          "form-control form-control-sm " + (amount < 0 ? "red" : "green")
+        }
       />
-      <div className="col-sm">
-        {deleting && (
-          <Button
-            className="red"
-            onClick={() => deleteTxn()}
-            border={false}
-            icon="question-lg"
-          />
-        )}
-        <Button
-          className="red"
-          onClick={() => setDeleting(!deleting)}
-          border={false}
-          icon="x-lg"
-        />
+      <div className="d-flex w-100 hide-on-mobile">
+        <Input value={accountName} onChange={onChangeAccountName} />
+        <Input value={timestamp} onChange={onChangeTimestamp} />
       </div>
-      <Button className="d-none" icon="plus-lg" type_="submit" />
-    </form>
+      {deleting && (
+        <Button
+          onClick={() => deleteTxn()}
+          border={false}
+          icon="question-lg"
+          className="red"
+        />
+      )}
+      <Button
+        onClick={() => setDeleting(!deleting)}
+        border={false}
+        icon="x-lg"
+        className="red"
+      />
+    </div>
   );
 }

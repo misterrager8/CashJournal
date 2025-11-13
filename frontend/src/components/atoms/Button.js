@@ -20,13 +20,8 @@ export default function Button({
         (active ? " active" : "")
       }
       onClick={onClick}>
-      {icon && (
-        <i
-          className={
-            className + (" bi bi-" + icon) + (text ? " me-2" : "")
-          }></i>
-      )}
-      <span>{text}</span>
+      {icon && <i className={"bi bi-" + icon}></i>}
+      {text && <span className={icon ? "ms-2" : ""}>{text}</span>}
       {children}
     </button>
   );

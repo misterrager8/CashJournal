@@ -1,35 +1,35 @@
 import { useContext, useState } from "react";
-import Button from "../Button";
-import Input from "../Input";
-import { AuthContext } from "../../AuthContext";
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
+import { Context } from "../../Context";
 
 export default function Login({ className = "" }) {
-  const authCtx = useContext(AuthContext);
+  const ctx = useContext(Context);
 
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
   const onChangeUsername = (e) => setUsername(e.target.value);
+
+  const [password, setPassword] = useState("");
   const onChangePassword = (e) => setPassword(e.target.value);
 
   return (
     <form
-      onSubmit={(e) => authCtx.login(e, username, password)}
-      className={className}>
+      className={className}
+      onSubmit={(e) => ctx.login(e, username, password)}>
       <Input
-        className="mb-3"
-        onChange={onChangeUsername}
+        className="mb-2"
         value={username}
+        onChange={onChangeUsername}
         placeholder="Username"
       />
       <Input
-        className="mb-3"
+        className="mb-2"
         type_="password"
-        onChange={onChangePassword}
         value={password}
+        onChange={onChangePassword}
         placeholder="Password"
       />
-      <Button className="w-100" border={false} text="Log In" type_="submit" />
+      <Button type_="submit" className="mt-3 w-100" text="Log In" />
     </form>
   );
 }

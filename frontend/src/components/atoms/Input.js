@@ -1,4 +1,4 @@
-export default function Button({
+export default function Input({
   value,
   onChange,
   placeholder,

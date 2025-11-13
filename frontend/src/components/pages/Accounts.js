@@ -1,50 +1,105 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { MultiContext } from "../../MultiContext";
+import AccountItem from "../items/AccountItem";
+import TxnItem from "../items/TxnItem";
 import NewAccount from "../forms/NewAccount";
 import NewTxn from "../forms/NewTxn";
-import TxnItem from "../items/TxnItem";
-import Button from "../Button";
-import EditAccount from "../forms/EditAccount";
-import AccountItem from "../items/AccountItem";
+import { Context } from "../../Context";
+import { api } from "../../util";
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
 
 export const AccountContext = createContext();
 
-export default function Accounts() {
-  const multiCtx = useContext(MultiContext);
+export default function Accounts({ className = "" }) {
+  const ctx = useContext(Context);
+
+  const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
+
+  const [txns, setTxns] = useState([]);
+
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [accountName, setAccountName] = useState("");
+  const onChangeAccountName = (e) => setAccountName(e.target.value);
+
+  const [accountBalance, setAccountBalance] = useState(0.0);
+  const onChangeAccountBalance = (e) => setAccountBalance(e.target.value);
+
+  const getAccounts = () => {
+    ctx.setLoading(true);
+    api("get_accounts", {}, (data) => {
+      setAccounts(data.accounts);
+      ctx.setLoading(false);
+    });
+  };
+
+  const getTxns = (id) => {
+    ctx.setLoading(true);
+    api("get_txns", { id: id }, (data) => {
+      setTxns(data.txns);
+      ctx.setLoading(false);
+    });
+  };
+
+  const editAccount = (e) => {
+    e.preventDefault();
+    api(
+      "edit_account",
+      {
+        id: selectedAccount?.id,
+        name: accountName,
+        balance: accountBalance,
+      },
+      (data) => {
+        setSelectedAccount(data.account);
+        setAccounts(data.accounts);
+      }
+    );
+  };
+
   useEffect(() => {
-    multiCtx.getTxns(selectedAccount?.id);
+    ctx.currentUser && getAccounts();
+  }, [ctx.currentUser]);
+
+  useEffect(() => {
+    setAccountName(selectedAccount?.name);
+    setAccountBalance(selectedAccount?.balance);
+    getTxns(selectedAccount?.id);
   }, [selectedAccount]);
 
   useEffect(() => {
-    multiCtx.getAccounts();
-  }, []);
+    setEditing(false);
+  }, [selectedAccount]);
 
   const contextValue = {
     selectedAccount: selectedAccount,
     setSelectedAccount: setSelectedAccount,
+    accounts: accounts,
+    setAccounts: setAccounts,
+
+    txns: txns,
+    setTxns: setTxns,
   };
 
   return (
     <AccountContext.Provider value={contextValue}>
-      <div className="row border-bottom" style={{ height: "81vh" }}>
-        <div className="col-md-4 px-4">
-          <NewAccount className="mb-4" />
-          {multiCtx.accounts.map((x) => (
-            <AccountItem key={x.id} item={x} />
+      <div className={className + " flex"}>
+        <div className="col-33">
+          <NewAccount className="mb-3" />
+          {accounts.map((item) => (
+            <AccountItem item={item} />
           ))}
           <div
+            onClick={() => setSelectedAccount(null)}
             className={
-              "fw-bold item account-item" + (selectedAccount ? "" : " active")
-            }
-            onClick={() => setSelectedAccount(null)}>
-            <div>All Accounts</div>
+              className + " account-item" + (!selectedAccount ? " active" : "")
+            }>
+            <div className="fw-bold">All Accounts</div>
             <div className="font-monospace">
               {parseFloat(
-                multiCtx.accounts.reduce((x, y) => x + parseFloat(y.balance), 0)
+                accounts.reduce((x, y) => x + y.balance, 0)
               ).toLocaleString("en-US", {
                 style: "currency",
                 currency: "USD",
@@ -52,74 +107,79 @@ export default function Accounts() {
             </div>
           </div>
         </div>
-        <div className="col px-4 ">
-          <div className="text-center my-5">
-            {!editing ? (
-              <>
-                <h5>
-                  {selectedAccount ? selectedAccount?.name : "All Accounts"}
-                </h5>
-                <div style={{ fontSize: "4rem" }}>
-                  {parseFloat(
-                    selectedAccount
-                      ? selectedAccount?.balance
-                      : multiCtx.accounts.reduce(
-                          (x, y) => x + parseFloat(y.balance),
-                          0
-                        )
-                  ).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </div>
-              </>
-            ) : (
-              <EditAccount />
-            )}
-
-            {selectedAccount && (
-              <>
-                <Button
-                  onClick={() => setEditing(!editing)}
-                  icon="pencil"
-                  border={false}
-                />
-                {deleting && (
-                  <Button
-                    className="red"
-                    onClick={() => {
-                      multiCtx.deleteAccount(selectedAccount.id);
-                      setSelectedAccount(null);
-                    }}
-                    icon="question-lg"
-                    border={false}
+        <div className="divider"></div>
+        <div className="col-67">
+          <div>
+            <div className="text-center">
+              {!editing ? (
+                <>
+                  <div style={{ fontSize: "1.5rem" }}>
+                    {selectedAccount ? selectedAccount?.name : "All Accounts"}
+                  </div>
+                  <div style={{ fontSize: "3.5rem" }}>
+                    {parseFloat(
+                      selectedAccount
+                        ? selectedAccount?.balance
+                        : accounts.reduce((x, y) => x + y.balance, 0)
+                    ).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })}
+                  </div>
+                </>
+              ) : (
+                <form onSubmit={(e) => editAccount(e)}>
+                  <Input
+                    className="border-0"
+                    style={{ fontSize: "1.5rem", textAlign: "center" }}
+                    value={accountName}
+                    onChange={onChangeAccountName}
                   />
-                )}
-                <Button
-                  className="red"
-                  onClick={() => setDeleting(!deleting)}
-                  icon="trash2"
-                  border={false}
-                />
-              </>
-            )}
-          </div>
-          {multiCtx.accounts.length > 0 && <NewTxn className="mb-3" />}
-          <div
-            // className=" border-bottom"
-            style={{ height: "36vh", overflowY: "auto" }}>
-            {multiCtx.txns.length > 0 && (
-              <div className="between small border-bottom pb-2 fw-bold">
-                <span>Merchant</span>
-                <span>Amount</span>
-                <span>Account</span>
-                <span>Timestamp</span>
-                <span></span>
+                  <input
+                    style={{ fontSize: "3.5rem", textAlign: "center" }}
+                    type="number"
+                    step={0.01}
+                    autoComplete="off"
+                    className="form-control form-control-sm border-0"
+                    value={accountBalance}
+                    onChange={onChangeAccountBalance}
+                  />
+                  <Button type_="submit" className="d-none" />
+                </form>
+              )}
+            </div>
+            {selectedAccount && (
+              <div className="d-flex">
+                <div className="mx-auto">
+                  <Button
+                    border={false}
+                    active={editing}
+                    icon="pencil"
+                    onClick={() => setEditing(!editing)}
+                  />
+                  {deleting && (
+                    <Button
+                      border={false}
+                      className="red"
+                      icon="question-lg"
+                      // onClick={() => setEditing(!editing)}
+                    />
+                  )}
+                  <Button
+                    border={false}
+                    className="red"
+                    icon="x-lg"
+                    onClick={() => setDeleting(!deleting)}
+                  />
+                </div>
               </div>
             )}
-            {multiCtx.txns.map((x) => (
-              <TxnItem key={x.id} item={x} />
-            ))}
+            <NewTxn className="my-4" />
+            <div className="txn-scroll">
+              {txns.map((item) => (
+                <TxnItem key={item.id} item={item} />
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -1,91 +1,91 @@
 import { useContext, useEffect, useState } from "react";
-import Button from "../Button";
-import Input from "../Input";
-import { MultiContext } from "../../MultiContext";
-import Dropdown from "../Dropdown";
+import Input from "../atoms/Input";
+import Button from "../atoms/Button";
+import { Context } from "../../Context";
 import { AccountContext } from "../pages/Accounts";
+import Dropdown from "../atoms/Dropdown";
+import { api } from "../../util";
 
 export default function NewTxn({ className = "" }) {
-  const multiCtx = useContext(MultiContext);
+  const ctx = useContext(Context);
   const accountCtx = useContext(AccountContext);
 
-  const [amount, setAmount] = useState(0.01);
   const [merchant, setMerchant] = useState("");
-  const [accountId, setAccountId] = useState("");
-  const [isCharge, setIsCharge] = useState(true);
-
-  const onChangeAmount = (e) => setAmount(e.target.value);
   const onChangeMerchant = (e) => setMerchant(e.target.value);
 
-  const getAccount = () => {
-    return multiCtx.accounts.find((x) => x.id == accountId);
+  const [amount, setAmount] = useState(0.0);
+  const onChangeAmount = (e) => setAmount(e.target.value);
+
+  const [account, setAccount] = useState(null);
+
+  const [isDeposit, setIsDeposit] = useState(false);
+
+  const addTxn = (e) => {
+    ctx.setLoading(true);
+    e.preventDefault();
+    api(
+      "add_txn",
+      {
+        amount: amount,
+        merchant: merchant,
+        id: account?.id,
+        isCharge: !isDeposit,
+      },
+      (data) => {
+        accountCtx.setAccounts(data.accounts);
+        accountCtx.setTxns(data.txns);
+        ctx.setLoading(false);
+
+        setMerchant("");
+        setAmount(0.01);
+      }
+    );
   };
 
   useEffect(() => {
-    setAccountId(
-      accountCtx.selectedAccount
-        ? accountCtx.selectedAccount?.id
-        : multiCtx.accounts?.[0]?.id
-    );
-  }, [accountCtx.selectedAccount]);
+    accountCtx.accounts.length > 0 && setAccount(accountCtx.accounts[0]);
+  }, [accountCtx.accounts]);
 
   return (
-    <form
-      onSubmit={(e) => {
-        multiCtx.addTxn(e, amount, merchant, accountId, isCharge);
-        setAmount(0.01);
-        setMerchant("");
-        setAccountId("");
-      }}
-      className={className + " row m-0"}>
-      <div className="col-sm d-flex">
+    <form onSubmit={(e) => addTxn(e)} className={className + " txn-form"}>
+      <div className="d-flex">
         <Button
-          className={isCharge ? "red" : "green"}
-          onClick={() => setIsCharge(!isCharge)}
-          icon={isCharge ? "dash-lg" : "plus-lg"}
+          onClick={() => setIsDeposit(!isDeposit)}
+          className={isDeposit ? "green" : "red"}
           border={false}
+          icon={(isDeposit ? "plus-" : "dash-") + "lg"}
         />
         <input
-          // style={{ width: "100px" }}
-          placeholder="Amount"
-          autoComplete="off"
-          required
-          onChange={onChangeAmount}
+          placeholder="0.01"
+          min={0.01}
           type="number"
           step={0.01}
-          className="form-control"
+          autoComplete="off"
           value={amount}
+          onChange={onChangeAmount}
+          className={
+            "form-control form-control-sm " + (!isDeposit ? "red" : "green")
+          }
         />
       </div>
-      <Input
-        className="col-sm "
-        onChange={onChangeMerchant}
-        value={merchant}
-        placeholder="Merchant Name"
-      />
-      <div className="col-sm">
+      <div className="d-flex w-100">
+        <Input
+          placeholder="Merchant"
+          value={merchant}
+          onChange={onChangeMerchant}
+        />
         <Dropdown
-          classNameBtn="w-100"
+          target="chooseAccount"
           icon="piggy-bank-fill"
-          size={null}
-          text={getAccount()?.name}>
-          {multiCtx.accounts.map((x) => (
-            <div
-              className="dropdown-item"
-              key={x.id}
-              onClick={() => setAccountId(x.id)}>
-              {x.name}
+          text={account?.name}>
+          {accountCtx.accounts.map((item) => (
+            <div onClick={() => setAccount(item)} className="dropdown-item">
+              {item.name}
             </div>
           ))}
         </Dropdown>
       </div>
-      <Button
-        className="d-none"
-        border={false}
-        text="Add Transaction"
-        icon="plus-lg"
-        type_="submit"
-      />
+      <Button type_="submit" className="d-none" />
     </form>
   );
 }

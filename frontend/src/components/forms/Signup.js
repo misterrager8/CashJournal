@@ -1,55 +1,56 @@
 import { useContext, useState } from "react";
-import Button from "../Button";
-import Input from "../Input";
-import { MultiContext } from "../../MultiContext";
-import { AuthContext } from "../../AuthContext";
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
+import { Context } from "../../Context";
 
 export default function Signup({ className = "" }) {
-  const authCtx = useContext(AuthContext);
+  const ctx = useContext(Context);
 
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [email, setEmail] = useState("");
-
   const onChangeUsername = (e) => setUsername(e.target.value);
+
+  const [password, setPassword] = useState("");
   const onChangePassword = (e) => setPassword(e.target.value);
+
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const onChangePasswordConfirm = (e) => setPasswordConfirm(e.target.value);
+
+  const [email, setEmail] = useState("");
   const onChangeEmail = (e) => setEmail(e.target.value);
 
   return (
     <form
+      className={className}
       onSubmit={(e) =>
-        authCtx.signup(e, username, email, password, passwordConfirm)
-      }
-      className={className}>
+        ctx.signup(e, username, email, password, passwordConfirm)
+      }>
       <Input
-        className="mb-3"
-        onChange={onChangeUsername}
+        className="mb-2"
         value={username}
+        onChange={onChangeUsername}
         placeholder="Username"
       />
       <Input
-        className="mb-3"
-        onChange={onChangeEmail}
+        className="mb-2"
         value={email}
-        placeholder="E-mail"
+        onChange={onChangeEmail}
+        placeholder="Username"
       />
       <Input
-        className="mb-3"
+        className="mb-2"
         type_="password"
-        onChange={onChangePassword}
         value={password}
+        onChange={onChangePassword}
         placeholder="Password"
       />
       <Input
-        className="mb-3"
+        className="mb-2"
         type_="password"
-        onChange={onChangePasswordConfirm}
         value={passwordConfirm}
-        placeholder="Password Confirmed"
+        onChange={onChangePasswordConfirm}
+        placeholder="Confirm Password"
       />
-      <Button className="w-100" border={false} text="Sign Up" type_="submit" />
+      <Button className="mt-3 w-100" text="Sign Up" type_="submit" />
     </form>
   );
 }

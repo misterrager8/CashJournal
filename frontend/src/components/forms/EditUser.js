@@ -1,71 +1,66 @@
-import { useContext, useState } from "react";
-import Button from "../Button";
-import Input from "../Input";
-import { AuthContext } from "../../AuthContext";
-import { api } from "../../util";
+import { useContext, useEffect, useState } from "react";
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
+import { Context } from "../../Context";
 
 export default function EditUser({ className = "" }) {
-  const authCtx = useContext(AuthContext);
+  const ctx = useContext(Context);
 
-  const [username, setUsername] = useState(authCtx.username);
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [email, setEmail] = useState(authCtx.email);
-
+  const [username, setUsername] = useState("");
   const onChangeUsername = (e) => setUsername(e.target.value);
+
+  const [password, setPassword] = useState("");
   const onChangePassword = (e) => setPassword(e.target.value);
+
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const onChangePasswordConfirm = (e) => setPasswordConfirm(e.target.value);
+
+  const [email, setEmail] = useState("");
   const onChangeEmail = (e) => setEmail(e.target.value);
 
-  const editUser = (e) => {
-    e.preventDefault();
-    if (password === passwordConfirm) {
-      api(
-        "edit_user",
-        { username: username, password: password, email: email },
-        (data) => {
-          authCtx.setUsername(data.user?.username);
-          authCtx.setEmail(data.user?.email);
-        }
-      );
-    } else {
-      alert("Passwords don't match");
-    }
-  };
+  useEffect(() => {
+    setUsername(ctx.currentUser?.username);
+    setEmail(ctx.currentUser?.email);
+  }, [ctx.setCurrentUser]);
 
   return (
-    <form onSubmit={(e) => editUser(e)} className={className}>
+    <form className={className}>
       <Input
-        className="mb-3"
-        onChange={onChangeUsername}
+        className="mb-2"
         value={username}
+        onChange={onChangeUsername}
         placeholder="Username"
       />
       <Input
-        className="mb-3"
-        onChange={onChangeEmail}
+        className="mb-2"
         value={email}
-        placeholder="E-mail"
+        onChange={onChangeEmail}
+        placeholder="Email"
       />
       <Input
-        className="mb-3"
+        className="mb-2"
         type_="password"
-        onChange={onChangePassword}
         value={password}
+        onChange={onChangePassword}
         placeholder="Password"
       />
       <Input
-        className="mb-3"
+        className="mb-2"
         type_="password"
-        onChange={onChangePasswordConfirm}
         value={passwordConfirm}
-        placeholder="Password Confirm"
+        onChange={onChangePasswordConfirm}
+        placeholder="Confirm Password"
       />
       <Button
-        className="w-100"
+        icon="pencil"
+        className="mt-3 w-100"
         text="Save Changes"
-        icon="save2"
-        type_="submit"
+        onClick={() =>
+          ctx.setCurrentUser({
+            username: "chemllei",
+            email: "chemllei0304@gmail.com",
+          })
+        }
       />
     </form>
   );

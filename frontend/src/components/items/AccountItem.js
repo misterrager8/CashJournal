@@ -2,18 +2,21 @@ import { useContext } from "react";
 import { AccountContext } from "../pages/Accounts";
 
 export default function AccountItem({ item, className = "" }) {
-  const acctCtx = useContext(AccountContext);
-  // const [deleting, setDeleting] = useState(false);
+  const accountCtx = useContext(AccountContext);
 
   return (
     <div
+      onClick={() =>
+        accountCtx.setSelectedAccount(
+          accountCtx.selectedAccount?.id === item.id ? null : item
+        )
+      }
       className={
         className +
-        " item account-item" +
-        (acctCtx.selectedAccount?.id === item.id ? " active" : "")
-      }
-      onClick={() => acctCtx.setSelectedAccount(item)}>
-      <div>{item.name}</div>
+        " account-item" +
+        (accountCtx.selectedAccount?.id === item.id ? " active" : "")
+      }>
+      <div className="fw-bold">{item.name}</div>
       <div className="font-monospace">
         {parseFloat(item.balance).toLocaleString("en-US", {
           style: "currency",
