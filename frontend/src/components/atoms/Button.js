@@ -1,3 +1,5 @@
+import Icon from "./Icon";
+
 export default function Button({
   text,
   type_ = "button",
@@ -20,7 +22,7 @@ export default function Button({
         (active ? " active" : "")
       }
       onClick={onClick}>
-      {icon && <i className={"bi bi-" + icon}></i>}
+      {icon && <Icon name={icon} />}
       {text && <span className={icon ? "ms-2" : ""}>{text}</span>}
       {children}
     </button>

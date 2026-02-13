@@ -17,6 +17,7 @@ export default function NewTxn({ className = "" }) {
   const onChangeAmount = (e) => setAmount(e.target.value);
 
   const [account, setAccount] = useState(null);
+  const [category, setCategory] = useState(null);
 
   const [isDeposit, setIsDeposit] = useState(false);
 
@@ -30,15 +31,17 @@ export default function NewTxn({ className = "" }) {
         merchant: merchant,
         id: account?.id,
         isCharge: !isDeposit,
+        categoryId: category,
       },
       (data) => {
         accountCtx.setAccounts(data.accounts);
         accountCtx.setTxns(data.txns);
-        ctx.setLoading(false);
+        ctx.setBudgets(data.budgets);
 
         setMerchant("");
         setAmount(0.01);
-      }
+        ctx.setLoading(false);
+      },
     );
   };
 
@@ -48,44 +51,72 @@ export default function NewTxn({ className = "" }) {
 
   return (
     <form onSubmit={(e) => addTxn(e)} className={className + " txn-form"}>
-      <div className="d-flex">
-        <Button
-          onClick={() => setIsDeposit(!isDeposit)}
-          className={isDeposit ? "green" : "red"}
-          border={false}
-          icon={(isDeposit ? "plus-" : "dash-") + "lg"}
-        />
-        <input
-          placeholder="0.01"
-          min={0.01}
-          type="number"
-          step={0.01}
-          autoComplete="off"
-          value={amount}
-          onChange={onChangeAmount}
-          className={
-            "form-control form-control-sm " + (!isDeposit ? "red" : "green")
-          }
-        />
-      </div>
-      <div className="d-flex w-100">
-        <Input
-          placeholder="Merchant"
-          value={merchant}
-          onChange={onChangeMerchant}
-        />
-        <Dropdown
-          target="chooseAccount"
-          icon="piggy-bank-fill"
-          text={account?.name}>
-          {accountCtx.accounts.map((item) => (
-            <div onClick={() => setAccount(item)} className="dropdown-item">
-              {item.name}
-            </div>
-          ))}
-        </Dropdown>
-      </div>
-      <Button type_="submit" className="d-none" />
+      <Button
+        onClick={() => setIsDeposit(!isDeposit)}
+        className={isDeposit ? "green" : "red"}
+        border={false}
+        icon={(isDeposit ? "plus-" : "dash-") + "lg"}
+      />
+      <input
+        placeholder="0.01"
+        min={0.01}
+        type="number"
+        step={0.01}
+        autoComplete="off"
+        value={amount}
+        onChange={onChangeAmount}
+        className={
+          "form-control form-control-sm " + (!isDeposit ? "red" : "green")
+        }
+      />
+      <Dropdown icon="bxs:purchase-tag" target="all-merchants">
+        {ctx.merchants.map((x) => (
+          <a onClick={() => setMerchant(x)} className="dropdown-item">
+            {x}
+          </a>
+        ))}
+      </Dropdown>
+      <Input
+        placeholder="Merchant"
+        value={merchant}
+        onChange={onChangeMerchant}
+      />
+      <Dropdown
+        active={category}
+        target="chooseBudget"
+        icon="streamline-ultimate:presentation-projector-screen-budget-analytics-bold">
+        <a
+          onClick={() => setCategory(null)}
+          className={"dropdown-item" + (!category ? " active" : "")}>
+          None
+        </a>
+        {ctx.budgets.map((item) => (
+          <a
+            onClick={() => setCategory(item.id)}
+            className={
+              "dropdown-item" + (category === item.id ? " active" : "")
+            }>
+            {item.name}
+          </a>
+        ))}
+      </Dropdown>
+      <Dropdown
+        target="chooseAccount"
+        icon="bi:piggy-bank-fill"
+        text={account?.name}>
+        {accountCtx.accounts.map((item) => (
+          <div onClick={() => setAccount(item)} className="dropdown-item">
+            {item.name}
+          </div>
+        ))}
+      </Dropdown>
+      <Button
+        border={false}
+        type_="submit"
+        className="show-on-mobile"
+        icon="bi:caret-right-fill"
+        // text="Add"
+      />
     </form>
   );
 }

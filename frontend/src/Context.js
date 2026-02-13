@@ -6,12 +6,17 @@ export const Context = createContext();
 export default function ContextProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(
-    localStorage.getItem("cash-journal-page") || "accounts"
+    localStorage.getItem("cash-journal-page") || "accounts",
   );
 
   const [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("cash-journal-user"))
+    JSON.parse(localStorage.getItem("cash-journal-user")),
   );
+
+  const [bills, setBills] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [merchants, setMerchants] = useState([]);
+  const [budgets, setBudgets] = useState([]);
 
   useEffect(() => {
     localStorage.setItem("cash-journal-page", currentPage);
@@ -29,7 +34,7 @@ export default function ContextProvider({ children }) {
         { username: username, email: email, password: password },
         (data) => {
           setCurrentUser(data.user);
-        }
+        },
       );
     } else {
       alert("Passwords don't match");
@@ -50,6 +55,44 @@ export default function ContextProvider({ children }) {
     });
   };
 
+  const getBills = () => {
+    setLoading(true);
+    api("get_bills", {}, (data) => {
+      setBills(data.bills);
+      setAccounts(data.accounts);
+    });
+  };
+
+  const deleteBill = (id) => {
+    setLoading(true);
+    api("delete_bill", { id: id }, (data) => setBills(data.bills));
+  };
+
+  const addBudget = (e, name) => {
+    e.preventDefault();
+    setLoading(true);
+    api("add_budget", { name: name }, (data) => {
+      setBudgets(data.budgets);
+      setLoading(false);
+    });
+  };
+
+  const getBudgets = () => {
+    setLoading(true);
+    api("get_budgets", {}, (data) => {
+      setBudgets(data.budgets);
+      setLoading(false);
+    });
+  };
+
+  const deleteBudget = (id) => {
+    setLoading(true);
+    api("delete_budget", { id: id }, (data) => {
+      setBudgets(data.budgets);
+      setLoading(false);
+    });
+  };
+
   const contextValue = {
     loading: loading,
     setLoading: setLoading,
@@ -63,6 +106,21 @@ export default function ContextProvider({ children }) {
     login: login,
     signup: signup,
     logout: logout,
+
+    bills: bills,
+    setBills: setBills,
+    accounts: accounts,
+    setAccounts: setAccounts,
+    getBills: getBills,
+    deleteBill: deleteBill,
+    merchants: merchants,
+    setMerchants: setMerchants,
+
+    budgets: budgets,
+    setBudgets: setBudgets,
+    addBudget: addBudget,
+    getBudgets: getBudgets,
+    deleteBudget: deleteBudget,
   };
 
   return <Context.Provider value={contextValue}>{children}</Context.Provider>;

@@ -1,5 +1,9 @@
 @import "./colors.css";
 
+* {
+  font-family: "Roboto";
+}
+
 body {
   background-color: var(--primary-bg);
   color: var(--primary-txt);
@@ -21,7 +25,7 @@ body {
 .form-control,
 .form-control:focus {
   background-color: transparent;
-  border-color: var(--secondary-bg);
+  border-color: var(--secondary-color);
   color: var(--primary-txt);
 }
 
@@ -33,7 +37,7 @@ body {
 
 .txn-item .form-control {
   border: 0;
-  border-left: 1px solid var(--secondary-bg);
+  border-left: 1px solid var(--secondary-color);
   border-radius: 0;
 }
 
@@ -41,6 +45,28 @@ body {
   height: 100vh;
   width: 100vw;
   display: flex;
+}
+
+.subtle-input {
+  background-color: transparent;
+  border: 0;
+  color: var(--primary-txt);
+  text-align: center;
+  width: 100%;
+  font-size: 1.5rem;
+}
+
+.subtle-input-lg {
+  background-color: transparent;
+  border: 0;
+  color: var(--primary-txt);
+  font-size: 3rem;
+  text-align: center;
+  width: 100%;
+}
+
+.spinner-border {
+  color: var(--btn-color);
 }
 
 .inner {
@@ -52,7 +78,7 @@ body {
 .nav-custom {
   height: 60px;
   width: 100%;
-  border-bottom: 1px solid var(--secondary-bg);
+  border-bottom: 1px solid var(--secondary-color);
   display: flex;
 }
 
@@ -86,17 +112,28 @@ body {
 }
 
 .divider {
-  border: 1px solid var(--secondary-bg);
+  border: 1px solid var(--secondary-color);
   margin: 0px 15px;
 }
 
 .txn-item {
   display: flex;
-  justify-content: space-between;
-  padding: 5px 15px;
+  border-bottom: 0.5px solid var(--secondary-color);
+  cursor: pointer;
+  border-radius: 5px;
+  /* border: 0.5px solid; */
+  padding: 2px 20px;
   margin-bottom: 5px;
-  border-bottom: 1px solid var(--secondary-bg);
-  /* cursor: pointer; */
+}
+
+.txn-item:hover {
+  background-color: var(--btn-color);
+  color: var(--btn-hover-txt);
+}
+
+.txn-item:hover .red,
+.txn-item:hover .green {
+  color: var(--btn-hover-txt);
 }
 
 .account-item {
@@ -104,7 +141,7 @@ body {
   justify-content: space-between;
   padding: 5px 15px;
   margin-bottom: 5px;
-  /* border-bottom: 1px solid var(--secondary-bg); */
+  /* border-bottom: 1px solid var(--secondary-color); */
   cursor: pointer;
 }
 
@@ -119,7 +156,13 @@ body {
 }
 
 .txn-scroll {
-  height: 55vh;
+  height: 45vh;
+  overflow-y: auto;
+  border-bottom: 0.5px solid var(--btn-color);
+}
+
+.bills-scroll {
+  height: 56vh;
   overflow-y: auto;
   border-bottom: 0.5px solid var(--btn-color);
 }
@@ -193,9 +236,73 @@ body {
   margin: 1px;
 }
 
+.month {
+  width: 191px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.weekday {
+  width: 26px;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+.day {
+  width: 20px;
+  height: 20px;
+  background-color: var(--secondary-color);
+  margin: 2px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.selected-day {
+  border: 2px solid blue;
+}
+
+.hovered-day {
+  border: 2px solid red;
+}
+
+.today {
+  border: 2px solid var(--primary-txt);
+}
+
+.filler {
+  cursor: unset;
+  background-color: var(--primary-bg);
+}
+
+.filled {
+  background-color: var(--btn-color);
+  color: var(--btn-hover-txt);
+}
+
+.show-on-mobile {
+  display: none;
+}
+
+::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.w-95 {
+  width: 95%;
+}
+
+.orange {
+  color: var(--orange);
+}
+
 @media screen and (max-width: 1050px) {
   .inner {
-    width: 90%;
+    width: 95%;
+  }
+
+  .btn.abbreviate > span {
+    display: none;
   }
 
   .nav-custom .btn > span {
@@ -232,10 +339,14 @@ body {
   }
 
   .txn-scroll {
+    height: 41vh;
+  }
+
+  .bills-scroll {
     height: 17vh;
   }
 
-  .txn-form {
+  /* .txn-form {
     flex-direction: column;
   }
 
@@ -248,9 +359,13 @@ body {
   .txn-form .btn.red,
   .txn-form .btn.green {
     width: 10%;
-  }
+  } */
 
   .hide-on-mobile {
     display: none !important;
+  }
+
+  .show-on-mobile {
+    display: unset;
   }
 }

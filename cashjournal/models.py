@@ -1,4 +1,5 @@
 from calendar import Calendar
+import datetime
 
 from flask_login import UserMixin
 from sqlalchemy import desc
@@ -21,6 +22,7 @@ class User(UserMixin, db.Model):
     shopping_list = db.relationship(
         "ShoppingListItem", lazy="dynamic", order_by="ShoppingListItem.bought"
     )
+    budgets = db.relationship("Category", lazy="dynamic")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -32,6 +34,15 @@ class User(UserMixin, db.Model):
     @classmethod
     def get(cls, id):
         return User.query.get(id)
+
+    def get_txns(
+        self, month=datetime.date.today().month, year=datetime.date.today().year
+    ):
+        return [
+            i
+            for i in self.txns
+            if i.timestamp.month == month and i.timestamp.year == year
+        ]
 
     def create(self):
         db.session.add(self)
@@ -122,6 +133,7 @@ class Transaction(db.Model):
     memo = db.Column(db.Text)
     account = db.Column(db.Integer, db.ForeignKey("accounts.id"))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
 
     def __init__(self, **kwargs):
         super(Transaction, self).__init__(**kwargs)
@@ -135,8 +147,16 @@ class Transaction(db.Model):
         return Transaction.query.get(id)
 
     @classmethod
-    def get_by_account(cls, id):
-        return [i for i in Account.get(id).transactions]
+    def get_by_account(cls, id, month, year):
+        return [
+            i
+            for i in Account.get(id).transactions
+            if i.timestamp.month == month and i.timestamp.year == year
+        ]
+
+    @property
+    def category(self):
+        return Category.get(self.category_id)
 
     def create(self):
         account_ = Account.get(self.account)
@@ -170,6 +190,7 @@ class Transaction(db.Model):
             "merchant": self.merchant,
             "memo": self.memo,
             "accountId": self.account,
+            "category": self.category.to_dict() if self.category_id else None,
             "accountName": Account.get(self.account).name,
         }
 
@@ -286,4 +307,62 @@ class ShoppingListItem(db.Model):
             "estimate": str(self.estimate),
             "date_added": self.date_added.isoformat() if self.date_added else None,
             "bought": self.bought,
+        }
+
+
+class Category(db.Model):
+    __tablename__ = "categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text)
+    color = db.Column(db.Text)
+    maximum = db.Column(db.Numeric(10, 2))
+    txns = db.relationship("Transaction", lazy="dynamic")
+    user = db.Column(db.Integer, db.ForeignKey("users.id"))
+
+    def __init__(self, **kwargs):
+        super(Category, self).__init__(**kwargs)
+
+    @classmethod
+    def all(cls):
+        return Category.query.all()
+
+    @classmethod
+    def get(cls, id):
+        return Category.query.get(id)
+
+    def get_txns(
+        self, month=datetime.date.today().month, year=datetime.date.today().year
+    ):
+        return [
+            i
+            for i in self.txns
+            if i.timestamp.month == month and i.timestamp.year == year
+        ]
+
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def edit(self):
+        db.session.commit()
+
+    def delete(self):
+        for i in self.txns.all():
+            i.category = None
+            i.edit()
+
+        db.session.delete(self)
+        db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "maximum": str(self.maximum),
+            # "transactions": sorted(
+            #     [t.to_dict() for t in self.txns.all()],
+            #     key=lambda x: x["timestamp"],
+            #     reverse=True,
+            # ),
         }

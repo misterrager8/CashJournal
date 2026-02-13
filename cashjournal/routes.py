@@ -6,7 +6,14 @@ from flask import current_app, request, send_from_directory
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from cashjournal.models import Account, Bill, ShoppingListItem, Transaction, User
+from cashjournal.models import (
+    Account,
+    Bill,
+    Category,
+    ShoppingListItem,
+    Transaction,
+    User,
+)
 
 from . import login_manager
 
@@ -34,7 +41,7 @@ def login():
 
         user_: User = User.query.filter_by(username=username).first()
         if user_ and check_password_hash(user_.password, password):
-            login_user(user_)
+            login_user(user_, remember=True)
             user = user_.to_dict()
         else:
             msg = "Wrong password"
@@ -63,7 +70,7 @@ def signup():
         )
 
         _.create()
-        login_user(_)
+        login_user(_, remember=True)
         user = _.to_dict()
 
     except Exception as e:
@@ -377,6 +384,7 @@ def add_txn():
     new_txn = None
     accounts = []
     txns = []
+    budgets = []
 
     try:
         is_charge = -1 if request.json.get("isCharge") else 1
@@ -385,6 +393,11 @@ def add_txn():
         timestamp = datetime.datetime.now()
         merchant = request.json.get("merchant")
         account = int(request.json.get("id"))
+        category_id = (
+            int(request.json.get("categoryId"))
+            if request.json.get("categoryId")
+            else None
+        )
 
         new_txn = Transaction(
             amount=amount,
@@ -392,16 +405,32 @@ def add_txn():
             merchant=merchant,
             account=account,
             user=current_user.id,
+            category_id=category_id,
         )
         new_txn.create()
 
         accounts = [i.to_dict() for i in current_user.accounts]
-        txns = [i.to_dict() for i in current_user.txns]
+        txns = [i.to_dict() for i in current_user.get_txns()]
+
+        for i in Category.all():
+            budgets.append(
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "txns": [j.to_dict() for j in i.get_txns()],
+                }
+            )
 
     except Exception as e:
         success = False
         msg = str(e)
-    return {"success": success, "msg": msg, "accounts": accounts, "txns": txns}
+    return {
+        "success": success,
+        "msg": msg,
+        "accounts": accounts,
+        "txns": txns,
+        "budgets": budgets,
+    }
 
 
 @current_app.post("/get_txns")
@@ -411,21 +440,49 @@ def get_txns():
     msg = ""
 
     txns = []
+    budgets = []
 
     try:
         account_id = request.json.get("id")
         if account_id:
-            txns = [i.to_dict() for i in Transaction.get_by_account(account_id)]
+            txns = [
+                i.to_dict()
+                for i in Transaction.get_by_account(
+                    account_id,
+                    int(request.json.get("month")),
+                    int(request.json.get("year")),
+                )
+            ]
         else:
-            txns = [i.to_dict() for i in current_user.txns]
+            txns = [
+                i.to_dict()
+                for i in current_user.get_txns(
+                    int(request.json.get("month")), int(request.json.get("year"))
+                )
+            ]
 
         # Sort transactions by timestamp
         txns.sort(key=lambda x: x["timestamp"], reverse=True)
+        # budgets = [i.to_dict() for i in Category.all()]
+        for i in Category.all():
+            budgets.append(
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "txns": [
+                        j.to_dict()
+                        for j in i.get_txns(
+                            int(request.json.get("month")),
+                            int(request.json.get("year")),
+                        )
+                    ],
+                }
+            )
 
     except Exception as e:
         success = False
         msg = str(e)
-    return {"success": success, "msg": msg, "txns": txns}
+    return {"success": success, "msg": msg, "txns": txns, "budgets": budgets}
 
 
 @current_app.post("/edit_txn")
@@ -442,20 +499,15 @@ def edit_txn():
         txn = Transaction.get(request.json.get("id"))
         account = Account.get(txn.account)
 
-        account.balance -= txn.amount
-
-        txn.amount = float(request.json.get("amount"))
         txn.merchant = request.json.get("merchant")
-        txn.timestamp = request.json.get("timestamp")
+        txn.description = request.json.get("description")
 
         txn.edit()
-
-        account.balance += txn.amount
-
         account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
-        txns = [i.to_dict() for i in current_user.txns]
+        txns = [i.to_dict() for i in current_user.get_txns()]
+        txn = txn.to_dict()
 
     except Exception as e:
         success = False
@@ -465,6 +517,7 @@ def edit_txn():
         "msg": msg,
         "accounts": accounts,
         "txns": txns,
+        "txn": txn,
     }
 
 
@@ -482,7 +535,7 @@ def delete_txn():
         txn = Transaction.get(request.json.get("id"))
         txn.delete()
 
-        txns = [i.to_dict() for i in current_user.txns]
+        txns = [i.to_dict() for i in current_user.get_txns()]
         accounts = [i.to_dict() for i in current_user.accounts]
 
     except Exception as e:
@@ -613,4 +666,100 @@ def delete_shopping_item():
         "success": success,
         "msg": msg,
         "shoppingList": slis,
+    }
+
+
+@current_app.post("/add_budget")
+@login_required
+def add_budget():
+    success = True
+    msg = ""
+    budgets = []
+    budget = None
+
+    try:
+        budget = Category(name=request.json.get("name"), user=current_user.id)
+        budget.create()
+
+        budget = budget.to_dict()
+        for i in Category.all():
+            budgets.append(
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "txns": [j.to_dict() for j in i.get_txns()],
+                }
+            )
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "budgets": budgets, "budget": budget}
+
+
+@current_app.post("/get_budgets")
+@login_required
+def get_budgets():
+    success = True
+    msg = ""
+    budgets = []
+
+    try:
+        budgets = [i.to_dict() for i in current_user.budgets]
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "budgets": budgets}
+
+
+@current_app.post("/delete_budget")
+@login_required
+def delete_budget():
+    success = True
+    msg = ""
+    budgets = []
+
+    try:
+        budget = Category.get(int(request.json.get("id")))
+        budget.delete()
+
+        for i in Category.all():
+            budgets.append(
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "txns": [j.to_dict() for j in i.get_txns()],
+                }
+            )
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "budgets": budgets}
+
+
+@current_app.post("/switch_budget")
+@login_required
+def switch_budget():
+    success = True
+    msg = ""
+
+    txns = []
+    txn = None
+
+    try:
+        txn = Transaction.get(request.json.get("id"))
+
+        txn.category_id = request.json.get("budgetId")
+        txn.edit()
+
+        txns = [i.to_dict() for i in current_user.get_txns()]
+        txn = txn.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "txns": txns,
+        "txn": txn,
     }
