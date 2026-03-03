@@ -52,7 +52,7 @@ export default function EditUser({ className = "" }) {
         placeholder="Confirm Password"
       />
       <Button
-        icon="bi:pencil"
+        icon="tdesign:edit-2-filled"
         className="mt-3 w-100"
         text="Save Changes"
         onClick={() =>

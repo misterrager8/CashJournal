@@ -4,15 +4,13 @@ import TxnItem from "../items/TxnItem";
 import NewAccount from "../forms/NewAccount";
 import NewTxn from "../forms/NewTxn";
 import { Context } from "../../Context";
-import { api } from "../../util";
+import { api, moment_ as moment } from "../../util";
 import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import EditTxn from "../forms/EditTxn";
 import Dropdown from "../atoms/Dropdown";
-import moment from "moment";
-import NewBudget from "../forms/NewBudget";
-import BudgetItem from "../items/BudgetItem";
 import Icon from "../atoms/Icon";
+import Budgets from "../sections/Budgets";
 
 export const AccountContext = createContext();
 
@@ -23,6 +21,10 @@ export default function Accounts({ className = "" }) {
   const [selectedAccount, setSelectedAccount] = useState(null);
 
   const [selectedTxn, setSelectedTxn] = useState(null);
+  const [selectedTxns, setSelectedTxns] = useState([]);
+  const [selectedBudget, setSelectedBudget] = useState(null);
+
+  const [selectedBudgets, setSelectedBudgets] = useState([]);
 
   const [txns, setTxns] = useState([]);
   const [sort, setSort] = useState("date-desc");
@@ -38,6 +40,7 @@ export default function Accounts({ className = "" }) {
 
   const [filter, setFilter] = useState(null);
   const [showBudgets, setShowBudgets] = useState(false);
+  const [total, setTotal] = useState(0);
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -97,7 +100,12 @@ export default function Accounts({ className = "" }) {
   const switchBudget = (budgetId) => {
     api(
       "switch_budget",
-      { id: selectedTxn?.id, budgetId: budgetId },
+      {
+        id: selectedTxn?.id,
+        budgetId: budgetId,
+        month: currentMonth,
+        year: currentYear,
+      },
       (data) => {
         setTxns(data.txns);
         setSelectedTxn(data.txn);
@@ -113,9 +121,23 @@ export default function Accounts({ className = "" }) {
     );
   };
 
-  useEffect(() => {
-    ctx.currentUser && getAccounts();
-  }, [ctx.currentUser]);
+  const toggleSelect = (item_) => {
+    if (selectedTxns.includes(item_)) {
+      setSelectedTxns([...selectedTxns].filter((x) => x !== item_));
+    } else {
+      let selectedTxns_ = [...selectedTxns];
+      selectedTxns_.push(item_);
+      setSelectedTxns(selectedTxns_);
+    }
+  };
+
+  const selectAll = () => {
+    setSelectedTxns([...txns]);
+  };
+
+  const deselectAll = () => {
+    setSelectedTxns([]);
+  };
 
   useEffect(() => {
     let merchants_ = txns.map((x) => x.merchant);
@@ -131,12 +153,17 @@ export default function Accounts({ className = "" }) {
   }, [selectedAccount]);
 
   useEffect(() => {
+    ctx.currentUser && getAccounts();
     getTxns();
-  }, [currentMonth, currentYear, selectedAccount]);
+  }, [ctx.currentUser, currentMonth, currentYear, selectedAccount]);
 
   useEffect(() => {
     setEditing(false);
   }, [selectedAccount]);
+
+  useEffect(() => {
+    setSelectedBudgets([]);
+  }, [showBudgets, currentMonth]);
 
   const contextValue = {
     selectedAccount: selectedAccount,
@@ -145,9 +172,22 @@ export default function Accounts({ className = "" }) {
     setAccounts: setAccounts,
     selectedTxn: selectedTxn,
     setSelectedTxn: setSelectedTxn,
+    selectedTxns: selectedTxns,
+    setSelectedTxns: setSelectedTxns,
+    selectedBudgets: selectedBudgets,
+    setSelectedBudgets: setSelectedBudgets,
     txns: txns,
     setTxns: setTxns,
     switchBudget: switchBudget,
+    currentMonth: currentMonth,
+    setCurrentMonth: setCurrentMonth,
+    currentYear: currentYear,
+    setCurrentYear: setCurrentYear,
+    total: total,
+    setTotal: setTotal,
+    selectedBudget: selectedBudget,
+    setSelectedBudget: setSelectedBudget,
+    toggleSelect: toggleSelect,
   };
 
   const sorts = [
@@ -206,7 +246,10 @@ export default function Accounts({ className = "" }) {
             className={
               className + " account-item" + (!selectedAccount ? " active" : "")
             }>
-            <div className="fw-bold">All Accounts</div>
+            <div className="fw-bold">
+              <Icon className="me-3" name="fluent-mdl2:total" />
+              All Accounts
+            </div>
             <div className="font-monospace">
               {parseFloat(
                 accounts.reduce((x, y) => x + parseFloat(y.balance), 0),
@@ -229,7 +272,7 @@ export default function Accounts({ className = "" }) {
                     <Dropdown
                       active={selectedAccount}
                       classNameMenu="w-95"
-                      icon="bi:piggy-bank-fill"
+                      icon="bi:credit-card-fill"
                       border={false}>
                       {accounts.map((x) => (
                         <a
@@ -319,7 +362,7 @@ export default function Accounts({ className = "" }) {
                     <Button
                       border={false}
                       active={editing}
-                      icon="bi:pencil"
+                      icon="tdesign:edit-2-filled"
                       onClick={() => setEditing(!editing)}
                     />
                     {deleting && (
@@ -338,15 +381,16 @@ export default function Accounts({ className = "" }) {
                     />
                   </div>
                 </div>
-                <NewTxn className="my-3" />
-                <div className="between">
-                  <div className="d-flex">
+                <NewTxn className="my-2" />
+                <div className="between txn-menu">
+                  <div className="d-flex ">
                     <Button
+                      border={false}
                       className="abbreviate"
                       icon={
                         !showBudgets
-                          ? "streamline-ultimate:presentation-projector-screen-budget-analytics-bold"
-                          : "hugeicons:transaction"
+                          ? "uis:graph-bar"
+                          : "streamline-plump:credit-card-5-solid"
                       }
                       active={showBudgets}
                       onClick={() => setShowBudgets(!showBudgets)}
@@ -377,34 +421,26 @@ export default function Accounts({ className = "" }) {
                       />
                     )}
                     <Dropdown
+                      active={filter}
                       classNameBtn="abbreviate"
                       border={false}
                       target="merchants"
-                      icon="bi:funnel"
+                      icon="tdesign:store-filled"
                       text={filter ? filter : "Merchants"}>
-                      {ctx.merchants.map((x) => (
-                        <a
-                          onClick={() => setFilter(x)}
-                          className={
-                            "dropdown-item" + (filter === x ? " active" : "")
-                          }>
-                          {x}
-                        </a>
-                      ))}
+                      <div style={{ height: "300px", overflowY: "auto" }}>
+                        {ctx.merchants.map((x) => (
+                          <a
+                            onClick={() => setFilter(x)}
+                            className={
+                              "dropdown-item" + (filter === x ? " active" : "")
+                            }>
+                            {x}
+                          </a>
+                        ))}
+                      </div>
                     </Dropdown>
                   </div>
-                  <div className="d-flex">
-                    <Button
-                      icon="material-symbols:today"
-                      onClick={() => {
-                        if (!currentMonthSelected()) {
-                          setCurrentMonth(new Date().getMonth() + 1);
-                          setCurrentYear(new Date().getFullYear());
-                        }
-                      }}
-                      border={false}
-                      text={`${months[currentMonth - 1]} ${currentYear}`}
-                    />
+                  <div className="d-flex text-truncate">
                     <Button
                       border={false}
                       icon="bi:caret-left-fill"
@@ -416,6 +452,18 @@ export default function Accounts({ className = "" }) {
                           setCurrentMonth(currentMonth - 1);
                         }
                       }}
+                    />
+                    <Button
+                      className="text-truncate"
+                      active={!currentMonthSelected()}
+                      onClick={() => {
+                        if (!currentMonthSelected()) {
+                          setCurrentMonth(new Date().getMonth() + 1);
+                          setCurrentYear(new Date().getFullYear());
+                        }
+                      }}
+                      border={false}
+                      text={`${months[currentMonth - 1]} '${currentYear.toString().substring(2)}`}
                     />
                     <Button
                       className={currentMonthSelected() ? "invisible" : ""}
@@ -448,80 +496,102 @@ export default function Accounts({ className = "" }) {
                         ))}
                     </>
                   ) : (
-                    <div>
-                      <div className="mb-2">
-                        <NewBudget />
-                      </div>
-                      <div>
-                        {ctx.budgets
-                          .sort(
-                            (v, w) =>
-                              w?.txns.reduce(
-                                (t, u) => t + Math.abs(u.amount),
-                                0,
-                              ) -
-                              v?.txns.reduce(
-                                (t, u) => t + Math.abs(u.amount),
-                                0,
-                              ),
-                          )
-                          .map((x) => (
-                            <BudgetItem item={x} />
-                          ))}
-                      </div>
-                    </div>
+                    <Budgets />
                   )}
                 </div>
 
                 <div className="between mt-2 small">
-                  <div className="green">
-                    <Icon name="bi:plus-lg" className="me-2" />
-                    {txns
-                      .filter((x) => {
-                        if (filter) {
-                          return x.merchant === filter && x.amount > 0;
-                        } else {
-                          return x.amount > 0 ? x : null;
-                        }
-                      })
-                      .reduce((y, z) => y + parseFloat(z.amount), 0)
-                      .toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                  </div>
-                  <div className="red">
-                    <Icon name="bi:dash-lg" className="me-2" />
-                    {txns
-                      .filter((x) => {
-                        if (filter) {
-                          return x.merchant === filter && x.amount < 0;
-                        } else {
-                          return x.amount < 0 ? x : null;
-                        }
-                      })
-                      .reduce((y, z) => y + parseFloat(Math.abs(z.amount)), 0)
-                      .toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                  </div>
-                  <div className="orange">
-                    <Icon name="fluent-mdl2:total" className="me-2" />
-                    {txns
-                      .filter((x) => {
-                        if (filter) {
-                          return x.merchant === filter;
-                        } else {
-                          return x;
-                        }
-                      })
-                      .reduce((y, z) => y + parseFloat(z.amount), 0)
-                      .toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                  </div>
+                  {!showBudgets ? (
+                    <div className="between w-75">
+                      <div className="green my-auto">
+                        <Icon name="bi:plus-lg" className="me-2" />
+                        {(selectedTxns.length > 0 ? selectedTxns : txns)
+                          .filter((x) => {
+                            if (filter) {
+                              return x.merchant === filter && x.amount > 0;
+                            } else {
+                              return x.amount > 0 ? x : null;
+                            }
+                          })
+                          .reduce((y, z) => y + parseFloat(z.amount), 0)
+                          .toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                      </div>
+                      <div className="red my-auto">
+                        <Icon name="bi:dash-lg" className="me-2" />
+                        {(selectedTxns.length > 0 ? selectedTxns : txns)
+                          .filter((x) => {
+                            if (filter) {
+                              return x.merchant === filter && x.amount < 0;
+                            } else {
+                              return x.amount < 0 ? x : null;
+                            }
+                          })
+                          .reduce(
+                            (y, z) => y + parseFloat(Math.abs(z.amount)),
+                            0,
+                          )
+                          .toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                      </div>
+                      <div className="orange my-auto">
+                        <Icon name="fluent-mdl2:total" className="me-2" />
+                        {(selectedTxns.length > 0 ? selectedTxns : txns)
+                          .filter((x) => {
+                            if (filter) {
+                              return x.merchant === filter;
+                            } else {
+                              return x;
+                            }
+                          })
+                          .reduce((y, z) => y + parseFloat(z.amount), 0)
+                          .toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="orange my-auto">
+                        <Icon name="fluent-mdl2:total" className="me-2" />
+                        {selectedBudgets
+                          .reduce(
+                            (x, y) =>
+                              x +
+                              y.txns.reduce(
+                                (z, a) => z + Math.abs(a.amount),
+                                0,
+                              ),
+                            0,
+                          )
+                          .toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                      </div>
+                    </div>
+                  )}
+                  {!showBudgets && (
+                    <div className="d-flex flex-row-reverse w-25">
+                      {selectedTxns.length > 0 && (
+                        <Button
+                          border={false}
+                          icon="bi:square"
+                          onClick={() => deselectAll()}
+                        />
+                      )}
+                      <Button
+                        border={false}
+                        icon="bi:check-square"
+                        onClick={() => selectAll()}
+                      />
+                    </div>
+                  )}
                 </div>
               </>
             )}

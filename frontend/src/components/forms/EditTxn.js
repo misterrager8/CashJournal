@@ -1,9 +1,8 @@
 import { useContext, useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { AccountContext } from "../pages/Accounts";
-import { api } from "../../util";
+import { api, moment_ as moment } from "../../util";
 import Icon from "../atoms/Icon";
-import moment from "moment";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
 
@@ -33,12 +32,20 @@ export default function EditTxn() {
   }, [accountCtx.selectedTxn]);
 
   const deleteTxn = () => {
-    api("delete_txn", { id: accountCtx.selectedTxn?.id }, (data) => {
-      accountCtx.setTxns(data.txns);
-      accountCtx.setAccounts(data.accounts);
-      accountCtx.setSelectedTxn(null);
-      setDeleting(false);
-    });
+    api(
+      "delete_txn",
+      {
+        id: accountCtx.selectedTxn?.id,
+        month: accountCtx.currentMonth,
+        year: accountCtx.currentYear,
+      },
+      (data) => {
+        accountCtx.setTxns(data.txns);
+        accountCtx.setAccounts(data.accounts);
+        accountCtx.setSelectedTxn(null);
+        setDeleting(false);
+      },
+    );
   };
 
   const editTxn = (e) => {
@@ -49,6 +56,8 @@ export default function EditTxn() {
         id: accountCtx.selectedTxn?.id,
         merchant: merchant,
         description: description,
+        month: accountCtx.currentMonth,
+        year: accountCtx.currentYear,
       },
       (data) => {
         accountCtx.setTxns(data.txns);
@@ -68,6 +77,7 @@ export default function EditTxn() {
     <>
       <div className="between">
         <Button
+          size="lg"
           border={false}
           icon="bi:arrow-left"
           onClick={() => accountCtx.setSelectedTxn(null)}
@@ -81,6 +91,7 @@ export default function EditTxn() {
         <div className="d-flex">
           {deleting && (
             <Button
+              size="lg"
               border={false}
               className="red"
               icon="bi:question-lg"
@@ -88,6 +99,7 @@ export default function EditTxn() {
             />
           )}
           <Button
+            size="lg"
             border={false}
             className="red"
             icon="bi:trash2"

@@ -7,6 +7,7 @@ export default function Dropdown({
   showCaret = true,
   border = true,
   active = false,
+  autoClose = true,
   size = "sm",
   children,
   classNameBtn = "",
@@ -16,6 +17,7 @@ export default function Dropdown({
   return (
     <div className={className}>
       <a
+        data-bs-auto-close={autoClose}
         data-bs-target={"#" + target}
         data-bs-toggle="dropdown"
         className={

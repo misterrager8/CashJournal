@@ -6,6 +6,7 @@ import Auth from "./pages/Auth";
 import Bills from "./pages/Bills";
 import WishList from "./pages/WishList";
 import { Context } from "../Context";
+import moment from "moment";
 
 export default function Display({ className = "" }) {
   const ctx = useContext(Context);

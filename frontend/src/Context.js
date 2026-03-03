@@ -85,6 +85,15 @@ export default function ContextProvider({ children }) {
     });
   };
 
+  const editBudget = (e, id, name, color) => {
+    e.preventDefault();
+    setLoading(true);
+    api("edit_budget", { id: id, name: name, color: color }, (data) => {
+      setBudgets(data.budgets);
+      setLoading(false);
+    });
+  };
+
   const deleteBudget = (id) => {
     setLoading(true);
     api("delete_budget", { id: id }, (data) => {
@@ -119,6 +128,7 @@ export default function ContextProvider({ children }) {
     budgets: budgets,
     setBudgets: setBudgets,
     addBudget: addBudget,
+    editBudget: editBudget,
     getBudgets: getBudgets,
     deleteBudget: deleteBudget,
   };

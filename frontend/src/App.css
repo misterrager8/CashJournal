@@ -122,17 +122,17 @@ body {
   cursor: pointer;
   border-radius: 5px;
   /* border: 0.5px solid; */
-  padding: 2px 20px;
+  padding: 2px 10px;
   margin-bottom: 5px;
 }
 
-.txn-item:hover {
+.txn-item.active {
   background-color: var(--btn-color);
   color: var(--btn-hover-txt);
 }
 
-.txn-item:hover .red,
-.txn-item:hover .green {
+.txn-item.active .red,
+.txn-item.active .green {
   color: var(--btn-hover-txt);
 }
 
@@ -234,6 +234,7 @@ body {
 .txn-form .form-control,
 .txn-form .btn {
   margin: 1px;
+  font-size: 1.1rem;
 }
 
 .month {
@@ -296,7 +297,51 @@ body {
   color: var(--orange);
 }
 
+.budget-scroll {
+  height: 39vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.progress-bar-custom {
+  width: 100%;
+  display: flex;
+}
+
+.progress-div {
+  margin: 1px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--btn-hover-txt);
+}
+
+.progress-div:hover {
+  border: 0.5px solid var(--orange);
+  padding: 0px;
+  margin: 0px;
+}
+
+.budget-item {
+  padding: 0px 10px;
+  border-radius: 5px;
+  margin-bottom: 3px;
+}
+
+.budget-item.active {
+  background-color: var(--btn-color);
+  color: var(--btn-hover-txt);
+}
+
+.budget-item.active .btn {
+  color: var(--btn-hover-txt);
+}
+
 @media screen and (max-width: 1050px) {
+  .budget-scroll {
+    height: 35vh;
+  }
+
   .inner {
     width: 95%;
   }
@@ -309,10 +354,11 @@ body {
     display: none;
   }
 
-  .nav-custom .btn {
-    font-size: 1.5rem;
-    padding-left: 15px;
-    padding-right: 15px;
+  .nav-custom .btn,
+  .txn-menu .btn {
+    font-size: 1.1rem;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .flex {
@@ -367,5 +413,13 @@ body {
 
   .show-on-mobile {
     display: unset;
+  }
+
+  .progress-bar-custom {
+    flex-direction: column;
+  }
+
+  .dropdown-item {
+    font-size: 1.1rem;
   }
 }

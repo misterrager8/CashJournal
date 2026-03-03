@@ -4,7 +4,8 @@ import Button from "../atoms/Button";
 import { Context } from "../../Context";
 import { AccountContext } from "../pages/Accounts";
 import Dropdown from "../atoms/Dropdown";
-import { api } from "../../util";
+import { api, moment_ as moment } from "../../util";
+import { Icon } from "@iconify/react";
 
 export default function NewTxn({ className = "" }) {
   const ctx = useContext(Context);
@@ -13,13 +14,20 @@ export default function NewTxn({ className = "" }) {
   const [merchant, setMerchant] = useState("");
   const onChangeMerchant = (e) => setMerchant(e.target.value);
 
-  const [amount, setAmount] = useState(0.0);
+  const [amount, setAmount] = useState(0.01);
   const onChangeAmount = (e) => setAmount(e.target.value);
 
   const [account, setAccount] = useState(null);
   const [category, setCategory] = useState(null);
 
   const [isDeposit, setIsDeposit] = useState(false);
+
+  const resetAll = () => {
+    setMerchant("");
+    setAmount(0.01);
+    setCategory(null);
+    setIsDeposit(false);
+  };
 
   const addTxn = (e) => {
     ctx.setLoading(true);
@@ -38,8 +46,7 @@ export default function NewTxn({ className = "" }) {
         accountCtx.setTxns(data.txns);
         ctx.setBudgets(data.budgets);
 
-        setMerchant("");
-        setAmount(0.01);
+        resetAll();
         ctx.setLoading(false);
       },
     );
@@ -50,73 +57,116 @@ export default function NewTxn({ className = "" }) {
   }, [accountCtx.accounts]);
 
   return (
-    <form onSubmit={(e) => addTxn(e)} className={className + " txn-form"}>
-      <Button
-        onClick={() => setIsDeposit(!isDeposit)}
-        className={isDeposit ? "green" : "red"}
-        border={false}
-        icon={(isDeposit ? "plus-" : "dash-") + "lg"}
-      />
-      <input
-        placeholder="0.01"
-        min={0.01}
-        type="number"
-        step={0.01}
-        autoComplete="off"
-        value={amount}
-        onChange={onChangeAmount}
-        className={
-          "form-control form-control-sm " + (!isDeposit ? "red" : "green")
-        }
-      />
-      <Dropdown icon="bxs:purchase-tag" target="all-merchants">
-        {ctx.merchants.map((x) => (
-          <a onClick={() => setMerchant(x)} className="dropdown-item">
-            {x}
-          </a>
-        ))}
-      </Dropdown>
-      <Input
-        placeholder="Merchant"
-        value={merchant}
-        onChange={onChangeMerchant}
-      />
-      <Dropdown
-        active={category}
-        target="chooseBudget"
-        icon="streamline-ultimate:presentation-projector-screen-budget-analytics-bold">
-        <a
-          onClick={() => setCategory(null)}
-          className={"dropdown-item" + (!category ? " active" : "")}>
-          None
-        </a>
-        {ctx.budgets.map((item) => (
-          <a
-            onClick={() => setCategory(item.id)}
-            className={
-              "dropdown-item" + (category === item.id ? " active" : "")
-            }>
-            {item.name}
-          </a>
-        ))}
-      </Dropdown>
-      <Dropdown
-        target="chooseAccount"
-        icon="bi:piggy-bank-fill"
-        text={account?.name}>
-        {accountCtx.accounts.map((item) => (
-          <div onClick={() => setAccount(item)} className="dropdown-item">
-            {item.name}
+    <form onSubmit={(e) => addTxn(e)}>
+      <div className={className + " txn-form"}>
+        <Dropdown
+          classNameBtn="py-1"
+          border={false}
+          icon="tdesign:store-filled"
+          target="all-merchants">
+          <div style={{ height: "300px", overflowY: "auto" }}>
+            {ctx.merchants.map((x) => (
+              <a onClick={() => setMerchant(x)} className="dropdown-item">
+                {x}
+              </a>
+            ))}
           </div>
-        ))}
-      </Dropdown>
-      <Button
-        border={false}
-        type_="submit"
-        className="show-on-mobile"
-        icon="bi:caret-right-fill"
-        // text="Add"
-      />
+        </Dropdown>
+        <Input
+          className="border-0"
+          placeholder="-"
+          value={merchant}
+          onChange={onChangeMerchant}
+        />
+        <Button
+          onClick={() => setIsDeposit(!isDeposit)}
+          className={isDeposit ? "green" : "red"}
+          border={false}
+          icon={"bi:" + (isDeposit ? "plus-" : "dash-") + "lg"}
+        />
+        <input
+          onFocus={(e) => e.target.select()}
+          placeholder="0.01"
+          min={0.01}
+          type="number"
+          step={0.01}
+          autoComplete="off"
+          value={amount}
+          onChange={onChangeAmount}
+          className={
+            "form-control form-control-sm border-0 p-0 " +
+            (!isDeposit ? "red" : "green")
+          }
+        />
+        <a
+          data-bs-target="#choose-budget"
+          data-bs-toggle="dropdown"
+          className={
+            "btn btn-sm dropdown-toggle border-0" +
+            (category ? " text-truncate" : "")
+          }>
+          {category ? (
+            <Icon
+              style={{
+                color: ctx.budgets.find((x) => x.id === category)?.color,
+              }}
+              inline
+              icon="uis:graph-bar"
+              className=" me-2"
+            />
+          ) : (
+            <Icon inline icon="bi:dash-lg" className=" me2" />
+          )}
+          <span>{ctx.budgets.find((x) => x.id === category)?.name}</span>
+        </a>
+        <div id="choose-budget" className={" dropdown-menu"}>
+          <a
+            onClick={() => setCategory(null)}
+            className={"dropdown-item" + (!category ? " active" : "")}>
+            None
+          </a>
+          {ctx.budgets.map((item) => (
+            <a
+              onClick={() => setCategory(item.id)}
+              className={
+                "dropdown-item" + (category === item.id ? " active" : "")
+              }>
+              {item.name}
+            </a>
+          ))}
+        </div>
+        <Dropdown
+          classNameBtn="border-0"
+          target="choose-account"
+          icon="bi:credit-card-fill"
+          text={account?.name}>
+          {accountCtx.accounts.map((item) => (
+            <div onClick={() => setAccount(item)} className="dropdown-item">
+              {item.name}
+            </div>
+          ))}
+        </Dropdown>
+        {merchant !== "" ||
+        parseFloat(amount) !== parseFloat(0.01) ||
+        category !== null ? (
+          <>
+            <Button
+              onClick={() => resetAll()}
+              className="red"
+              icon="bi:eraser-fill"
+              border={false}
+            />
+            <Button
+              type_="submit"
+              className="green"
+              icon="bi:plus-lg"
+              border={false}
+            />
+          </>
+        ) : (
+          <></>
+        )}
+      </div>
     </form>
   );
 }

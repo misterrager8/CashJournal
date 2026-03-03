@@ -8,3 +8,5 @@ dotenv.load_dotenv()
 SQLALCHEMY_DATABASE_URI = os.getenv("db")
 PORT = os.getenv("port") or "3939"
 SECRET_KEY = os.getenv("secret_key")
+SQLALCHEMY_ENGINE_OPTIONS = {"pool_size": 5, "max_overflow": 10, "pool_recycle": 280}
+# SQLALCHEMY_ECHO = True

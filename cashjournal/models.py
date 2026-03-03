@@ -131,9 +131,11 @@ class Transaction(db.Model):
     description = db.Column(db.Text)
     merchant = db.Column(db.Text)
     memo = db.Column(db.Text)
-    account = db.Column(db.Integer, db.ForeignKey("accounts.id"))
+    account_id = db.Column(db.Integer, db.ForeignKey("accounts.id"))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    account = db.relationship("Account")
+    category = db.relationship("Category")
 
     def __init__(self, **kwargs):
         super(Transaction, self).__init__(**kwargs)
@@ -148,18 +150,19 @@ class Transaction(db.Model):
 
     @classmethod
     def get_by_account(cls, id, month, year):
-        return [
-            i
-            for i in Account.get(id).transactions
-            if i.timestamp.month == month and i.timestamp.year == year
-        ]
-
-    @property
-    def category(self):
-        return Category.get(self.category_id)
+        return (
+            Account.query.filter(Account.id == id)
+            .filter(Account.timestamp.month == month)
+            .filter(Account.timestamp.year == year)
+        )
+        # return [
+        #     i
+        #     for i in Account.get(id).transactions
+        #     if i.timestamp.month == month and i.timestamp.year == year
+        # ]
 
     def create(self):
-        account_ = Account.get(self.account)
+        account_ = Account.get(self.account_id)
         account_.balance += self.amount
 
         account_.edit()
@@ -171,7 +174,7 @@ class Transaction(db.Model):
         db.session.commit()
 
     def delete(self):
-        account_ = Account.get(self.account)
+        account_ = Account.get(self.account_id)
         account_.balance -= self.amount
 
         account_.edit()
@@ -189,9 +192,9 @@ class Transaction(db.Model):
             "description": self.description,
             "merchant": self.merchant,
             "memo": self.memo,
-            "accountId": self.account,
-            "category": self.category.to_dict() if self.category_id else None,
-            "accountName": Account.get(self.account).name,
+            "accountId": self.account_id,
+            "category": self.category.to_dict() if self.category else None,
+            "accountName": self.account.name if self.account else None,
         }
 
 
@@ -360,6 +363,7 @@ class Category(db.Model):
             "id": self.id,
             "name": self.name,
             "maximum": str(self.maximum),
+            "color": self.color,
             # "transactions": sorted(
             #     [t.to_dict() for t in self.txns.all()],
             #     key=lambda x: x["timestamp"],

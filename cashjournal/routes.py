@@ -403,7 +403,7 @@ def add_txn():
             amount=amount,
             timestamp=timestamp,
             merchant=merchant,
-            account=account,
+            account_id=account,
             user=current_user.id,
             category_id=category_id,
         )
@@ -417,6 +417,7 @@ def add_txn():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "color": i.color,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -469,6 +470,7 @@ def get_txns():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "color": i.color,
                     "txns": [
                         j.to_dict()
                         for j in i.get_txns(
@@ -497,7 +499,7 @@ def edit_txn():
 
     try:
         txn = Transaction.get(request.json.get("id"))
-        account = Account.get(txn.account)
+        account = Account.get(txn.account_id)
 
         txn.merchant = request.json.get("merchant")
         txn.description = request.json.get("description")
@@ -506,7 +508,12 @@ def edit_txn():
         account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
-        txns = [i.to_dict() for i in current_user.get_txns()]
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                int(request.json.get("month")), int(request.json.get("year"))
+            )
+        ]
         txn = txn.to_dict()
 
     except Exception as e:
@@ -535,7 +542,12 @@ def delete_txn():
         txn = Transaction.get(request.json.get("id"))
         txn.delete()
 
-        txns = [i.to_dict() for i in current_user.get_txns()]
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                int(request.json.get("month")), int(request.json.get("year"))
+            )
+        ]
         accounts = [i.to_dict() for i in current_user.accounts]
 
     except Exception as e:
@@ -687,6 +699,7 @@ def add_budget():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "color": i.color,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -711,6 +724,35 @@ def get_budgets():
     return {"success": success, "msg": msg, "budgets": budgets}
 
 
+@current_app.post("/edit_budget")
+@login_required
+def edit_budget():
+    success = True
+    msg = ""
+    budgets = []
+
+    try:
+        budget = Category.get(int(request.json.get("id")))
+        budget.name = request.json.get("name")
+        budget.color = request.json.get("color")
+
+        budget.edit()
+
+        for i in Category.all():
+            budgets.append(
+                {
+                    "id": i.id,
+                    "name": i.name,
+                    "color": i.color,
+                    "txns": [j.to_dict() for j in i.get_txns()],
+                }
+            )
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "budgets": budgets}
+
+
 @current_app.post("/delete_budget")
 @login_required
 def delete_budget():
@@ -727,6 +769,7 @@ def delete_budget():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "color": i.color,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -751,7 +794,12 @@ def switch_budget():
         txn.category_id = request.json.get("budgetId")
         txn.edit()
 
-        txns = [i.to_dict() for i in current_user.get_txns()]
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                int(request.json.get("month")), int(request.json.get("year"))
+            )
+        ]
         txn = txn.to_dict()
 
     except Exception as e:

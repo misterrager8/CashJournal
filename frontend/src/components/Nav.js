@@ -52,7 +52,7 @@ export default function Nav({ className = "" }) {
           onClick={() => ctx.setCurrentPage("auth")}
           text={ctx.currentUser?.username}
           border={false}
-          icon="bi:person-circle"
+          icon="si:user-alt-6-fill"
         />
         {ctx.currentUser && (
           <>
@@ -61,15 +61,15 @@ export default function Nav({ className = "" }) {
               onClick={() => ctx.setCurrentPage("accounts")}
               text="Accounts"
               border={false}
-              icon="bi:piggy-bank-fill"
+              icon="bi:credit-card-fill"
             />
-            <Button
+            {/* <Button
               active={ctx.currentPage === "bills"}
               onClick={() => ctx.setCurrentPage("bills")}
               text="Bills"
               border={false}
               icon="bi:calendar-day"
-            />
+            /> */}
             {/* <Button
               active={ctx.currentPage === "wish-list"}
               onClick={() => ctx.setCurrentPage("wish-list")}
@@ -82,19 +82,24 @@ export default function Nav({ className = "" }) {
       </div>
 
       <div>
-        <Dropdown border={false} icon="bi:paint-bucket" target="themes">
-          {themes.map((item) => (
-            <>
-              <div
-                onClick={() => setTheme(item)}
-                className={
-                  "dropdown-item text-capitalize text-center" +
-                  (theme === item ? " active" : "")
-                }>
-                {item}
-              </div>
-            </>
-          ))}
+        <Dropdown
+          border={false}
+          icon="fluent:paint-bucket-24-filled"
+          target="themes">
+          <div style={{ height: "600px", overflowY: "auto" }}>
+            {themes.map((item) => (
+              <>
+                <div
+                  onClick={() => setTheme(item)}
+                  className={
+                    "dropdown-item text-capitalize text-center" +
+                    (theme === item ? " active" : "")
+                  }>
+                  {item}
+                </div>
+              </>
+            ))}
+          </div>
         </Dropdown>
       </div>
     </div>
