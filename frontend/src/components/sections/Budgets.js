@@ -3,6 +3,7 @@ import NewBudget from "../forms/NewBudget";
 import { Context } from "../../Context";
 import BudgetItem from "../items/BudgetItem";
 import { AccountContext } from "../pages/Accounts";
+import { Icon } from "@iconify/react";
 
 export default function Budgets() {
   const ctx = useContext(Context);
@@ -39,28 +40,38 @@ export default function Budgets() {
                 v?.txns.reduce((t, u) => t + Math.abs(u.amount), 0),
             )
             .map((x) => (
-              <BudgetItem item={x} />
+              <BudgetItem key={`budget-${x.id}`} item={x} />
             ))}
         </div>
         <div className="progress-bar-custom my-3">
           {ctx.budgets.map((x) => (
             <Fragment key={x.id}>
               {getTotals(x) > 0 && (
-                <div
-                  className="progress-div"
-                  onClick={() =>
-                    accountCtx.setSelectedBudget(
-                      accountCtx.selectedBudget?.id === x.id ? null : x,
-                    )
-                  }
-                  style={{
-                    width: `${getTotals(x)}%`,
-                    backgroundColor: x.color,
-                  }}>
-                  <div className="text-center small">
-                    {getTotals(x) > 5 ? `${getTotals(x)}%` : "\u00A0"}
+                <>
+                  <div className="show-on-mobile">
+                    <Icon
+                      inline
+                      icon={x.icon || "uis:graph-bar"}
+                      className="me-2"
+                    />
+                    <span>{x.name}</span>
                   </div>
-                </div>
+                  <div
+                    className="progress-div"
+                    onClick={() =>
+                      accountCtx.setSelectedBudget(
+                        accountCtx.selectedBudget?.id === x.id ? null : x,
+                      )
+                    }
+                    style={{
+                      width: `${getTotals(x)}%`,
+                      backgroundColor: x.color,
+                    }}>
+                    <div className="text-center small">
+                      {getTotals(x) > 5 ? `${getTotals(x)}%` : "\u00A0"}
+                    </div>
+                  </div>
+                </>
               )}
             </Fragment>
           ))}

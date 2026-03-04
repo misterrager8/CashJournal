@@ -85,13 +85,17 @@ export default function ContextProvider({ children }) {
     });
   };
 
-  const editBudget = (e, id, name, color) => {
+  const editBudget = (e, id, name, color, icon) => {
     e.preventDefault();
     setLoading(true);
-    api("edit_budget", { id: id, name: name, color: color }, (data) => {
-      setBudgets(data.budgets);
-      setLoading(false);
-    });
+    api(
+      "edit_budget",
+      { id: id, name: name, color: color, icon: icon },
+      (data) => {
+        setBudgets(data.budgets);
+        setLoading(false);
+      },
+    );
   };
 
   const deleteBudget = (id) => {

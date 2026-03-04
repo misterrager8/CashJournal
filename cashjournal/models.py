@@ -319,6 +319,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
     color = db.Column(db.Text)
+    icon = db.Column(db.Text)
     maximum = db.Column(db.Numeric(10, 2))
     txns = db.relationship("Transaction", lazy="dynamic")
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -364,6 +365,7 @@ class Category(db.Model):
             "name": self.name,
             "maximum": str(self.maximum),
             "color": self.color,
+            "icon": self.icon,
             # "transactions": sorted(
             #     [t.to_dict() for t in self.txns.all()],
             #     key=lambda x: x["timestamp"],

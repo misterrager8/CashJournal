@@ -162,29 +162,61 @@ export default function EditTxn() {
           </div>
         </div>
         <div className="mt-3 w-50 mx-auto">
-          <Dropdown
-            icon="uis:graph-bar"
-            border={false}
-            classNameBtn="w-100"
-            text={
-              accountCtx.selectedTxn.category?.id
-                ? accountCtx.selectedTxn.category?.name
-                : "No Budget"
-            }
-            target="budgets">
-            <a
-              onClick={() => accountCtx.switchBudget(null)}
-              className="dropdown-item">
-              No Budget
-            </a>
-            {ctx.budgets.map((x) => (
-              <a
-                onClick={() => accountCtx.switchBudget(x.id)}
-                className="dropdown-item">
-                {x.name}
-              </a>
-            ))}
-          </Dropdown>
+          <div className="d-flex">
+            <div className="d-flex mx-auto">
+              <div
+                style={{
+                  color: accountCtx.selectedTxn.category?.color,
+                }}>
+                <Icon
+                  name={
+                    accountCtx.selectedTxn.category?.icon || "uis:graph-bar"
+                  }
+                  className="my-auto me-2"
+                />
+              </div>
+              <Dropdown
+                border={false}
+                classNameBtn="w-100"
+                text={
+                  accountCtx.selectedTxn.category?.id
+                    ? accountCtx.selectedTxn.category?.name
+                    : "No Budget"
+                }
+                target="budgets">
+                <a
+                  onClick={() => accountCtx.switchBudget(null)}
+                  className="dropdown-item">
+                  No Budget
+                </a>
+                {ctx.budgets.map((x) => (
+                  <a
+                    onClick={() => accountCtx.switchBudget(x.id)}
+                    className={
+                      "dropdown-item" +
+                      (x.id === accountCtx.selectedTxn?.category?.id
+                        ? " active"
+                        : "")
+                    }>
+                    <span
+                      style={{
+                        color: x.color,
+                      }}>
+                      <Icon
+                        className="me-2"
+                        name={
+                          accountCtx.selectedTxn.category?.icon ||
+                          "uis:graph-bar"
+                        }
+                      />
+                    </span>
+                    {x.name}
+                  </a>
+                ))}
+              </Dropdown>
+            </div>
+          </div>
+
           <div className="small opacity-50 my-2">Description</div>
           <textarea
             rows={6}

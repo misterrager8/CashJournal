@@ -418,6 +418,7 @@ def add_txn():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -471,6 +472,7 @@ def get_txns():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [
                         j.to_dict()
                         for j in i.get_txns(
@@ -690,7 +692,9 @@ def add_budget():
     budget = None
 
     try:
-        budget = Category(name=request.json.get("name"), user=current_user.id)
+        budget = Category(
+            name=request.json.get("name"), user=current_user.id, icon="uis:graph-bar"
+        )
         budget.create()
 
         budget = budget.to_dict()
@@ -700,6 +704,7 @@ def add_budget():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -735,6 +740,7 @@ def edit_budget():
         budget = Category.get(int(request.json.get("id")))
         budget.name = request.json.get("name")
         budget.color = request.json.get("color")
+        budget.icon = request.json.get("icon")
 
         budget.edit()
 
@@ -744,6 +750,7 @@ def edit_budget():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -769,6 +776,7 @@ def delete_budget():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "icon": i.icon,
                     "color": i.color,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }

@@ -19,7 +19,11 @@ export default function BudgetItem({ item, className = "" }) {
   const [color, setColor] = useState(item.color);
   const onChangeColor = (e) => setColor(e.target.value);
 
-  const isChanged = () => name !== item.name || color !== item.color;
+  const [icon, setIcon] = useState(item.icon);
+  const onChangeIcon = (e) => setIcon(e.target.value);
+
+  const isChanged = () =>
+    name !== item.name || color !== item.color || icon !== item.icon;
 
   const toggleSelect = () => {
     let selectedBudgets_ = [...accountCtx.selectedBudgets];
@@ -34,6 +38,7 @@ export default function BudgetItem({ item, className = "" }) {
   useEffect(() => {
     setName(item.name);
     setColor(item.color);
+    setIcon(item.icon);
   }, []);
 
   return (
@@ -67,15 +72,18 @@ export default function BudgetItem({ item, className = "" }) {
           <Icon
             style={{ color: item.color }}
             inline
-            icon="uis:graph-bar"
+            icon={item.icon || "uis:graph-bar"}
             className="my-auto me-3"
           />
           {editing ? (
             <form
-              onSubmit={(e) => multiCtx.editBudget(e, item.id, name, color)}
+              onSubmit={(e) =>
+                multiCtx.editBudget(e, item.id, name, color, icon)
+              }
               className="d-flex">
               <Input value={name} onChange={onChangeName} />
               <Input type_="color" value={color} onChange={onChangeColor} />
+              <Input value={icon} placeholder="Icon" onChange={onChangeIcon} />
               {isChanged() && (
                 <Button
                   border={false}

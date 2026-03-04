@@ -38,7 +38,7 @@ export default function TxnItem({ item, className = "" }) {
             <Icon
               className="me-2"
               inline
-              icon="uis:graph-bar"
+              icon={item.category?.icon || "uis:graph-bar"}
               style={{ color: item.category?.color }}
             />
           )}
