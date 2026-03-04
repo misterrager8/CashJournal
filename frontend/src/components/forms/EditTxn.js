@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { AccountContext } from "../pages/Accounts";
-import { api, moment_ as moment } from "../../util";
+import { api, moment_ as moment, moment2 } from "../../util";
 import Icon from "../atoms/Icon";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
@@ -21,6 +21,9 @@ export default function EditTxn() {
   const [description, setDescription] = useState("");
   const onChangeDescription = (e) => setDescription(e.target.value);
 
+  const [timestamp, setTimestamp] = useState("");
+  const onChangeTimestamp = (e) => setTimestamp(e.target.value);
+
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -28,6 +31,12 @@ export default function EditTxn() {
       setAmount(accountCtx.selectedTxn?.amount);
       setMerchant(accountCtx.selectedTxn?.merchant);
       setDescription(accountCtx.selectedTxn?.description);
+
+      setTimestamp(
+        moment2(accountCtx.selectedTxn?.timestamp).format(
+          "YYYY-MM-DD HH:mm:ss",
+        ),
+      );
     }
   }, [accountCtx.selectedTxn]);
 
@@ -56,6 +65,7 @@ export default function EditTxn() {
         id: accountCtx.selectedTxn?.id,
         merchant: merchant,
         description: description,
+        timestamp: timestamp,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -71,7 +81,9 @@ export default function EditTxn() {
 
   const isChanged = () =>
     merchant !== accountCtx.selectedTxn?.merchant ||
-    description !== accountCtx.selectedTxn?.description;
+    description !== accountCtx.selectedTxn?.description ||
+    timestamp !==
+      moment2(accountCtx.selectedTxn?.timestamp).format("YYYY-MM-DD HH:mm:ss");
 
   return (
     <>
@@ -127,12 +139,19 @@ export default function EditTxn() {
         />
         <div className="mt-3">
           <div className="text-center" style={{ fontSize: "1.1rem" }}>
-            <div className="mb-2">
-              <Icon className="" name="bi:clock-history" />
-              <div className="">
-                {moment(accountCtx.selectedTxn.timestamp).format("LLLL")}
+            <div className="d-flex my-3">
+              <div className="mx-auto">
+                <input
+                  max={moment2(new Date()).format("YYYY-MM-DD")}
+                  type="datetime-local"
+                  value={timestamp}
+                  onChange={onChangeTimestamp}
+                  autoComplete="off"
+                  className="form-control borer-0 mb-2"
+                />
               </div>
             </div>
+
             <div className="">
               <Icon className="" name="bi:credit-card" />
               <div className="">{accountCtx.selectedTxn.accountName}</div>

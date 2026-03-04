@@ -16,3 +16,8 @@ export const moment_ = (timestamp) => {
   time_.add(time_.utcOffset(), "minutes");
   return time_;
 };
+
+export const moment2 = (timestamp) => {
+  let time_ = timestamp ? moment(timestamp) : moment();
+  return time_;
+};

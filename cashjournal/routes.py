@@ -499,13 +499,13 @@ def edit_txn():
 
     try:
         txn = Transaction.get(request.json.get("id"))
-        account = Account.get(txn.account_id)
 
         txn.merchant = request.json.get("merchant")
         txn.description = request.json.get("description")
+        txn.timestamp = request.json.get("timestamp")
+        click.secho(request.json.get("timestamp"), fg="blue")
 
         txn.edit()
-        account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
         txns = [
