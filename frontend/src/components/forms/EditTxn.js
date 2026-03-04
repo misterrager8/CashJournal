@@ -140,26 +140,30 @@ export default function EditTxn() {
         <div className="mt-3">
           <div className="text-center" style={{ fontSize: "1.1rem" }}>
             <div className="d-flex my-3">
-              <div className="mx-auto">
+              <div className="d-flex mx-auto">
+                <Icon className="my-auto" name="uit:clock-three" />
                 <input
                   max={moment2(new Date()).format("YYYY-MM-DD")}
                   type="datetime-local"
                   value={timestamp}
                   onChange={onChangeTimestamp}
                   autoComplete="off"
-                  className="form-control borer-0 mb-2"
+                  className="form-control border-0"
                 />
               </div>
             </div>
 
-            <div className="">
-              <Icon className="" name="bi:credit-card" />
-              <div className="">{accountCtx.selectedTxn.accountName}</div>
+            <div className="d-flex">
+              <div className="d-flex mx-auto">
+                <Icon className="my-auto me-2" name="bi:credit-card" />
+                <div className="">{accountCtx.selectedTxn.accountName}</div>
+              </div>
             </div>
           </div>
         </div>
         <div className="mt-3 w-50 mx-auto">
           <Dropdown
+            icon="uis:graph-bar"
             border={false}
             classNameBtn="w-100"
             text={
