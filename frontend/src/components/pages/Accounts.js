@@ -27,7 +27,8 @@ export default function Accounts({ className = "" }) {
   const [selectedBudgets, setSelectedBudgets] = useState([]);
 
   const [txns, setTxns] = useState([]);
-  const [sort, setSort] = useState("date-desc");
+  const [sort, setSort] = useState("date");
+  const [descending, setDescending] = useState(true);
 
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -198,8 +199,8 @@ export default function Accounts({ className = "" }) {
 
   const sorts = [
     {
-      value: "date-desc",
-      label: "Newest",
+      value: "date",
+      label: "Date",
     },
     {
       value: "merchant",
@@ -207,7 +208,7 @@ export default function Accounts({ className = "" }) {
     },
     {
       value: "amount",
-      label: "Amount (Desc)",
+      label: "Amount",
     },
     {
       value: "category",
@@ -220,24 +221,32 @@ export default function Accounts({ className = "" }) {
   useEffect(() => {
     let txns_ = [...txns];
     if (sort === "amount") {
-      txns_.sort((x, y) => Math.abs(y.amount) - Math.abs(x.amount));
-    } else if (sort === "date-desc") {
       txns_.sort(
-        (x, y) => moment(y.timestamp).valueOf() - moment(x.timestamp).valueOf(),
+        (x, y) =>
+          Math.abs((descending ? y : x).amount) -
+          Math.abs((descending ? x : y).amount),
+      );
+    } else if (sort === "date") {
+      txns_.sort(
+        (x, y) =>
+          moment((descending ? y : x).timestamp).valueOf() -
+          moment((descending ? x : y).timestamp).valueOf(),
       );
     } else if (sort === "merchant") {
       txns_.sort((x, y) =>
-        x.merchant.toLowerCase()?.localeCompare(y.merchant.toLowerCase()),
+        (descending ? y : x).merchant
+          .toLowerCase()
+          ?.localeCompare((descending ? x : y).merchant.toLowerCase()),
       );
     } else if (sort === "category") {
       txns_.sort((x, y) =>
-        x.category?.name
+        (descending ? y : x).category?.name
           .toLowerCase()
-          ?.localeCompare(y.category?.name.toLowerCase()),
+          ?.localeCompare((descending ? x : y).category?.name.toLowerCase()),
       );
     }
     setTxns(txns_);
-  }, [sort]);
+  }, [sort, descending]);
 
   return (
     <AccountContext.Provider value={contextValue}>
@@ -402,11 +411,16 @@ export default function Accounts({ className = "" }) {
                       onClick={() => setShowBudgets(!showBudgets)}
                       text={showBudgets ? "Transactions" : "Budgets"}
                     />
+                    <Button
+                      border={false}
+                      onClick={() => setDescending(!descending)}
+                      icon={"uiw:" + (descending ? "down" : "up")}
+                    />
                     <Dropdown
                       classNameBtn="abbreviate"
                       border={false}
                       target="sort"
-                      icon="bi:sort-down"
+                      // icon="bi:sort-down"
                       text={`Sort: ${getSort()?.label}`}>
                       {sorts.map((x) => (
                         <a
