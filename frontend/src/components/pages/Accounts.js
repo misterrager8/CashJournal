@@ -153,8 +153,10 @@ export default function Accounts({ className = "" }) {
   }, [selectedAccount]);
 
   useEffect(() => {
-    ctx.currentUser && getAccounts();
-    getTxns();
+    if (ctx.currentUser) {
+      getAccounts();
+      getTxns();
+    }
   }, [ctx.currentUser, currentMonth, currentYear, selectedAccount]);
 
   useEffect(() => {
@@ -164,6 +166,10 @@ export default function Accounts({ className = "" }) {
   useEffect(() => {
     setSelectedBudgets([]);
   }, [showBudgets, currentMonth]);
+
+  useEffect(() => {
+    setSelectedTxns([]);
+  }, [currentMonth]);
 
   const contextValue = {
     selectedAccount: selectedAccount,
@@ -578,6 +584,11 @@ export default function Accounts({ className = "" }) {
                   )}
                   {!showBudgets && (
                     <div className="d-flex flex-row-reverse w-25">
+                      <Button
+                        border={false}
+                        icon="bi:check-square"
+                        onClick={() => selectAll()}
+                      />
                       {selectedTxns.length > 0 && (
                         <Button
                           border={false}
@@ -585,11 +596,20 @@ export default function Accounts({ className = "" }) {
                           onClick={() => deselectAll()}
                         />
                       )}
-                      <Button
-                        border={false}
-                        icon="bi:check-square"
-                        onClick={() => selectAll()}
-                      />
+                      <span
+                        className={
+                          "my-auto me-2" +
+                          (!selectedTxns.length > 0 ? " opacity-50" : "")
+                        }>
+                        <Icon
+                          name="streamline-plump:credit-card-5-solid"
+                          className="me-2"
+                        />
+
+                        {selectedTxns.length > 0
+                          ? selectedTxns.length
+                          : txns.length}
+                      </span>
                     </div>
                   )}
                 </div>
