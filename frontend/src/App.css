@@ -297,6 +297,10 @@ body {
   color: var(--orange);
 }
 
+.purple {
+  color: var(--purple);
+}
+
 .budget-scroll {
   height: 39vh;
   display: flex;
@@ -309,11 +313,16 @@ body {
   display: flex;
 }
 
-.progress-div {
+.progress-div,
+.progress-div.total {
   margin: 1px;
   border-radius: 5px;
   cursor: pointer;
   color: var(--btn-hover-txt);
+}
+
+.progress-div.total {
+  background-color: var(--purple);
 }
 
 .progress-div:hover {
@@ -335,6 +344,40 @@ body {
 
 .budget-item.active .btn {
   color: var(--btn-hover-txt);
+}
+
+.recharts-layer {
+  cursor: pointer;
+}
+
+.recharts-layer:hover {
+  fill: var(--secondary-color);
+}
+
+.recharts-zIndex-layer_200 {
+  display: none;
+}
+
+.recharts-default-tooltip {
+  background-color: var(--primary-bg) !important;
+  border-radius: 10px;
+  border: 0.5px solid var(--primary-txt) !important;
+}
+
+li.recharts-tooltip-item {
+  color: var(--primary-txt) !important;
+}
+
+tspan {
+  fill: var(--primary-txt);
+}
+
+.recharts-reference-line line {
+  stroke: var(--red) !important;
+}
+
+.recharts-cartesian-grid-horizontal line {
+  stroke: var(--secondary-color);
 }
 
 @media screen and (max-width: 1050px) {

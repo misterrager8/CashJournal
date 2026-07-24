@@ -55,6 +55,43 @@ export default function ContextProvider({ children }) {
     });
   };
 
+  const addBill = (e, name, amount, dayOfMonth, accountId) => {
+    e.preventDefault();
+    setLoading(true);
+    api(
+      "add_bill",
+      {
+        name: name,
+        day_of_month: dayOfMonth,
+        amount: amount,
+        accountId: accountId,
+      },
+      (data) => {
+        setLoading(false);
+        setBills(data.bills);
+      },
+    );
+  };
+
+  const editBill = (e, id, name, amount, dayOfMonth, accountId) => {
+    e.preventDefault();
+    setLoading(true);
+    api(
+      "edit_bill",
+      {
+        id: id,
+        name: name,
+        day_of_month: dayOfMonth,
+        amount: amount,
+        accountId: accountId,
+      },
+      (data) => {
+        setLoading(false);
+        setBills(data.bills);
+      },
+    );
+  };
+
   const getBills = () => {
     setLoading(true);
     api("get_bills", {}, (data) => {
@@ -65,7 +102,10 @@ export default function ContextProvider({ children }) {
 
   const deleteBill = (id) => {
     setLoading(true);
-    api("delete_bill", { id: id }, (data) => setBills(data.bills));
+    api("delete_bill", { id: id }, (data) => {
+      setBills(data.bills);
+      setLoading(false);
+    });
   };
 
   const addBudget = (e, name) => {
@@ -85,19 +125,31 @@ export default function ContextProvider({ children }) {
     });
   };
 
-  const editBudget = (e, id, name, color) => {
+  const editBudget = (e, id, name, color, icon, maximum) => {
     e.preventDefault();
     setLoading(true);
-    api("edit_budget", { id: id, name: name, color: color }, (data) => {
-      setBudgets(data.budgets);
-      setLoading(false);
-    });
+    api(
+      "edit_budget",
+      { id: id, name: name, color: color, icon: icon, maximum: maximum },
+      (data) => {
+        setBudgets(data.budgets);
+        setLoading(false);
+      },
+    );
   };
 
   const deleteBudget = (id) => {
     setLoading(true);
     api("delete_budget", { id: id }, (data) => {
       setBudgets(data.budgets);
+      setLoading(false);
+    });
+  };
+
+  const deleteAccount = (id) => {
+    setLoading(true);
+    api("delete_account", { id: id }, (data) => {
+      setAccounts(data.accounts);
       setLoading(false);
     });
   };
@@ -120,6 +172,9 @@ export default function ContextProvider({ children }) {
     setBills: setBills,
     accounts: accounts,
     setAccounts: setAccounts,
+    deleteAccount: deleteAccount,
+    addBill: addBill,
+    editBill: editBill,
     getBills: getBills,
     deleteBill: deleteBill,
     merchants: merchants,

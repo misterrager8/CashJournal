@@ -113,7 +113,7 @@ class Account(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "balance": str(self.balance),
+            "balance": str(sum([i.amount for i in self.transactions.all()])),
             "transactions": sorted(
                 [t.to_dict() for t in self.transactions.all()],
                 key=lambda x: x["timestamp"],
@@ -162,11 +162,6 @@ class Transaction(db.Model):
         # ]
 
     def create(self):
-        account_ = Account.get(self.account_id)
-        account_.balance += self.amount
-
-        account_.edit()
-
         db.session.add(self)
         db.session.commit()
 
@@ -174,11 +169,6 @@ class Transaction(db.Model):
         db.session.commit()
 
     def delete(self):
-        account_ = Account.get(self.account_id)
-        account_.balance -= self.amount
-
-        account_.edit()
-
         db.session.delete(self)
         db.session.commit()
 
@@ -319,6 +309,7 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
     color = db.Column(db.Text)
+    icon = db.Column(db.Text)
     maximum = db.Column(db.Numeric(10, 2))
     txns = db.relationship("Transaction", lazy="dynamic")
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -364,6 +355,7 @@ class Category(db.Model):
             "name": self.name,
             "maximum": str(self.maximum),
             "color": self.color,
+            "icon": self.icon,
             # "transactions": sorted(
             #     [t.to_dict() for t in self.txns.all()],
             #     key=lambda x: x["timestamp"],

@@ -101,23 +101,23 @@ export default function NewTxn({ className = "" }) {
         <a
           data-bs-target="#choose-budget"
           data-bs-toggle="dropdown"
-          className={
-            "btn btn-sm dropdown-toggle border-0" +
-            (category ? " text-truncate" : "")
-          }>
+          className="btn btn-sm dropdown-toggle border-0">
           {category ? (
             <Icon
               style={{
                 color: ctx.budgets.find((x) => x.id === category)?.color,
               }}
               inline
-              icon="uis:graph-bar"
+              icon={
+                ctx.budgets.find((x) => x.id === category)?.icon ||
+                "uis:graph-bar"
+              }
               className=" me-2"
             />
           ) : (
             <Icon inline icon="bi:dash-lg" className=" me2" />
           )}
-          <span>{ctx.budgets.find((x) => x.id === category)?.name}</span>
+          {/* <span>{ctx.budgets.find((x) => x.id === category)?.name}</span> */}
         </a>
         <div id="choose-budget" className={" dropdown-menu"}>
           <a
@@ -131,6 +131,12 @@ export default function NewTxn({ className = "" }) {
               className={
                 "dropdown-item" + (category === item.id ? " active" : "")
               }>
+              <Icon
+                style={{ color: item.color }}
+                className="me-2"
+                inline
+                icon={item.icon || "uis:graph-bar"}
+              />
               {item.name}
             </a>
           ))}

@@ -4,9 +4,9 @@ import Nav from "./Nav";
 import Accounts from "./pages/Accounts";
 import Auth from "./pages/Auth";
 import Bills from "./pages/Bills";
-import WishList from "./pages/WishList";
 import { Context } from "../Context";
 import moment from "moment";
+import Stats from "./pages/Stats";
 
 export default function Display({ className = "" }) {
   const ctx = useContext(Context);
@@ -25,8 +25,8 @@ export default function Display({ className = "" }) {
       component: <Bills />,
     },
     {
-      value: "wish-list",
-      component: <WishList />,
+      value: "stats",
+      component: <Stats />,
     },
   ];
 

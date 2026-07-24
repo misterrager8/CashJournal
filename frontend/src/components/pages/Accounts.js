@@ -27,16 +27,14 @@ export default function Accounts({ className = "" }) {
   const [selectedBudgets, setSelectedBudgets] = useState([]);
 
   const [txns, setTxns] = useState([]);
-  const [sort, setSort] = useState("date-desc");
+  const [sort, setSort] = useState("date");
+  const [descending, setDescending] = useState(true);
 
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const [accountName, setAccountName] = useState("");
   const onChangeAccountName = (e) => setAccountName(e.target.value);
-
-  const [accountBalance, setAccountBalance] = useState(0.0);
-  const onChangeAccountBalance = (e) => setAccountBalance(e.target.value);
 
   const [filter, setFilter] = useState(null);
   const [showBudgets, setShowBudgets] = useState(false);
@@ -88,7 +86,6 @@ export default function Accounts({ className = "" }) {
       {
         id: selectedAccount?.id,
         name: accountName,
-        balance: accountBalance,
       },
       (data) => {
         setSelectedAccount(data.account);
@@ -147,14 +144,15 @@ export default function Accounts({ className = "" }) {
 
   useEffect(() => {
     setAccountName(selectedAccount?.name);
-    setAccountBalance(selectedAccount?.balance);
     setSelectedTxn(null);
     // getTxns(selectedAccount?.id);
   }, [selectedAccount]);
 
   useEffect(() => {
-    ctx.currentUser && getAccounts();
-    getTxns();
+    if (ctx.currentUser) {
+      getAccounts();
+      getTxns();
+    }
   }, [ctx.currentUser, currentMonth, currentYear, selectedAccount]);
 
   useEffect(() => {
@@ -164,6 +162,10 @@ export default function Accounts({ className = "" }) {
   useEffect(() => {
     setSelectedBudgets([]);
   }, [showBudgets, currentMonth]);
+
+  useEffect(() => {
+    setSelectedTxns([]);
+  }, [currentMonth]);
 
   const contextValue = {
     selectedAccount: selectedAccount,
@@ -192,8 +194,8 @@ export default function Accounts({ className = "" }) {
 
   const sorts = [
     {
-      value: "date-desc",
-      label: "Newest",
+      value: "date",
+      label: "Date",
     },
     {
       value: "merchant",
@@ -201,7 +203,7 @@ export default function Accounts({ className = "" }) {
     },
     {
       value: "amount",
-      label: "Amount (Desc)",
+      label: "Amount",
     },
     {
       value: "category",
@@ -214,23 +216,35 @@ export default function Accounts({ className = "" }) {
   useEffect(() => {
     let txns_ = [...txns];
     if (sort === "amount") {
-      txns_.sort((x, y) => Math.abs(y.amount) - Math.abs(x.amount));
-    } else if (sort === "date-desc") {
       txns_.sort(
-        (x, y) => moment(y.timestamp).valueOf() - moment(x.timestamp).valueOf(),
+        (x, y) =>
+          Math.abs((descending ? y : x).amount) -
+          Math.abs((descending ? x : y).amount),
+      );
+    } else if (sort === "date") {
+      txns_.sort(
+        (x, y) =>
+          moment((descending ? y : x).timestamp).valueOf() -
+          moment((descending ? x : y).timestamp).valueOf(),
       );
     } else if (sort === "merchant") {
       txns_.sort((x, y) =>
-        x.merchant.toLowerCase()?.localeCompare(y.merchant.toLowerCase()),
+        (descending ? y : x).merchant
+          .toLowerCase()
+          ?.localeCompare((descending ? x : y).merchant.toLowerCase()),
       );
     } else if (sort === "category") {
       txns_.sort((x, y) =>
-        x.category?.name
+        (descending ? y : x).category?.name
           .toLowerCase()
-          ?.localeCompare(y.category?.name.toLowerCase()),
+          ?.localeCompare((descending ? x : y).category?.name.toLowerCase()),
       );
     }
     setTxns(txns_);
+  }, [sort, descending]);
+
+  useEffect(() => {
+    setDescending(!["merchant", "category"].includes(sort));
   }, [sort]);
 
   return (
@@ -314,47 +328,38 @@ export default function Accounts({ className = "" }) {
                       </a>
                     </Dropdown>
                   </div>
-                  {!editing ? (
-                    <>
+                  <>
+                    {!editing ? (
                       <div style={{ fontSize: "1.5rem" }}>
                         {selectedAccount
                           ? selectedAccount?.name
                           : "All Accounts"}
                       </div>
-                      <div style={{ fontSize: "3.5rem" }}>
-                        {parseFloat(
-                          selectedAccount
-                            ? selectedAccount?.balance
-                            : accounts.reduce(
-                                (x, y) => x + parseFloat(y.balance),
-                                0,
-                              ),
-                        ).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </div>
-                    </>
-                  ) : (
-                    <form onSubmit={(e) => editAccount(e)}>
-                      <Input
-                        className="border-0"
-                        style={{ fontSize: "1.5rem", textAlign: "center" }}
-                        value={accountName}
-                        onChange={onChangeAccountName}
-                      />
-                      <input
-                        style={{ fontSize: "3.5rem", textAlign: "center" }}
-                        type="number"
-                        step={0.01}
-                        autoComplete="off"
-                        className="form-control border-0 opacity-50 fst-italic"
-                        value={accountBalance}
-                        onChange={onChangeAccountBalance}
-                      />
-                      <Button type_="submit" className="d-none" />
-                    </form>
-                  )}
+                    ) : (
+                      <form onSubmit={(e) => editAccount(e)}>
+                        <Input
+                          className="border-0"
+                          style={{ fontSize: "1.5rem", textAlign: "center" }}
+                          value={accountName}
+                          onChange={onChangeAccountName}
+                        />
+                        <Button type_="submit" className="d-none" />
+                      </form>
+                    )}
+                    <div style={{ fontSize: "3.5rem" }}>
+                      {parseFloat(
+                        selectedAccount
+                          ? selectedAccount?.balance
+                          : accounts.reduce(
+                              (x, y) => x + parseFloat(y.balance),
+                              0,
+                            ),
+                      ).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </div>
+                  </>
                 </div>
                 <div
                   className={"d-flex" + (selectedAccount ? "" : " invisible")}>
@@ -370,7 +375,10 @@ export default function Accounts({ className = "" }) {
                         border={false}
                         className="red"
                         icon="bi:question-lg"
-                        // onClick={() => setEditing(!editing)}
+                        onClick={() => {
+                          ctx.deleteAccount(selectedAccount?.id);
+                          setSelectedAccount(null);
+                        }}
                       />
                     )}
                     <Button
@@ -396,12 +404,18 @@ export default function Accounts({ className = "" }) {
                       onClick={() => setShowBudgets(!showBudgets)}
                       text={showBudgets ? "Transactions" : "Budgets"}
                     />
+                    <Button
+                      border={false}
+                      onClick={() => setDescending(!descending)}
+                      icon={"uiw:" + (descending ? "down" : "up")}
+                    />
                     <Dropdown
-                      classNameBtn="abbreviate"
+                      showCaret={false}
+                      // classNameBtn="abbreviate"
                       border={false}
                       target="sort"
-                      icon="bi:sort-down"
-                      text={`Sort: ${getSort()?.label}`}>
+                      // icon="bi:sort-down"
+                      text={`${getSort()?.label}`}>
                       {sorts.map((x) => (
                         <a
                           onClick={() => setSort(x.value)}
@@ -491,6 +505,11 @@ export default function Accounts({ className = "" }) {
                             return x;
                           }
                         })
+                        .filter((y) =>
+                          selectedAccount
+                            ? y.accountId === selectedAccount?.id
+                            : y,
+                        )
                         .map((item) => (
                           <TxnItem key={item.id} item={item} />
                         ))}
@@ -578,6 +597,11 @@ export default function Accounts({ className = "" }) {
                   )}
                   {!showBudgets && (
                     <div className="d-flex flex-row-reverse w-25">
+                      <Button
+                        border={false}
+                        icon="bi:check-square"
+                        onClick={() => selectAll()}
+                      />
                       {selectedTxns.length > 0 && (
                         <Button
                           border={false}
@@ -585,11 +609,20 @@ export default function Accounts({ className = "" }) {
                           onClick={() => deselectAll()}
                         />
                       )}
-                      <Button
-                        border={false}
-                        icon="bi:check-square"
-                        onClick={() => selectAll()}
-                      />
+                      <span
+                        className={
+                          "my-auto me-2" +
+                          (!selectedTxns.length > 0 ? " opacity-50" : "")
+                        }>
+                        <Icon
+                          name="streamline-plump:credit-card-5-solid"
+                          className="me-2"
+                        />
+
+                        {selectedTxns.length > 0
+                          ? selectedTxns.length
+                          : txns.length}
+                      </span>
                     </div>
                   )}
                 </div>

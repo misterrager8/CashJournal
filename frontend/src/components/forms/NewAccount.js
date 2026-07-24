@@ -1,28 +1,25 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Input from "../atoms/Input";
+import { api } from "../../util";
+import { Context } from "../../Context";
 
 export default function NewAccount({ className = "" }) {
+  const { setAccounts } = useContext(Context);
   const [name, setName] = useState("");
   const onChangeName = (e) => setName(e.target.value);
 
-  const [balance, setBalance] = useState(0.0);
-  const onChangeBalance = (e) => setBalance(e.target.value);
+  const addAccount = (e) => {
+    e.preventDefault();
+    api("add_account", { name: name }, (data) => {
+      setAccounts(data.accounts);
+    });
+  };
 
   return (
-    <div className={className + " input-group"}>
+    <form
+      onSubmit={(e) => addAccount(e)}
+      className={className + " input-group"}>
       <Input placeholder="Name" value={name} onChange={onChangeName} />
-      <input
-        placeholder="0.01"
-        type="number"
-        step={0.01}
-        autoComplete="off"
-        value={balance}
-        onChange={onChangeBalance}
-        className={
-          "form-control form-control-sm " + (balance < 0 ? "red" : "green")
-        }
-      />
-      {/* <Input type_="number" value={balance} onChange={onChangeBalance} /> */}
-    </div>
+    </form>
   );
 }

@@ -63,20 +63,20 @@ export default function Nav({ className = "" }) {
               border={false}
               icon="bi:credit-card-fill"
             />
-            {/* <Button
+            <Button
               active={ctx.currentPage === "bills"}
               onClick={() => ctx.setCurrentPage("bills")}
               text="Bills"
               border={false}
               icon="bi:calendar-day"
-            /> */}
-            {/* <Button
-              active={ctx.currentPage === "wish-list"}
-              onClick={() => ctx.setCurrentPage("wish-list")}
-              text="Wish List"
+            />
+            <Button
+              active={ctx.currentPage === "stats"}
+              onClick={() => ctx.setCurrentPage("stats")}
+              text="Stats"
               border={false}
-              icon="bi:cart"
-            /> */}
+              icon="bi:bar-chart-fill"
+            />
           </>
         )}
       </div>

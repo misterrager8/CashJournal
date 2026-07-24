@@ -3,6 +3,7 @@ import NewBudget from "../forms/NewBudget";
 import { Context } from "../../Context";
 import BudgetItem from "../items/BudgetItem";
 import { AccountContext } from "../pages/Accounts";
+import { Icon } from "@iconify/react";
 
 export default function Budgets() {
   const ctx = useContext(Context);
@@ -13,6 +14,18 @@ export default function Budgets() {
     Math.round(
       (item.txns.reduce((y, z) => y + Math.abs(z.amount), 0) /
         accountCtx.total) *
+        100,
+    );
+
+  const getBudgetPerc = () =>
+    Math.round(
+      (ctx.budgets
+        .filter((x) => x.maximum)
+        .reduce(
+          (x, y) => x + y.txns.reduce((z, a) => z + Math.abs(a.amount), 0),
+          0,
+        ) /
+        ctx.budgets.reduce((x, y) => x + Number(y.maximum), 0)) *
         100,
     );
 
@@ -39,28 +52,68 @@ export default function Budgets() {
                 v?.txns.reduce((t, u) => t + Math.abs(u.amount), 0),
             )
             .map((x) => (
-              <BudgetItem item={x} />
+              <BudgetItem key={`budget-${x.id}`} item={x} />
             ))}
         </div>
+        {accountCtx.txns.length > 0 && (
+          <div className="mt-3 text-center">
+            <div className={getBudgetPerc() > 100 ? "red" : ""}>
+              <div className="fw-bold">Total vs Budget:</div>
+
+              <div className="text-center">
+                {parseFloat(
+                  ctx.budgets
+                    .filter((x) => x.maximum)
+                    .reduce(
+                      (x, y) =>
+                        x + y.txns.reduce((z, a) => z + Math.abs(a.amount), 0),
+                      0,
+                    ),
+                ).toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}
+                {" / "}
+                {parseFloat(
+                  ctx.budgets.reduce((x, y) => x + Number(y.maximum), 0),
+                ).toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}{" "}
+                ({getBudgetPerc()}%)
+              </div>
+            </div>
+          </div>
+        )}
         <div className="progress-bar-custom my-3">
           {ctx.budgets.map((x) => (
             <Fragment key={x.id}>
               {getTotals(x) > 0 && (
-                <div
-                  className="progress-div"
-                  onClick={() =>
-                    accountCtx.setSelectedBudget(
-                      accountCtx.selectedBudget?.id === x.id ? null : x,
-                    )
-                  }
-                  style={{
-                    width: `${getTotals(x)}%`,
-                    backgroundColor: x.color,
-                  }}>
-                  <div className="text-center small">
-                    {getTotals(x) > 5 ? `${getTotals(x)}%` : "\u00A0"}
+                <>
+                  <div className="show-on-mobile">
+                    <Icon
+                      inline
+                      icon={x.icon || "uis:graph-bar"}
+                      className="me-2"
+                    />
+                    <span>{x.name}</span>
                   </div>
-                </div>
+                  <div
+                    className="progress-div"
+                    onClick={() =>
+                      accountCtx.setSelectedBudget(
+                        accountCtx.selectedBudget?.id === x.id ? null : x,
+                      )
+                    }
+                    style={{
+                      width: `${getTotals(x)}%`,
+                      backgroundColor: x.color,
+                    }}>
+                    <div className="text-center small">
+                      {getTotals(x) > 5 ? `${getTotals(x)}%` : "\u00A0"}
+                    </div>
+                  </div>
+                </>
               )}
             </Fragment>
           ))}

@@ -1,3 +1,4 @@
+from collections import defaultdict
 import datetime
 import decimal
 
@@ -134,9 +135,8 @@ def add_account():
 
     try:
         name = request.json.get("name")
-        balance = float(request.json.get("balance"))
 
-        new_account = Account(name=name, balance=balance, user=current_user.id)
+        new_account = Account(name=name, user=current_user.id)
         new_account.create()
 
         new_account = new_account.to_dict()
@@ -187,8 +187,6 @@ def edit_account():
         account = Account.get(request.json.get("id"))
 
         account.name = request.json.get("name")
-        account.balance = float(request.json.get("balance"))
-
         account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
@@ -418,6 +416,7 @@ def add_txn():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -432,6 +431,23 @@ def add_txn():
         "txns": txns,
         "budgets": budgets,
     }
+
+
+@current_app.post("/get_all_txns")
+@login_required
+def get_all_txns():
+    success = True
+    msg = ""
+
+    txns = []
+
+    try:
+        txns = [i.to_dict() for i in current_user.txns]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "txns": txns}
 
 
 @current_app.post("/get_txns")
@@ -471,6 +487,8 @@ def get_txns():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
+                    "maximum": i.maximum,
                     "txns": [
                         j.to_dict()
                         for j in i.get_txns(
@@ -499,13 +517,60 @@ def edit_txn():
 
     try:
         txn = Transaction.get(request.json.get("id"))
-        account = Account.get(txn.account_id)
 
         txn.merchant = request.json.get("merchant")
+        txn.merchant = request.json.get("merchant")
         txn.description = request.json.get("description")
+        txn.timestamp = request.json.get("timestamp")
+        txn.amount = decimal.Decimal(request.json.get("amount"))
+        click.secho(request.json.get("timestamp"), fg="blue")
 
         txn.edit()
-        account.edit()
+
+        accounts = [i.to_dict() for i in current_user.accounts]
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                int(request.json.get("month")), int(request.json.get("year"))
+            )
+        ]
+        txn = txn.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "accounts": accounts,
+        "txns": txns,
+        "txn": txn,
+    }
+
+
+@current_app.post("/duplicate_txn")
+@login_required
+def duplicate_txn():
+    success = True
+    msg = ""
+
+    accounts = []
+    txns = []
+    txn = None
+
+    try:
+        txn_ = Transaction.get(request.json.get("id"))
+        txn = Transaction(
+            amount=txn_.amount,
+            timestamp=datetime.datetime.now(),
+            description=txn_.description,
+            merchant=txn_.merchant,
+            memo=txn_.memo,
+            account_id=txn_.account_id,
+            user=current_user.id,
+            category_id=txn_.category_id,
+        )
+        txn.create()
 
         accounts = [i.to_dict() for i in current_user.accounts]
         txns = [
@@ -690,7 +755,9 @@ def add_budget():
     budget = None
 
     try:
-        budget = Category(name=request.json.get("name"), user=current_user.id)
+        budget = Category(
+            name=request.json.get("name"), user=current_user.id, icon="uis:graph-bar"
+        )
         budget.create()
 
         budget = budget.to_dict()
@@ -700,6 +767,7 @@ def add_budget():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -735,6 +803,20 @@ def edit_budget():
         budget = Category.get(int(request.json.get("id")))
         budget.name = request.json.get("name")
         budget.color = request.json.get("color")
+        budget.icon = request.json.get("icon")
+        budget.maximum = (
+            decimal.Decimal(request.json.get("maximum"))
+            if request.json.get("maximum")
+            else 0
+        )
+        click.secho(
+            (
+                decimal.Decimal(request.json.get("maximum"))
+                if request.json.get("maximum")
+                else 0
+            ),
+            fg="blue",
+        )
 
         budget.edit()
 
@@ -744,6 +826,7 @@ def edit_budget():
                     "id": i.id,
                     "name": i.name,
                     "color": i.color,
+                    "icon": i.icon,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
             )
@@ -769,6 +852,7 @@ def delete_budget():
                 {
                     "id": i.id,
                     "name": i.name,
+                    "icon": i.icon,
                     "color": i.color,
                     "txns": [j.to_dict() for j in i.get_txns()],
                 }
@@ -810,4 +894,37 @@ def switch_budget():
         "msg": msg,
         "txns": txns,
         "txn": txn,
+    }
+
+
+@current_app.post("/get_balance_at_point")
+@login_required
+def get_balance_at_point():
+    success = True
+    msg = ""
+
+    account_balance = None
+    net_balance = None
+
+    try:
+        txn = Transaction.get(request.json.get("id"))
+        txns = [i for i in current_user.txns]
+
+        account_balance = sum(
+            [
+                i.amount
+                for i in txns
+                if i.timestamp <= txn.timestamp and i.account_id == txn.account_id
+            ]
+        )
+        net_balance = sum([i.amount for i in txns if i.timestamp <= txn.timestamp])
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "account_balance": account_balance,
+        "net_balance": net_balance,
     }

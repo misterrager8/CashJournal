@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { AccountContext } from "../pages/Accounts";
-import { api, moment_ as moment } from "../../util";
+import { api, moment_ as moment, moment2 } from "../../util";
 import Icon from "../atoms/Icon";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
@@ -21,13 +21,25 @@ export default function EditTxn() {
   const [description, setDescription] = useState("");
   const onChangeDescription = (e) => setDescription(e.target.value);
 
+  const [timestamp, setTimestamp] = useState("");
+  const onChangeTimestamp = (e) => setTimestamp(e.target.value);
+
   const [deleting, setDeleting] = useState(false);
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [netBalance, setNetBalance] = useState(0);
 
   useEffect(() => {
     if (accountCtx.selectedTxn) {
       setAmount(accountCtx.selectedTxn?.amount);
       setMerchant(accountCtx.selectedTxn?.merchant);
       setDescription(accountCtx.selectedTxn?.description);
+
+      setTimestamp(
+        moment2(accountCtx.selectedTxn?.timestamp).format(
+          "YYYY-MM-DD HH:mm:ss",
+        ),
+      );
+      getAccountBalance();
     }
   }, [accountCtx.selectedTxn]);
 
@@ -56,6 +68,8 @@ export default function EditTxn() {
         id: accountCtx.selectedTxn?.id,
         merchant: merchant,
         description: description,
+        timestamp: timestamp,
+        amount: amount,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -69,9 +83,40 @@ export default function EditTxn() {
     );
   };
 
+  const duplicateTxn = () => {
+    api(
+      "duplicate_txn",
+      {
+        id: accountCtx.selectedTxn?.id,
+        month: accountCtx.currentMonth,
+        year: accountCtx.currentYear,
+      },
+      (data) => {
+        accountCtx.setTxns(data.txns);
+        accountCtx.setAccounts(data.accounts);
+        accountCtx.setSelectedTxn(null);
+      },
+    );
+  };
+
+  const getAccountBalance = () => {
+    api(
+      "get_balance_at_point",
+      {
+        id: accountCtx.selectedTxn?.id,
+      },
+      (data) => {
+        setAccountBalance(data.account_balance);
+        setNetBalance(data.net_balance);
+      },
+    );
+  };
+
   const isChanged = () =>
     merchant !== accountCtx.selectedTxn?.merchant ||
-    description !== accountCtx.selectedTxn?.description;
+    description !== accountCtx.selectedTxn?.description ||
+    timestamp !==
+      moment2(accountCtx.selectedTxn?.timestamp).format("YYYY-MM-DD HH:mm:ss");
 
   return (
     <>
@@ -89,6 +134,12 @@ export default function EditTxn() {
           </div>
         )}
         <div className="d-flex">
+          <Button
+            size="lg"
+            border={false}
+            icon="bi:arrow-clockwise"
+            onClick={() => duplicateTxn()}
+          />
           {deleting && (
             <Button
               size="lg"
@@ -127,41 +178,101 @@ export default function EditTxn() {
         />
         <div className="mt-3">
           <div className="text-center" style={{ fontSize: "1.1rem" }}>
-            <div className="mb-2">
-              <Icon className="" name="bi:clock-history" />
-              <div className="">
-                {moment(accountCtx.selectedTxn.timestamp).format("LLLL")}
+            <div className="d-flex my-3">
+              <div className="d-flex mx-auto">
+                <Icon className="my-auto" name="uit:clock-three" />
+                <input
+                  max={moment2(new Date()).format("YYYY-MM-DD")}
+                  type="datetime-local"
+                  value={timestamp}
+                  onChange={onChangeTimestamp}
+                  autoComplete="off"
+                  className="form-control border-0"
+                />
               </div>
             </div>
-            <div className="">
-              <Icon className="" name="bi:credit-card" />
-              <div className="">{accountCtx.selectedTxn.accountName}</div>
+
+            <div className="d-flex">
+              <div className="mx-auto">
+                <div className="d-flex">
+                  <Icon className="my-auto me-2" name="bi:credit-card" />
+                  <div className="">{accountCtx.selectedTxn.accountName}</div>
+                </div>
+
+                <div className="mt-2">
+                  {parseFloat(accountBalance).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+                <div className="mt-2">
+                  (
+                  {parseFloat(netBalance).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                  {" Net"})
+                </div>
+              </div>
             </div>
           </div>
         </div>
         <div className="mt-3 w-50 mx-auto">
-          <Dropdown
-            border={false}
-            classNameBtn="w-100"
-            text={
-              accountCtx.selectedTxn.category?.id
-                ? accountCtx.selectedTxn.category?.name
-                : "No Budget"
-            }
-            target="budgets">
-            <a
-              onClick={() => accountCtx.switchBudget(null)}
-              className="dropdown-item">
-              No Budget
-            </a>
-            {ctx.budgets.map((x) => (
-              <a
-                onClick={() => accountCtx.switchBudget(x.id)}
-                className="dropdown-item">
-                {x.name}
-              </a>
-            ))}
-          </Dropdown>
+          <div className="d-flex">
+            <div className="d-flex mx-auto">
+              <div
+                style={{
+                  color: accountCtx.selectedTxn.category?.color,
+                }}>
+                <Icon
+                  name={
+                    accountCtx.selectedTxn.category?.icon || "uis:graph-bar"
+                  }
+                  className="my-auto me-2"
+                />
+              </div>
+              <Dropdown
+                border={false}
+                classNameBtn="w-100"
+                text={
+                  accountCtx.selectedTxn.category?.id
+                    ? accountCtx.selectedTxn.category?.name
+                    : "No Budget"
+                }
+                target="budgets">
+                <a
+                  onClick={() => accountCtx.switchBudget(null)}
+                  className="dropdown-item">
+                  No Budget
+                </a>
+                {ctx.budgets.map((x) => (
+                  <a
+                    onClick={() => accountCtx.switchBudget(x.id)}
+                    className={
+                      "dropdown-item" +
+                      (x.id === accountCtx.selectedTxn?.category?.id
+                        ? " active"
+                        : "")
+                    }>
+                    <span
+                      style={{
+                        color: x.color,
+                      }}>
+                      <Icon
+                        className="me-2"
+                        name={
+                          accountCtx.selectedTxn.category?.icon ||
+                          "uis:graph-bar"
+                        }
+                      />
+                    </span>
+                    {x.name}
+                  </a>
+                ))}
+              </Dropdown>
+            </div>
+          </div>
+
           <div className="small opacity-50 my-2">Description</div>
           <textarea
             rows={6}
