@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Context } from "../../Context";
 import { AccountContext } from "./Accounts";
 import { api } from "../../util";
+import { v4 as uuidv4 } from "uuid";
 import {
   LineChart,
   Line,
@@ -18,6 +19,9 @@ import {
 import moment from "moment";
 import Dropdown from "../atoms/Dropdown";
 import Button from "../atoms/Button";
+import CategoryStatItem from "../items/CategoryStatItem";
+
+export const StatsContext = createContext();
 
 export default function Stats({ className = "" }) {
   const { setLoading, merchants, setMerchants } = useContext(Context);
@@ -25,6 +29,8 @@ export default function Stats({ className = "" }) {
   const [deposits, setDeposits] = useState([]);
   const [nets, setNets] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [merchantGroups, setMerchantGroups] = useState([]);
+  const [categoryGroups, setCategoryGroups] = useState([]);
 
   const [merchantFilter, setMerchantFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
@@ -32,12 +38,10 @@ export default function Stats({ className = "" }) {
   const getAllTxns = () => {
     setLoading(true);
     api("get_all_txns", {}, (data) => {
-      let charges_ = [...data.txns].filter(
-        (x) => x.amount < 0 && x.amount > -9000,
+      let charges_ = [...data.txns].filter((x) =>
+        ["expense", "adjustment"].includes(x.type_),
       );
-      let deposits_ = [...data.txns].filter(
-        (x) => x.amount > 0 && x.amount < 21000,
-      );
+      let deposits_ = [...data.txns].filter((x) => x.type_ === "income");
       let nets = [];
       let all_txns = [...data.txns];
       let balances_ = [];
@@ -65,6 +69,28 @@ export default function Stats({ className = "" }) {
           return acc;
         }, {}),
       ).sort((a, b) => b.month.localeCompare(a.month));
+
+      const merchantGroups_ = Object.values(
+        all_txns.reduce((acc, txn) => {
+          const merchant = txn.merchant || "Unknown";
+          if (!acc[merchant]) {
+            acc[merchant] = { merchant, txns: [] };
+          }
+          acc[merchant].txns.push(txn);
+          return acc;
+        }, {}),
+      );
+
+      const categoryGroups_ = Object.values(
+        all_txns.reduce((acc, txn) => {
+          const category = txn.category?.name || "Unknown";
+          if (!acc[category]) {
+            acc[category] = { category, txns: [] };
+          }
+          acc[category].txns.push(txn);
+          return acc;
+        }, {}),
+      );
 
       setCharges(chargesByMonth);
       setDeposits(depositsByMonth);
@@ -109,6 +135,8 @@ export default function Stats({ className = "" }) {
           .sort((x, y) => moment(y).valueOf() - moment(x).valueOf())
           .filter((x) => x.balance < 12000 && x.balance !== 0),
       );
+      setMerchantGroups(merchantGroups_);
+      setCategoryGroups(categoryGroups_);
       setLoading(false);
     });
   };
@@ -116,6 +144,10 @@ export default function Stats({ className = "" }) {
   useEffect(() => {
     getAllTxns();
   }, []);
+
+  const contextValue = {
+    charges: charges,
+  };
 
   return (
     <div className={className}>
@@ -286,14 +318,48 @@ export default function Stats({ className = "" }) {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
-      {/* <div>
-        {balances.map((x) => (
-          <div style={{ whiteSpace: "pre-wrap" }}>
-            {JSON.stringify(x, null, 2)}
+        <div className="d-flex mt-4">
+          <div className="w-50 px-4">
+            {merchantGroups
+              .sort(
+                (v, w) =>
+                  v.txns.reduce((y, z) => y + Number(z.amount), 0) -
+                  w.txns.reduce((y, z) => y + Number(z.amount), 0),
+              )
+              .map((x) => (
+                <div className="row" style={{ borderBottom: ".5px solid" }}>
+                  <div
+                    className="col text-truncate"
+                    title={x.merchant}
+                    style={{ fontSize: "1.5rem" }}>
+                    {x.merchant}
+                  </div>
+                  <div className="col my-auto" style={{ fontSize: "1rem" }}>
+                    {parseFloat(
+                      x.txns.reduce((y, z) => y + Number(z.amount), 0),
+                    ).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })}
+                  </div>
+                </div>
+              ))}
           </div>
-        ))}
-      </div> */}
+          <StatsContext.Provider value={contextValue}>
+            <div className="w-50 px-4">
+              {categoryGroups
+                .sort(
+                  (v, w) =>
+                    v.txns.reduce((y, z) => y + Number(z.amount), 0) -
+                    w.txns.reduce((y, z) => y + Number(z.amount), 0),
+                )
+                .map((x) => (
+                  <CategoryStatItem key={uuidv4()} item={x} />
+                ))}
+            </div>
+          </StatsContext.Provider>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { AccountContext } from "../pages/Accounts";
-import { api, moment_ as moment, moment2 } from "../../util";
+import { api, txnTypes } from "../../util";
 import Icon from "../atoms/Icon";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
+import moment from "moment-timezone";
 
 export default function EditTxn() {
   const accountCtx = useContext(AccountContext);
@@ -24,20 +25,26 @@ export default function EditTxn() {
   const [timestamp, setTimestamp] = useState("");
   const onChangeTimestamp = (e) => setTimestamp(e.target.value);
 
+  const [accountType, setAccountType] = useState(null);
+
   const [deleting, setDeleting] = useState(false);
   const [accountBalance, setAccountBalance] = useState(0);
   const [netBalance, setNetBalance] = useState(0);
+
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (accountCtx.selectedTxn) {
       setAmount(accountCtx.selectedTxn?.amount);
       setMerchant(accountCtx.selectedTxn?.merchant);
       setDescription(accountCtx.selectedTxn?.description);
+      setAccountType(accountCtx.selectedTxn?.type_);
+      setPending(accountCtx.selectedTxn?.pending);
 
       setTimestamp(
-        moment2(accountCtx.selectedTxn?.timestamp).format(
-          "YYYY-MM-DD HH:mm:ss",
-        ),
+        moment
+          .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
+          .format("YYYY-MM-DD HH:mm:ss"),
       );
       getAccountBalance();
     }
@@ -68,8 +75,29 @@ export default function EditTxn() {
         id: accountCtx.selectedTxn?.id,
         merchant: merchant,
         description: description,
+        type_: accountType,
         timestamp: timestamp,
+        pending: pending,
         amount: amount,
+        month: accountCtx.currentMonth,
+        year: accountCtx.currentYear,
+      },
+      (data) => {
+        accountCtx.setTxns(data.txns);
+        accountCtx.setAccounts(data.accounts);
+        accountCtx.setSelectedTxn(data.txn);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1000);
+      },
+    );
+  };
+
+  const switchAccounts = (id) => {
+    api(
+      "switch_accounts",
+      {
+        id: accountCtx.selectedTxn?.id,
+        newAccount: id,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -115,8 +143,12 @@ export default function EditTxn() {
   const isChanged = () =>
     merchant !== accountCtx.selectedTxn?.merchant ||
     description !== accountCtx.selectedTxn?.description ||
+    accountType !== accountCtx.selectedTxn?.type_ ||
+    pending !== accountCtx.selectedTxn?.pending ||
     timestamp !==
-      moment2(accountCtx.selectedTxn?.timestamp).format("YYYY-MM-DD HH:mm:ss");
+      moment
+        .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
+        .format("YYYY-MM-DD HH:mm:ss");
 
   return (
     <>
@@ -159,6 +191,14 @@ export default function EditTxn() {
         </div>
       </div>
       <form onSubmit={(e) => editTxn(e)} className="mt-3">
+        {isChanged() && (
+          <Button
+            text="Save Changes"
+            icon="bi:plus-lg"
+            className="w-100 mb-3"
+            type_="submit"
+          />
+        )}
         <input
           placeholder="0.01"
           // min={0.01}
@@ -167,7 +207,10 @@ export default function EditTxn() {
           autoComplete="off"
           value={amount}
           onChange={onChangeAmount}
-          className={"subtle-input-lg " + (amount < 0 ? "red" : "green")}
+          className={
+            "subtle-input-lg " +
+            (pending ? "opacity-50" : amount < 0 ? "red" : "green")
+          }
         />
         <input
           step={0.01}
@@ -182,7 +225,9 @@ export default function EditTxn() {
               <div className="d-flex mx-auto">
                 <Icon className="my-auto" name="uit:clock-three" />
                 <input
-                  max={moment2(new Date()).format("YYYY-MM-DD")}
+                  max={moment
+                    .tz(new Date(), "America/New_York")
+                    .format("YYYY-MM-DD")}
                   type="datetime-local"
                   value={timestamp}
                   onChange={onChangeTimestamp}
@@ -191,13 +236,30 @@ export default function EditTxn() {
                 />
               </div>
             </div>
+            <Button
+              active={pending}
+              className="mb-3"
+              border={false}
+              text="Pending"
+              onClick={() => setPending(!pending)}
+              icon={"bi:" + (pending ? "check-square-fill" : "square")}
+            />
 
             <div className="d-flex">
               <div className="mx-auto">
-                <div className="d-flex">
-                  <Icon className="my-auto me-2" name="bi:credit-card" />
-                  <div className="">{accountCtx.selectedTxn.accountName}</div>
-                </div>
+                <Dropdown
+                  border={false}
+                  text={accountCtx.selectedTxn.accountName}
+                  target="switchAccounts"
+                  icon="bi:credit-card">
+                  {accountCtx.accounts.map((x) => (
+                    <a
+                      onClick={() => switchAccounts(x.id)}
+                      className="dropdown-item">
+                      {x.name}
+                    </a>
+                  ))}
+                </Dropdown>
 
                 <div className="mt-2">
                   {parseFloat(accountBalance).toLocaleString("en-US", {
@@ -219,8 +281,8 @@ export default function EditTxn() {
         </div>
         <div className="mt-3 w-50 mx-auto">
           <div className="d-flex">
-            <div className="d-flex mx-auto">
-              <div
+            <div className="mx-auto">
+              {/* <div
                 style={{
                   color: accountCtx.selectedTxn.category?.color,
                 }}>
@@ -230,8 +292,9 @@ export default function EditTxn() {
                   }
                   className="my-auto me-2"
                 />
-              </div>
+              </div> */}
               <Dropdown
+                icon={accountCtx.selectedTxn.category?.icon || "uis:graph-bar"}
                 border={false}
                 classNameBtn="w-100"
                 text={
@@ -260,13 +323,35 @@ export default function EditTxn() {
                       }}>
                       <Icon
                         className="me-2"
-                        name={
-                          accountCtx.selectedTxn.category?.icon ||
-                          "uis:graph-bar"
-                        }
+                        name={x?.icon || "uis:graph-bar"}
                       />
                     </span>
                     {x.name}
+                  </a>
+                ))}
+              </Dropdown>
+
+              <Dropdown
+                icon={txnTypes.find((x) => x.value === accountType)?.icon}
+                border={false}
+                classNameBtn="w-100 my-2"
+                text={
+                  accountType
+                    ? accountType.charAt(0).toUpperCase() + accountType.slice(1)
+                    : "No Type"
+                }
+                target="types">
+                {txnTypes.map((x) => (
+                  <a
+                    onClick={() => setAccountType(x.value)}
+                    className={
+                      "dropdown-item" +
+                      (x.value === accountCtx.selectedTxn?.type_
+                        ? " active"
+                        : "")
+                    }>
+                    <Icon className={"me-2 " + x.color} name={x.icon} />
+                    {x.label}
                   </a>
                 ))}
               </Dropdown>
@@ -275,20 +360,12 @@ export default function EditTxn() {
 
           <div className="small opacity-50 my-2">Description</div>
           <textarea
-            rows={6}
+            rows={3}
             style={{ resize: "none" }}
             autoComplete="off"
             className="form-control mb-3"
             value={description}
             onChange={onChangeDescription}></textarea>
-          <div className={isChanged() ? "" : "invisible"}>
-            <Button
-              text="Save Changes"
-              icon="bi:plus-lg"
-              className="w-100"
-              type_="submit"
-            />
-          </div>
         </div>
       </form>
     </>

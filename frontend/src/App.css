@@ -206,6 +206,14 @@ body {
   color: var(--green);
 }
 
+.yellow {
+  color: var(--yellow);
+}
+
+.blue {
+  color: var(--blue);
+}
+
 .btn.green.active,
 .btn.green:hover {
   background-color: var(--green);
@@ -378,6 +386,15 @@ tspan {
 
 .recharts-cartesian-grid-horizontal line {
   stroke: var(--secondary-color);
+}
+
+.pending > .txn-item {
+  opacity: 50%;
+  font-style: italic;
+}
+
+.pending > .txn-item * {
+  color: unset !important;
 }
 
 @media screen and (max-width: 1050px) {

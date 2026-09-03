@@ -21,3 +21,30 @@ export const moment2 = (timestamp) => {
   let time_ = timestamp ? moment(timestamp) : moment();
   return time_;
 };
+
+export const txnTypes = [
+  {
+    value: "income",
+    label: "Income",
+    icon: "bi:caret-up",
+    color: "green",
+  },
+  {
+    value: "expense",
+    label: "Expense",
+    icon: "bi:caret-down",
+    color: "red",
+  },
+  {
+    value: "adjustment",
+    label: "Adjustment",
+    icon: "tdesign:adjustment-filled",
+    color: "blue",
+  },
+  {
+    value: "transfer",
+    label: "Transfer",
+    icon: "mingcute:transfer-fill",
+    color: "yellow",
+  },
+];

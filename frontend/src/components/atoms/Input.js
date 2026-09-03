@@ -8,9 +8,11 @@ export default function Input({
   size = "sm",
   style = null,
   required = true,
+  onFocus = null,
 }) {
   return (
     <input
+      onFocus={onFocus}
       required={required}
       style={style}
       disabled={disabled}

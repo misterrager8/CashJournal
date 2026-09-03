@@ -389,21 +389,33 @@ def add_txn():
         amount = decimal.Decimal(request.json.get("amount")) * is_charge
 
         timestamp = datetime.datetime.now()
-        merchant = request.json.get("merchant")
+        type_ = request.json.get("type_")
         account = int(request.json.get("id"))
-        category_id = (
-            int(request.json.get("categoryId"))
-            if request.json.get("categoryId")
-            else None
-        )
+
+        merchant = request.json.get("merchant")
+        history = [
+            i
+            for i in current_user.get_txns(month=datetime.date.today().month - 1)
+            if i.merchant.casefold() == merchant.casefold()
+        ]
 
         new_txn = Transaction(
             amount=amount,
             timestamp=timestamp,
-            merchant=merchant,
+            merchant=(
+                history[0].merchant
+                if len(history) > 0 and history[0].merchant
+                else merchant
+            ),
             account_id=account,
             user=current_user.id,
-            category_id=category_id,
+            category_id=(
+                history[0].category_id
+                if len(history) > 0 and history[0].category_id
+                else None
+            ),
+            type_=type_,
+            pending=request.json.get("pending"),
         )
         new_txn.create()
 
@@ -519,12 +531,51 @@ def edit_txn():
         txn = Transaction.get(request.json.get("id"))
 
         txn.merchant = request.json.get("merchant")
-        txn.merchant = request.json.get("merchant")
+        txn.type_ = request.json.get("type_")
         txn.description = request.json.get("description")
-        txn.timestamp = request.json.get("timestamp")
         txn.amount = decimal.Decimal(request.json.get("amount"))
+        txn.pending = request.json.get("pending")
+        txn.timestamp = request.json.get("timestamp")
+
         click.secho(request.json.get("timestamp"), fg="blue")
 
+        txn.edit()
+
+        accounts = [i.to_dict() for i in current_user.accounts]
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                int(request.json.get("month")), int(request.json.get("year"))
+            )
+        ]
+        txn = txn.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "accounts": accounts,
+        "txns": txns,
+        "txn": txn,
+    }
+
+
+@current_app.post("/switch_accounts")
+@login_required
+def switch_accounts():
+    success = True
+    msg = ""
+
+    accounts = []
+    txns = []
+    txn = None
+
+    try:
+        txn = Transaction.get(request.json.get("id"))
+
+        txn.account_id = int(request.json.get("newAccount"))
         txn.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
@@ -569,6 +620,7 @@ def duplicate_txn():
             account_id=txn_.account_id,
             user=current_user.id,
             category_id=txn_.category_id,
+            type_=txn_.type_,
         )
         txn.create()
 
@@ -590,6 +642,34 @@ def duplicate_txn():
         "accounts": accounts,
         "txns": txns,
         "txn": txn,
+    }
+
+
+@current_app.post("/unpend")
+@login_required
+def unpend():
+    success = True
+    msg = ""
+
+    accounts = []
+    txns = []
+
+    try:
+        txn_ = Transaction.get(request.json.get("id"))
+        txn_.pending = False
+        txn_.edit()
+
+        accounts = [i.to_dict() for i in current_user.accounts]
+        txns = [i.to_dict() for i in current_user.get_txns()]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "accounts": accounts,
+        "txns": txns,
     }
 
 

@@ -25,33 +25,40 @@ class User(UserMixin, db.Model):
     budgets = db.relationship("Category", lazy="dynamic")
 
     def __init__(self, **kwargs):
+        """Initialize a new user with the provided attributes."""
         super(User, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all users."""
         return User.query.all()
 
     @classmethod
     def get(cls, id):
+        """Return a user by their ID."""
         return User.query.get(id)
 
     def get_txns(
         self, month=datetime.date.today().month, year=datetime.date.today().year
     ):
+        """Return transactions for the given month and year."""
         return [
             i
             for i in self.txns
-            if i.timestamp.month == month and i.timestamp.year == year
+            if (i.timestamp.month == month and i.timestamp.year == year) or (i.pending)
         ]
 
     def create(self):
+        """Create and persist the user."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the user."""
         db.session.commit()
 
     def delete(self):
+        """Delete the user and all associated related records."""
         for i in self.accounts.all():
             db.session.delete(i)
         for i in self.txns.all():
@@ -65,6 +72,7 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
     def to_dict(self):
+        """Return the user as a dictionary."""
         return {
             "id": self.id,
             "username": self.username,
@@ -85,24 +93,30 @@ class Account(db.Model):
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __init__(self, **kwargs):
+        """Initialize a new account with the provided attributes."""
         super(Account, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all accounts."""
         return Account.query.all()
 
     @classmethod
     def get(cls, id):
+        """Return an account by its ID."""
         return Account.query.get(id)
 
     def create(self):
+        """Create and persist the account."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the account."""
         db.session.commit()
 
     def delete(self):
+        """Delete the account and its related transactions."""
         for i in self.transactions.all():
             db.session.delete(i)
 
@@ -110,10 +124,13 @@ class Account(db.Model):
         db.session.commit()
 
     def to_dict(self):
+        """Return the account as a dictionary."""
+        txns = self.transactions.all()
         return {
             "id": self.id,
             "name": self.name,
-            "balance": str(sum([i.amount for i in self.transactions.all()])),
+            "balance": str(sum([i.amount for i in txns if not i.pending])),
+            "balancePending": str(sum([i.amount for i in txns])),
             "transactions": sorted(
                 [t.to_dict() for t in self.transactions.all()],
                 key=lambda x: x["timestamp"],
@@ -131,6 +148,8 @@ class Transaction(db.Model):
     description = db.Column(db.Text)
     merchant = db.Column(db.Text)
     memo = db.Column(db.Text)
+    type_ = db.Column(db.Text)
+    pending = db.Column(db.Boolean)
     account_id = db.Column(db.Integer, db.ForeignKey("accounts.id"))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
@@ -138,18 +157,22 @@ class Transaction(db.Model):
     category = db.relationship("Category")
 
     def __init__(self, **kwargs):
+        """Initialize a new transaction with the provided attributes."""
         super(Transaction, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all transactions ordered by newest first."""
         return Transaction.query.order_by(desc(Transaction.timestamp)).all()
 
     @classmethod
     def get(cls, id):
+        """Return a transaction by its ID."""
         return Transaction.query.get(id)
 
     @classmethod
     def get_by_account(cls, id, month, year):
+        """Return account transactions for the given month and year."""
         return (
             Account.query.filter(Account.id == id)
             .filter(Account.timestamp.month == month)
@@ -162,17 +185,21 @@ class Transaction(db.Model):
         # ]
 
     def create(self):
+        """Create and persist the transaction."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the transaction."""
         db.session.commit()
 
     def delete(self):
+        """Delete the transaction."""
         db.session.delete(self)
         db.session.commit()
 
     def to_dict(self):
+        """Return the transaction as a dictionary."""
         return {
             "id": self.id,
             "amount": str(self.amount),
@@ -182,6 +209,8 @@ class Transaction(db.Model):
             "description": self.description,
             "merchant": self.merchant,
             "memo": self.memo,
+            "type_": self.type_,
+            "pending": self.pending,
             "accountId": self.account_id,
             "category": self.category.to_dict() if self.category else None,
             "accountName": self.account.name if self.account else None,
@@ -199,14 +228,17 @@ class Bill(db.Model):
     account = db.Column(db.Integer, db.ForeignKey("accounts.id"))
 
     def __init__(self, **kwargs):
+        """Initialize a new bill with the provided attributes."""
         super(Bill, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all bills sorted by day of month."""
         return sorted(Bill.query.all(), key=lambda x: x.day_of_month)
 
     @classmethod
     def get_calendar(cls, month, year, user_id):
+        """Return a calendar-style list of days with bills for the selected month."""
         days_ = []
 
         for i in Calendar(6).itermonthdates(year, month):
@@ -233,20 +265,25 @@ class Bill(db.Model):
 
     @classmethod
     def get(cls, id):
+        """Return a bill by its ID."""
         return Bill.query.get(id)
 
     def create(self):
+        """Create and persist the bill."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the bill."""
         db.session.commit()
 
     def delete(self):
+        """Delete the bill."""
         db.session.delete(self)
         db.session.commit()
 
     def to_dict(self):
+        """Return the bill as a dictionary."""
         return {
             "id": self.id,
             "accountName": Account.get(self.account).name if self.account else "",
@@ -268,32 +305,40 @@ class ShoppingListItem(db.Model):
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __init__(self, **kwargs):
+        """Initialize a new shopping list item with the provided attributes."""
         super(ShoppingListItem, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all shopping list items."""
         return ShoppingListItem.query.order_by(ShoppingListItem.bought).all()
 
     @classmethod
     def get(cls, id):
+        """Return a shopping list item by its ID."""
         return ShoppingListItem.query.get(id)
 
     def create(self):
+        """Create and persist the shopping list item."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the shopping list item."""
         db.session.commit()
 
     def toggle_bought(self):
+        """Toggle the bought state of the shopping list item and persist it."""
         self.bought = not self.bought
         db.session.commit()
 
     def delete(self):
+        """Delete the shopping list item."""
         db.session.delete(self)
         db.session.commit()
 
     def to_dict(self):
+        """Return the shopping list item as a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -315,19 +360,23 @@ class Category(db.Model):
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     def __init__(self, **kwargs):
+        """Initialize a new category with the provided attributes."""
         super(Category, self).__init__(**kwargs)
 
     @classmethod
     def all(cls):
+        """Return all categories."""
         return Category.query.all()
 
     @classmethod
     def get(cls, id):
+        """Return a category by its ID."""
         return Category.query.get(id)
 
     def get_txns(
         self, month=datetime.date.today().month, year=datetime.date.today().year
     ):
+        """Return transactions for the given month and year."""
         return [
             i
             for i in self.txns
@@ -335,13 +384,16 @@ class Category(db.Model):
         ]
 
     def create(self):
+        """Create and persist the category."""
         db.session.add(self)
         db.session.commit()
 
     def edit(self):
+        """Persist changes to the category."""
         db.session.commit()
 
     def delete(self):
+        """Delete the category and unlink its transactions."""
         for i in self.txns.all():
             i.category = None
             i.edit()
@@ -350,6 +402,7 @@ class Category(db.Model):
         db.session.commit()
 
     def to_dict(self):
+        """Return the category as a dictionary."""
         return {
             "id": self.id,
             "name": self.name,

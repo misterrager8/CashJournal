@@ -1,14 +1,15 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { AccountContext } from "../pages/Accounts";
-import { moment_ as moment } from "../../util";
+import moment from "moment-timezone";
 import { Icon } from "@iconify/react";
 import Button from "../atoms/Button";
+import { txnTypes } from "../../util";
 
 export default function TxnItem({ item, className = "" }) {
   const accountCtx = useContext(AccountContext);
 
   return (
-    <div className="d-flex">
+    <div className={"d-flex" + (item.pending ? " pending" : "")}>
       <span
         className="my-auto pe-2"
         style={{ cursor: "pointer" }}
@@ -22,6 +23,14 @@ export default function TxnItem({ item, className = "" }) {
           }
         />
       </span>
+      {item.pending && (
+        <span
+          className="my-auto px-1"
+          style={{ cursor: "pointer" }}
+          onClick={() => accountCtx.unpend(item.id)}>
+          <Icon inline icon="material-symbols:hourglass-arrow-down-outline" />
+        </span>
+      )}
       <div
         onClick={() => accountCtx.setSelectedTxn(item)}
         className={
@@ -32,6 +41,11 @@ export default function TxnItem({ item, className = "" }) {
         <div className="col text-truncate">{item.merchant}</div>
         <div className={"col" + (item.amount < 0 ? " red" : " green")}>
           {item.amount}
+        </div>
+        <div className="col-1">
+          <div className={txnTypes.find((x) => x.value === item.type_)?.color}>
+            <Icon icon={txnTypes.find((x) => x.value === item.type_)?.icon} />
+          </div>
         </div>
         <div className="col text-truncate mx-1 small my-auto">
           {item.category && (
@@ -46,9 +60,9 @@ export default function TxnItem({ item, className = "" }) {
         </div>
         <div className="col text-truncate">{item.accountName}</div>
         <div
-          title={moment(item.timestamp).format("llll")}
+          title={moment.tz(item.timestamp, "America/New_York").format("llll")}
           className="col-1 d-flex flex-row-reverse">
-          {moment(item.timestamp).format("M/D")}
+          {moment.tz(item.timestamp, "America/New_York").format("M/D")}
         </div>
       </div>
     </div>

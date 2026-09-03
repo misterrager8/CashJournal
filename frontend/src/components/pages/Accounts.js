@@ -66,6 +66,15 @@ export default function Accounts({ className = "" }) {
     });
   };
 
+  const unpend = (id) => {
+    ctx.setLoading(true);
+    api("unpend", { id: id }, (data) => {
+      setAccounts(data.accounts);
+      setTxns(data.txns);
+      ctx.setLoading(false);
+    });
+  };
+
   const getTxns = (id) => {
     ctx.setLoading(true);
     api(
@@ -136,6 +145,63 @@ export default function Accounts({ className = "" }) {
     setSelectedTxns([]);
   };
 
+  const filteredTxns = txns
+    .filter((x) => {
+      if (filter) {
+        return x.merchant === filter;
+      } else {
+        return x;
+      }
+    })
+    .filter((y) => (selectedAccount ? y.accountId === selectedAccount?.id : y));
+
+  const incomeTotal = (selectedTxns.length > 0 ? selectedTxns : txns)
+    .filter((x) => {
+      if (filter) {
+        return x.merchant === filter;
+      } else {
+        return x;
+      }
+    })
+    .filter(
+      (x) =>
+        ["income", "adjustment"].includes(x.type_) &&
+        x.amount > 0 &&
+        (selectedTxns.length > 0 ? true : !x.pending),
+    )
+    .reduce((y, z) => y + parseFloat(z.amount), 0);
+
+  const expenseTotal = (selectedTxns.length > 0 ? selectedTxns : txns)
+    .filter((x) => {
+      if (filter) {
+        return x.merchant === filter;
+      } else {
+        return x;
+      }
+    })
+    .filter(
+      (x) =>
+        ["expense", "adjustment"].includes(x.type_) &&
+        x.amount < 0 &&
+        (selectedTxns.length > 0 ? true : !x.pending),
+    )
+    .reduce((y, z) => y + parseFloat(Math.abs(z.amount)), 0);
+
+  const monthlyNet = (selectedTxns.length > 0 ? selectedTxns : txns)
+    .filter((x) => {
+      if (filter) {
+        return x.merchant === filter;
+      } else {
+        return x;
+      }
+    })
+    .filter(
+      (x) =>
+        ["income", "expense", "adjustment"].includes(x.type_) &&
+        (selectedTxns.length > 0 ? true : !x.pending),
+    )
+    .reduce((y, z) => y + parseFloat(z.amount), 0);
+
   useEffect(() => {
     let merchants_ = txns.map((x) => x.merchant);
     let merchants__ = [...new Set(merchants_)];
@@ -190,6 +256,8 @@ export default function Accounts({ className = "" }) {
     selectedBudget: selectedBudget,
     setSelectedBudget: setSelectedBudget,
     toggleSelect: toggleSelect,
+
+    unpend: unpend,
   };
 
   const sorts = [
@@ -359,6 +427,28 @@ export default function Accounts({ className = "" }) {
                         currency: "USD",
                       })}
                     </div>
+                    {txns.filter((x) => x.pending).length > 0 && (
+                      <div
+                        className="mx-auto"
+                        style={{
+                          opacity: "50%",
+                          borderBottom: ".5px dotted",
+                          width: "150px",
+                        }}>
+                        {parseFloat(
+                          selectedAccount
+                            ? selectedAccount?.balancePending
+                            : accounts.reduce(
+                                (x, y) => x + parseFloat(y.balancePending),
+                                0,
+                              ),
+                        ).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                        {" Pending"}
+                      </div>
+                    )}
                   </>
                 </div>
                 <div
@@ -497,19 +587,8 @@ export default function Accounts({ className = "" }) {
                 <div className="txn-scroll mt-3">
                   {!showBudgets ? (
                     <>
-                      {txns
-                        .filter((x) => {
-                          if (filter) {
-                            return x.merchant === filter;
-                          } else {
-                            return x;
-                          }
-                        })
-                        .filter((y) =>
-                          selectedAccount
-                            ? y.accountId === selectedAccount?.id
-                            : y,
-                        )
+                      {filteredTxns
+                        .sort((x, y) => y.pending - x.pending)
                         .map((item) => (
                           <TxnItem key={item.id} item={item} />
                         ))}
@@ -524,54 +603,38 @@ export default function Accounts({ className = "" }) {
                     <div className="between w-75">
                       <div className="green my-auto">
                         <Icon name="bi:plus-lg" className="me-2" />
-                        {(selectedTxns.length > 0 ? selectedTxns : txns)
-                          .filter((x) => {
-                            if (filter) {
-                              return x.merchant === filter && x.amount > 0;
-                            } else {
-                              return x.amount > 0 ? x : null;
-                            }
-                          })
-                          .reduce((y, z) => y + parseFloat(z.amount), 0)
-                          .toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          })}
+                        {incomeTotal.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
                       </div>
                       <div className="red my-auto">
                         <Icon name="bi:dash-lg" className="me-2" />
-                        {(selectedTxns.length > 0 ? selectedTxns : txns)
-                          .filter((x) => {
-                            if (filter) {
-                              return x.merchant === filter && x.amount < 0;
-                            } else {
-                              return x.amount < 0 ? x : null;
-                            }
-                          })
-                          .reduce(
-                            (y, z) => y + parseFloat(Math.abs(z.amount)),
-                            0,
-                          )
-                          .toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          })}
+                        {expenseTotal.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
                       </div>
                       <div className="orange my-auto">
                         <Icon name="fluent-mdl2:total" className="me-2" />
-                        {(selectedTxns.length > 0 ? selectedTxns : txns)
-                          .filter((x) => {
-                            if (filter) {
-                              return x.merchant === filter;
-                            } else {
-                              return x;
-                            }
-                          })
-                          .reduce((y, z) => y + parseFloat(z.amount), 0)
-                          .toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          })}
+                        {monthlyNet.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                      </div>
+                      <div className="my-auto">
+                        <Icon
+                          name="material-symbols:hourglass-arrow-down-outline"
+                          className="me-2"
+                        />
+                        {parseFloat(
+                          txns
+                            .filter((x) => x.pending)
+                            .reduce((y, z) => z.amount + y, 0),
+                        ).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
                       </div>
                     </div>
                   ) : (
