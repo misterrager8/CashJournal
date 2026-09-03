@@ -11,6 +11,7 @@ import EditTxn from "../forms/EditTxn";
 import Dropdown from "../atoms/Dropdown";
 import Icon from "../atoms/Icon";
 import Budgets from "../sections/Budgets";
+import GetMonth from "../forms/GetMonth";
 
 export const AccountContext = createContext();
 
@@ -42,21 +43,6 @@ export default function Accounts({ className = "" }) {
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
 
   const getAccounts = () => {
     ctx.setLoading(true);
@@ -116,14 +102,6 @@ export default function Accounts({ className = "" }) {
         setTxns(data.txns);
         setSelectedTxn(data.txn);
       },
-    );
-  };
-
-  const currentMonthSelected = () => {
-    let today = new Date();
-    return (
-      currentMonth === today.getMonth() + 1 &&
-      currentYear === today.getFullYear()
     );
   };
 
@@ -544,45 +522,7 @@ export default function Accounts({ className = "" }) {
                       </div>
                     </Dropdown>
                   </div>
-                  <div className="d-flex text-truncate">
-                    <Button
-                      border={false}
-                      icon="bi:caret-left-fill"
-                      onClick={() => {
-                        if (currentMonth === 1) {
-                          setCurrentMonth(12);
-                          setCurrentYear(currentYear - 1);
-                        } else {
-                          setCurrentMonth(currentMonth - 1);
-                        }
-                      }}
-                    />
-                    <Button
-                      className="text-truncate"
-                      active={!currentMonthSelected()}
-                      onClick={() => {
-                        if (!currentMonthSelected()) {
-                          setCurrentMonth(new Date().getMonth() + 1);
-                          setCurrentYear(new Date().getFullYear());
-                        }
-                      }}
-                      border={false}
-                      text={`${months[currentMonth - 1]} '${currentYear.toString().substring(2)}`}
-                    />
-                    <Button
-                      className={currentMonthSelected() ? "invisible" : ""}
-                      border={false}
-                      icon="bi:caret-right-fill"
-                      onClick={() => {
-                        if (currentMonth === 12) {
-                          setCurrentMonth(1);
-                          setCurrentYear(currentYear + 1);
-                        } else {
-                          setCurrentMonth(currentMonth + 1);
-                        }
-                      }}
-                    />
-                  </div>
+                  <GetMonth />
                 </div>
                 <div className="txn-scroll mt-3">
                   {!showBudgets ? (
