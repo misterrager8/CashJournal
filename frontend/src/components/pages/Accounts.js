@@ -630,7 +630,7 @@ export default function Accounts({ className = "" }) {
                         {parseFloat(
                           txns
                             .filter((x) => x.pending)
-                            .reduce((y, z) => z.amount + y, 0),
+                            .reduce((y, z) => y + parseFloat(z.amount), 0),
                         ).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
