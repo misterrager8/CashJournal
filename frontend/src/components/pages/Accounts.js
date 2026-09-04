@@ -12,6 +12,7 @@ import Dropdown from "../atoms/Dropdown";
 import Icon from "../atoms/Icon";
 import Budgets from "../sections/Budgets";
 import GetMonth from "../forms/GetMonth";
+import SearchTxns from "../forms/SearchTxns";
 
 export const AccountContext = createContext();
 
@@ -28,6 +29,7 @@ export default function Accounts({ className = "" }) {
   const [selectedBudgets, setSelectedBudgets] = useState([]);
 
   const [txns, setTxns] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [sort, setSort] = useState("date");
   const [descending, setDescending] = useState(true);
 
@@ -121,6 +123,15 @@ export default function Accounts({ className = "" }) {
 
   const deselectAll = () => {
     setSelectedTxns([]);
+  };
+
+  const searchTxns = (e, search) => {
+    e.preventDefault();
+    ctx.setLoading(true);
+    api("search_txns", { search: search }, (data) => {
+      setSearchResults(data.txns);
+      ctx.setLoading(false);
+    });
   };
 
   const filteredTxns = txns
@@ -236,6 +247,9 @@ export default function Accounts({ className = "" }) {
     toggleSelect: toggleSelect,
 
     unpend: unpend,
+    searchTxns: searchTxns,
+    searchResults: searchResults,
+    setSearchResults: setSearchResults,
   };
 
   const sorts = [
@@ -524,10 +538,12 @@ export default function Accounts({ className = "" }) {
                   </div>
                   <GetMonth />
                 </div>
+                <SearchTxns className="my-2" />
+
                 <div className="txn-scroll mt-3">
                   {!showBudgets ? (
                     <>
-                      {filteredTxns
+                      {(searchResults.length > 0 ? searchResults : filteredTxns)
                         .sort((x, y) => y.pending - x.pending)
                         .map((item) => (
                           <TxnItem key={item.id} item={item} />

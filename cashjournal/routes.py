@@ -562,6 +562,31 @@ def edit_txn():
     }
 
 
+@current_app.post("/search_txns")
+@login_required
+def search_txns():
+    success = True
+    msg = ""
+
+    txns = []
+
+    try:
+        txns = [
+            i.to_dict()
+            for i in current_user.txns
+            if request.json.get("search").lower() in i.merchant.lower()
+        ]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "txns": txns,
+    }
+
+
 @current_app.post("/switch_accounts")
 @login_required
 def switch_accounts():
