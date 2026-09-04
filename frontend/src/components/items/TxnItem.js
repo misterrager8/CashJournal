@@ -40,7 +40,10 @@ export default function TxnItem({ item, className = "" }) {
         }>
         <div className="col text-truncate">{item.merchant}</div>
         <div className={"col" + (item.amount < 0 ? " red" : " green")}>
-          {item.amount}
+          {parseFloat(item.amount).toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
         </div>
         <div className="col-1">
           <div className={txnTypes.find((x) => x.value === item.type_)?.color}>
