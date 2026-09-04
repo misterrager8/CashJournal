@@ -23,6 +23,7 @@ export default function SearchTxns({ className = "" }) {
         />
         {searchResults.length > 0 && (
           <Button
+            border={false}
             icon="bi:x-lg"
             onClick={() => {
               setSearchResults([]);

@@ -156,7 +156,7 @@ body {
 }
 
 .txn-scroll {
-  height: 45vh;
+  height: 42vh;
   overflow-y: auto;
   border-bottom: 0.5px solid var(--btn-color);
 }
@@ -445,7 +445,7 @@ tspan {
   }
 
   .txn-scroll {
-    height: 41vh;
+    height: 37vh;
   }
 
   .bills-scroll {

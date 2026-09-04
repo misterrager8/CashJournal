@@ -35,7 +35,7 @@ export default function TxnItem({ item, className = "" }) {
         onClick={() => accountCtx.setSelectedTxn(item)}
         className={
           className +
-          " txn-item w-100 text-truncate" +
+          " txn-item w-100 text-truncate " +
           (accountCtx.selectedTxns.includes(item) ? " active" : "")
         }>
         <div className="col text-truncate">{item.merchant}</div>
@@ -58,12 +58,10 @@ export default function TxnItem({ item, className = "" }) {
           )}
           {item.category?.name}
         </div>
-        <div className="col text-truncate">
-          <div className="text-truncate">{item.accountName}</div>
-        </div>
+        <div className="col text-truncate">{item.accountName}</div>
         <div
           title={moment.tz(item.timestamp, "America/New_York").format("llll")}
-          className="col-1 d-flex flex-row-reverse">
+          className="col-2 d-flex flex-row-reverse">
           {moment
             .tz(item.timestamp, "America/New_York")
             .format(accountCtx.searchResults.length > 0 ? "M/D/Y" : "M/D")}
