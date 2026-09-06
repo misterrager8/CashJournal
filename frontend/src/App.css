@@ -2,6 +2,7 @@
 
 * {
   font-family: "Montserrat";
+  /* font-family: "JetBrains Mono"; */
 }
 
 body {
@@ -414,9 +415,14 @@ tspan {
     display: none;
   }
 
-  .nav-custom .btn,
   .txn-menu .btn {
     font-size: 1.1rem;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .nav-custom .btn {
+    font-size: 1.35rem;
     padding-left: 10px;
     padding-right: 10px;
   }
