@@ -481,7 +481,7 @@ def split_txn():
                 txn_.timestamp.year,
             )
         ]
-        txn_ = txn_.to_dict()
+        txn_ = new_txn.to_dict()
 
     except Exception as e:
         success = False
