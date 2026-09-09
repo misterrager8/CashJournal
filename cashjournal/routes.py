@@ -445,6 +445,43 @@ def add_txn():
     }
 
 
+@current_app.post("/split_txn")
+@login_required
+def split_txn():
+    success = True
+    msg = ""
+    txn_ = None
+
+    try:
+        txn_ = Transaction.get(int(request.json.get("txnId")))
+        new_txn = Transaction(
+            # amount=decimal.Decimal(request.json.get("amount")),
+            timestamp=txn_.timestamp,
+            merchant=request.json.get("merchant"),
+            account_id=txn_.account_id,
+            user=current_user.id,
+            type_=txn_.type_,
+        )
+
+        is_charge = txn_.amount < 0
+        difference = abs(txn_.amount) - decimal.Decimal(request.json.get("amount"))
+
+        txn_.amount = difference * (-1 if is_charge else 1)
+        new_txn.amount = decimal.Decimal(request.json.get("amount")) * (
+            -1 if is_charge else 1
+        )
+
+        txn_.edit()
+        new_txn.create()
+        txn_ = txn_.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+
+    return {"success": success, "msg": msg, "txn": txn_}
+
+
 @current_app.post("/get_all_txns")
 @login_required
 def get_all_txns():

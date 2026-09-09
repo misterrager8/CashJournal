@@ -6,6 +6,7 @@ import Icon from "../atoms/Icon";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
 import moment from "moment-timezone";
+import SplitTxn from "./SplitTxn";
 
 export default function EditTxn() {
   const accountCtx = useContext(AccountContext);
@@ -32,6 +33,7 @@ export default function EditTxn() {
   const [netBalance, setNetBalance] = useState(0);
 
   const [pending, setPending] = useState(false);
+  const [splitting, setSplitting] = useState(false);
 
   useEffect(() => {
     if (accountCtx.selectedTxn) {
@@ -145,6 +147,7 @@ export default function EditTxn() {
     description !== accountCtx.selectedTxn?.description ||
     accountType !== accountCtx.selectedTxn?.type_ ||
     pending !== accountCtx.selectedTxn?.pending ||
+    amount !== accountCtx.selectedTxn?.amount ||
     timestamp !==
       moment
         .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
@@ -201,7 +204,6 @@ export default function EditTxn() {
         )}
         <input
           placeholder="0.01"
-          // min={0.01}
           type="number"
           step={0.01}
           autoComplete="off"
@@ -282,17 +284,6 @@ export default function EditTxn() {
         <div className="mt-3 w-50 mx-auto">
           <div className="d-flex">
             <div className="mx-auto">
-              {/* <div
-                style={{
-                  color: accountCtx.selectedTxn.category?.color,
-                }}>
-                <Icon
-                  name={
-                    accountCtx.selectedTxn.category?.icon || "uis:graph-bar"
-                  }
-                  className="my-auto me-2"
-                />
-              </div> */}
               <Dropdown
                 icon={accountCtx.selectedTxn.category?.icon || "uis:graph-bar"}
                 border={false}
@@ -355,6 +346,16 @@ export default function EditTxn() {
                   </a>
                 ))}
               </Dropdown>
+
+              {!accountCtx.selectedTxn.pending && (
+                <Button
+                  icon="boxicons:split"
+                  className="w-100"
+                  onClick={() => setSplitting(!splitting)}
+                  text="Split"
+                  active={splitting}
+                />
+              )}
             </div>
           </div>
 
@@ -368,6 +369,11 @@ export default function EditTxn() {
             onChange={onChangeDescription}></textarea>
         </div>
       </form>
+      {splitting && (
+        <div className="w-50 mx-auto">
+          <SplitTxn />
+        </div>
+      )}
     </>
   );
 }
