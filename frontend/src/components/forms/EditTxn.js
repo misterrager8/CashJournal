@@ -170,11 +170,23 @@ export default function EditTxn() {
         )}
         <div className="d-flex">
           <Button
+            // text="Duplicate"
             size="lg"
             border={false}
             icon="bi:arrow-clockwise"
             onClick={() => duplicateTxn()}
           />
+
+          {!accountCtx.selectedTxn.pending && (
+            <Button
+              border={false}
+              size="lg"
+              icon="boxicons:split"
+              onClick={() => setSplitting(!splitting)}
+              // text="Split"
+              active={splitting}
+            />
+          )}
           {deleting && (
             <Button
               size="lg"
@@ -193,6 +205,8 @@ export default function EditTxn() {
           />
         </div>
       </div>
+
+      {splitting && <SplitTxn className="my-4" />}
       <form onSubmit={(e) => editTxn(e)} className="mt-3">
         {isChanged() && (
           <Button
@@ -346,16 +360,6 @@ export default function EditTxn() {
                   </a>
                 ))}
               </Dropdown>
-
-              {!accountCtx.selectedTxn.pending && (
-                <Button
-                  icon="boxicons:split"
-                  className="w-100"
-                  onClick={() => setSplitting(!splitting)}
-                  text="Split"
-                  active={splitting}
-                />
-              )}
             </div>
           </div>
 
@@ -369,11 +373,6 @@ export default function EditTxn() {
             onChange={onChangeDescription}></textarea>
         </div>
       </form>
-      {splitting && (
-        <div className="w-50 mx-auto">
-          <SplitTxn />
-        </div>
-      )}
     </>
   );
 }

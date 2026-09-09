@@ -451,6 +451,7 @@ def split_txn():
     success = True
     msg = ""
     txn_ = None
+    txns = []
 
     try:
         txn_ = Transaction.get(int(request.json.get("txnId")))
@@ -473,13 +474,20 @@ def split_txn():
 
         txn_.edit()
         new_txn.create()
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                txn_.timestamp.month,
+                txn_.timestamp.year,
+            )
+        ]
         txn_ = txn_.to_dict()
 
     except Exception as e:
         success = False
         msg = str(e)
 
-    return {"success": success, "msg": msg, "txn": txn_}
+    return {"success": success, "msg": msg, "txn": txn_, "txns": txns}
 
 
 @current_app.post("/get_all_txns")

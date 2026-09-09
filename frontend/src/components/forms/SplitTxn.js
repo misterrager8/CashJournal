@@ -34,6 +34,7 @@ export default function SplitTxn({ className = "" }) {
       },
       (data) => {
         accountCtx.setSelectedTxn(data.txn);
+        accountCtx.setTxns(data.txns);
         resetAll();
         ctx.setLoading(false);
       },
@@ -46,6 +47,7 @@ export default function SplitTxn({ className = "" }) {
 
   return (
     <form
+      className={className}
       onSubmit={(e) => {
         splitTxn(e);
       }}>
@@ -53,7 +55,7 @@ export default function SplitTxn({ className = "" }) {
         <div className={className + " txn-form"}>
           <Input
             onFocus={(e) => e.target.select()}
-            className={"border-0"}
+            className={""}
             placeholder="Amount @ Merchant"
             value={quickInput}
             onChange={onChangeQuickInput}
