@@ -578,20 +578,22 @@ export default function Accounts({ className = "" }) {
                           currency: "USD",
                         })}
                       </div>
-                      <div className="my-auto">
-                        <Icon
-                          name="material-symbols:hourglass-arrow-down-outline"
-                          className="me-2"
-                        />
-                        {parseFloat(
-                          txns
-                            .filter((x) => x.pending)
-                            .reduce((y, z) => y + parseFloat(z.amount), 0),
-                        ).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </div>
+                      {txns.filter((a) => a.pending).length > 0 && (
+                        <div className="my-auto">
+                          <Icon
+                            name="material-symbols:hourglass-arrow-down-outline"
+                            className="me-2"
+                          />
+                          {parseFloat(
+                            txns
+                              .filter((x) => x.pending)
+                              .reduce((y, z) => y + parseFloat(z.amount), 0),
+                          ).toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div>
