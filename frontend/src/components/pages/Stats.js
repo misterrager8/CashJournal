@@ -38,9 +38,7 @@ export default function Stats({ className = "" }) {
   const getAllTxns = () => {
     setLoading(true);
     api("get_all_txns", {}, (data) => {
-      let charges_ = [...data.txns].filter((x) =>
-        ["expense", "adjustment"].includes(x.type_),
-      );
+      let charges_ = [...data.txns].filter((x) => x.type_ === "expense");
       let deposits_ = [...data.txns].filter((x) => x.type_ === "income");
       let nets = [];
       let all_txns = [...data.txns];
