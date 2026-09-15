@@ -461,7 +461,7 @@ def split_txn():
             merchant=request.json.get("merchant"),
             account_id=txn_.account_id,
             user=current_user.id,
-            type_=txn_.type_,
+            type_="expense" if request.json.get("isCharge") else "income",
         )
 
         is_charge = -1 if request.json.get("isCharge") else 1
