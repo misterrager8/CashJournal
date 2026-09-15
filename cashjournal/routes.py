@@ -464,13 +464,12 @@ def split_txn():
             type_=txn_.type_,
         )
 
-        is_charge = txn_.amount < 0
-        difference = abs(txn_.amount) - decimal.Decimal(request.json.get("amount"))
+        is_charge = -1 if request.json.get("isCharge") else 1
 
-        txn_.amount = difference * (-1 if is_charge else 1)
-        new_txn.amount = decimal.Decimal(request.json.get("amount")) * (
-            -1 if is_charge else 1
+        txn_.amount = txn_.amount - (
+            decimal.Decimal(request.json.get("amount")) * is_charge
         )
+        new_txn.amount = decimal.Decimal(request.json.get("amount")) * is_charge
 
         txn_.edit()
         new_txn.create()

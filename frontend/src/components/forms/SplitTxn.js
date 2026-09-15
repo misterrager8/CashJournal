@@ -13,6 +13,7 @@ export default function SplitTxn({ className = "" }) {
 
   const [quickInput, setQuickInput] = useState("");
   const onChangeQuickInput = (e) => setQuickInput(e.target.value);
+  const [isDeposit, setIsDeposit] = useState(false);
 
   const [parsedInput, setParsedInput] = useState(null);
 
@@ -31,6 +32,7 @@ export default function SplitTxn({ className = "" }) {
         amount: parsedInput[1],
         merchant: parsedInput[2],
         txnId: accountCtx.selectedTxn?.id,
+        isCharge: !isDeposit,
       },
       (data) => {
         accountCtx.setSelectedTxn(data.txn);
@@ -53,6 +55,12 @@ export default function SplitTxn({ className = "" }) {
       }}>
       <>
         <div className={className + " txn-form"}>
+          <Button
+            onClick={() => setIsDeposit(!isDeposit)}
+            className={isDeposit ? "green" : "red"}
+            border={false}
+            icon={"bi:" + (isDeposit ? "plus-" : "dash-") + "lg"}
+          />
           <Input
             onFocus={(e) => e.target.select()}
             className={""}
