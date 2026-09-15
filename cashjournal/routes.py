@@ -581,8 +581,6 @@ def edit_txn():
         txn.pending = request.json.get("pending")
         txn.timestamp = request.json.get("timestamp")
 
-        click.secho(request.json.get("timestamp"), fg="blue")
-
         txn.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
@@ -957,14 +955,6 @@ def edit_budget():
             decimal.Decimal(request.json.get("maximum"))
             if request.json.get("maximum")
             else 0
-        )
-        click.secho(
-            (
-                decimal.Decimal(request.json.get("maximum"))
-                if request.json.get("maximum")
-                else 0
-            ),
-            fg="blue",
         )
 
         budget.edit()

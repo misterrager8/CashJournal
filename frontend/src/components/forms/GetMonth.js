@@ -66,6 +66,7 @@ export default function GetMonth() {
                 setCurrentYear(yearInput);
               }}>
               <input
+                onFocus={(e) => e.target.select()}
                 style={{ width: "35px" }}
                 className="form-control form-control-sm me-1"
                 type="number"
@@ -75,6 +76,7 @@ export default function GetMonth() {
                 onChange={onChangeMonthInput}
               />
               <input
+                onFocus={(e) => e.target.select()}
                 // style={{width:'70px'}}
                 className="form-control form-control-sm"
                 type="number"
