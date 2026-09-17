@@ -25,7 +25,10 @@ export const StatsContext = createContext();
 
 export default function Stats({ className = "" }) {
   const { setLoading, merchants, setMerchants } = useContext(Context);
+
   const [charges, setCharges] = useState([]);
+  const [filteredCharges, setFilteredCharges] = useState([]);
+
   const [deposits, setDeposits] = useState([]);
   const [nets, setNets] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -140,6 +143,19 @@ export default function Stats({ className = "" }) {
   };
 
   useEffect(() => {
+    let x = charges.reduce((a, b) => {
+      let filtered_ = b.txns.filter((c) => c.merchant === merchantFilter);
+      a.push({
+        ...b,
+        total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+        txns: filtered_,
+      });
+      return a;
+    }, []);
+    setFilteredCharges(merchantFilter ? x : charges);
+  }, [merchantFilter]);
+
+  useEffect(() => {
     getAllTxns();
   }, []);
 
@@ -177,15 +193,14 @@ export default function Stats({ className = "" }) {
                   border={false}
                 />
               )}
-              <Dropdown
+              {/* <Dropdown
                 classNameBtn="ms-3"
                 text="Categories"
-                // icon="tdesign:store-filled"
-                target="filter-categories"></Dropdown>
+                target="filter-categories"></Dropdown> */}
             </div>
           </div>
           <ResponsiveContainer height={250}>
-            <BarChart margin={{ left: 20, top: 30 }} data={charges}>
+            <BarChart margin={{ left: 20, top: 30 }} data={filteredCharges}>
               <Bar fill="#ff5b5b" radius={10} dataKey="total" />
               <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
               <YAxis
