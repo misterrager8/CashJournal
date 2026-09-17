@@ -277,9 +277,7 @@ export default function Accounts({ className = "" }) {
     let txns_ = [...txns];
     if (sort === "amount") {
       txns_.sort(
-        (x, y) =>
-          Math.abs((descending ? y : x).amount) -
-          Math.abs((descending ? x : y).amount),
+        (x, y) => (descending ? y : x).amount - (descending ? x : y).amount,
       );
     } else if (sort === "date") {
       txns_.sort(
