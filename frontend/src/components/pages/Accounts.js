@@ -406,7 +406,7 @@ export default function Accounts({ className = "" }) {
                         <Button type_="submit" className="d-none" />
                       </form>
                     )}
-                    <div style={{ fontSize: "3.5rem" }}>
+                    <div style={{ fontSize: "3.5rem", letterSpacing: "4px" }}>
                       {parseFloat(
                         selectedAccount
                           ? selectedAccount?.balance
