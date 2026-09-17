@@ -477,7 +477,7 @@ export default function Accounts({ className = "" }) {
                       className="abbreviate"
                       icon={
                         !showBudgets
-                          ? "uis:graph-bar"
+                          ? "akar-icons:tag"
                           : "streamline-plump:credit-card-5-solid"
                       }
                       active={showBudgets}
