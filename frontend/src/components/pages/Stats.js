@@ -143,17 +143,39 @@ export default function Stats({ className = "" }) {
   };
 
   useEffect(() => {
-    let x = charges.reduce((a, b) => {
-      let filtered_ = b.txns.filter((c) => c.merchant === merchantFilter);
-      a.push({
-        ...b,
-        total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
-        txns: filtered_,
-      });
-      return a;
-    }, []);
-    setFilteredCharges(merchantFilter ? x : charges);
+    if (merchantFilter) {
+      setCategoryFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => c.merchant === merchantFilter);
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
   }, [merchantFilter]);
+
+  useEffect(() => {
+    if (categoryFilter) {
+      setMerchantFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => {
+          // console.log(c.category);
+          return c.category?.name === categoryFilter;
+        });
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
+  }, [categoryFilter]);
 
   useEffect(() => {
     getAllTxns();
@@ -173,6 +195,7 @@ export default function Stats({ className = "" }) {
             </div>
             <div className="my-auto d-flex">
               <Dropdown
+                active={merchantFilter}
                 text={merchantFilter || "Merchants"}
                 icon="tdesign:store-filled"
                 target="filter-merchants">
@@ -180,7 +203,10 @@ export default function Stats({ className = "" }) {
                   {merchants.map((x) => (
                     <a
                       onClick={() => setMerchantFilter(x)}
-                      className="dropdown-item">
+                      className={
+                        "dropdown-item" +
+                        (x === merchantFilter ? " active" : "")
+                      }>
                       {x}
                     </a>
                   ))}
@@ -193,14 +219,37 @@ export default function Stats({ className = "" }) {
                   border={false}
                 />
               )}
-              {/* <Dropdown
+              <Dropdown
+                active={categoryFilter}
                 classNameBtn="ms-3"
-                text="Categories"
-                target="filter-categories"></Dropdown> */}
+                text={categoryFilter || "Categories"}
+                target="filter-categories">
+                {categoryGroups.map((x) => (
+                  <a
+                    onClick={() => setCategoryFilter(x.category)}
+                    className={
+                      "dropdown-item" +
+                      (x.category === categoryFilter ? " active" : "")
+                    }>
+                    {x.category}
+                  </a>
+                ))}
+              </Dropdown>
+              {categoryFilter && (
+                <Button
+                  icon="bi:x-lg"
+                  onClick={() => setCategoryFilter(null)}
+                  border={false}
+                />
+              )}
             </div>
           </div>
           <ResponsiveContainer height={250}>
-            <BarChart margin={{ left: 20, top: 30 }} data={filteredCharges}>
+            <BarChart
+              margin={{ left: 20, top: 30 }}
+              data={
+                merchantFilter || categoryFilter ? filteredCharges : charges
+              }>
               <Bar fill="#ff5b5b" radius={10} dataKey="total" />
               <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
               <YAxis
