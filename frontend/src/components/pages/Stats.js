@@ -20,6 +20,7 @@ import moment from "moment";
 import Dropdown from "../atoms/Dropdown";
 import Button from "../atoms/Button";
 import CategoryStatItem from "../items/CategoryStatItem";
+import Input from "../atoms/Input";
 
 export const StatsContext = createContext();
 
@@ -37,6 +38,9 @@ export default function Stats({ className = "" }) {
 
   const [merchantFilter, setMerchantFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const onChangeSearch = (e) => setSearch(e.target.value);
 
   const getAllTxns = () => {
     setLoading(true);
@@ -199,17 +203,38 @@ export default function Stats({ className = "" }) {
                 text={merchantFilter || "Merchants"}
                 icon="tdesign:store-filled"
                 target="filter-merchants">
-                <div style={{ height: "300px", overflowY: "auto" }}>
-                  {merchants.map((x) => (
-                    <a
-                      onClick={() => setMerchantFilter(x)}
-                      className={
-                        "dropdown-item" +
-                        (x === merchantFilter ? " active" : "")
-                      }>
-                      {x}
-                    </a>
-                  ))}
+                <div className="">
+                  <div className="d-flex p-2">
+                    {search !== "" && (
+                      <Button
+                        icon="bi:x-lg"
+                        border={false}
+                        onClick={() => setSearch("")}
+                      />
+                    )}
+                    <Input
+                      onChange={onChangeSearch}
+                      value={search}
+                      placeholder="Search"
+                      className=""
+                    />
+                  </div>
+                  <div style={{ height: "300px", overflowY: "auto" }}>
+                    {merchants
+                      .filter((w) =>
+                        w.toLowerCase().includes(search.toLowerCase()),
+                      )
+                      .map((x) => (
+                        <a
+                          onClick={() => setMerchantFilter(x)}
+                          className={
+                            "dropdown-item" +
+                            (x === merchantFilter ? " active" : "")
+                          }>
+                          {x}
+                        </a>
+                      ))}
+                  </div>
                 </div>
               </Dropdown>
               {merchantFilter && (
@@ -220,6 +245,7 @@ export default function Stats({ className = "" }) {
                 />
               )}
               <Dropdown
+                icon="bi:record"
                 active={categoryFilter}
                 classNameBtn="ms-3"
                 text={categoryFilter || "Categories"}
