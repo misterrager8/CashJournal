@@ -61,9 +61,11 @@ export default function TxnItem({ item, className = "" }) {
           </div>
           <div className="">
             {item.description && (
-              <>
-                <Icon className="" inline icon="bxs:comment-detail" />
-              </>
+              <Icon
+                className="opacity-50"
+                inline
+                icon="fluent:text-description-16-filled"
+              />
             )}
           </div>
         </div>

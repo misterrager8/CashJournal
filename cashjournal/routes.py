@@ -501,14 +501,21 @@ def get_all_txns():
     msg = ""
 
     txns = []
+    accounts = []
 
     try:
         txns = [i.to_dict() for i in current_user.txns]
+        accounts = [i.to_dict() for i in current_user.accounts]
 
     except Exception as e:
         success = False
         msg = str(e)
-    return {"success": success, "msg": msg, "txns": txns}
+    return {
+        "success": success,
+        "msg": msg,
+        "txns": txns,
+        "accounts": accounts,
+    }
 
 
 @current_app.post("/get_txns")

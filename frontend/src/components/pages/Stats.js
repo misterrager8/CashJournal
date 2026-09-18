@@ -25,7 +25,8 @@ import Input from "../atoms/Input";
 export const StatsContext = createContext();
 
 export default function Stats({ className = "" }) {
-  const { setLoading, merchants, setMerchants } = useContext(Context);
+  const { setLoading, merchants, setMerchants, setAccounts, accounts } =
+    useContext(Context);
 
   const [charges, setCharges] = useState([]);
   const [filteredCharges, setFilteredCharges] = useState([]);
@@ -38,6 +39,7 @@ export default function Stats({ className = "" }) {
 
   const [merchantFilter, setMerchantFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
+  const [accountFilter, setAccountFilter] = useState(null);
 
   const [search, setSearch] = useState("");
   const onChangeSearch = (e) => setSearch(e.target.value);
@@ -142,6 +144,7 @@ export default function Stats({ className = "" }) {
       );
       setMerchantGroups(merchantGroups_);
       setCategoryGroups(categoryGroups_);
+      setAccounts(data.accounts);
       setLoading(false);
     });
   };
@@ -149,6 +152,7 @@ export default function Stats({ className = "" }) {
   useEffect(() => {
     if (merchantFilter) {
       setCategoryFilter(null);
+      setAccountFilter(null);
       let x = charges.reduce((a, b) => {
         let filtered_ = b.txns.filter((c) => c.merchant === merchantFilter);
         a.push({
@@ -165,9 +169,9 @@ export default function Stats({ className = "" }) {
   useEffect(() => {
     if (categoryFilter) {
       setMerchantFilter(null);
+      setAccountFilter(null);
       let x = charges.reduce((a, b) => {
         let filtered_ = b.txns.filter((c) => {
-          // console.log(c.category);
           return c.category?.name === categoryFilter;
         });
         a.push({
@@ -180,6 +184,25 @@ export default function Stats({ className = "" }) {
       setFilteredCharges(x);
     }
   }, [categoryFilter]);
+
+  useEffect(() => {
+    if (accountFilter) {
+      setMerchantFilter(null);
+      setCategoryFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => {
+          return c.accountName === accountFilter;
+        });
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
+  }, [accountFilter]);
 
   useEffect(() => {
     getAllTxns();
@@ -197,11 +220,41 @@ export default function Stats({ className = "" }) {
             <div className="text-truncate" style={{ fontSize: "2rem" }}>
               Monthly Expenses
             </div>
-            <div className="my-auto d-flex">
+          </div>
+          <div className="d-flex flex-row-reverse my-2">
+            <div className="d-flex">
+              <Dropdown
+                active={accountFilter}
+                text={accountFilter || "Accounts"}
+                icon="bi:credit-card-fill"
+                target="filter-accounts">
+                <div className="">
+                  <div>
+                    {accounts.map((x) => (
+                      <a
+                        onClick={() => setAccountFilter(x.name)}
+                        className={
+                          "dropdown-item" +
+                          (x.name === accountFilter ? " active" : "")
+                        }>
+                        {x.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Dropdown>
+              {accountFilter && (
+                <Button
+                  icon="bi:x-lg"
+                  onClick={() => setAccountFilter(null)}
+                  border={false}
+                />
+              )}
               <Dropdown
                 active={merchantFilter}
                 text={merchantFilter || "Merchants"}
                 icon="tdesign:store-filled"
+                classNameBtn="ms-1"
                 target="filter-merchants">
                 <div className="">
                   <div className="d-flex p-2">
@@ -245,9 +298,9 @@ export default function Stats({ className = "" }) {
                 />
               )}
               <Dropdown
-                icon="bi:record"
+                icon="akar-icons:tag"
                 active={categoryFilter}
-                classNameBtn="ms-3"
+                classNameBtn="ms-1"
                 text={categoryFilter || "Categories"}
                 target="filter-categories">
                 {categoryGroups.map((x) => (
@@ -274,7 +327,9 @@ export default function Stats({ className = "" }) {
             <BarChart
               margin={{ left: 20, top: 30 }}
               data={
-                merchantFilter || categoryFilter ? filteredCharges : charges
+                merchantFilter || categoryFilter || accountFilter
+                  ? filteredCharges
+                  : charges
               }>
               <Bar fill="#ff5b5b" radius={10} dataKey="total" />
               <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
