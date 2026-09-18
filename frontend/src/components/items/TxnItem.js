@@ -55,7 +55,7 @@ export default function TxnItem({ item, className = "" }) {
           <div className="ms-2">
             {item.recurring && (
               <>
-                <Icon className="" inline icon="bi:arrow-clockwise" />
+                <Icon className="red" inline icon="at-icons:arrow-clockwise" />
               </>
             )}
           </div>
