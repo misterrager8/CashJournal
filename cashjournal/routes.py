@@ -187,6 +187,7 @@ def edit_account():
         account = Account.get(request.json.get("id"))
 
         account.name = request.json.get("name")
+        account.color = request.json.get("color")
         account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]

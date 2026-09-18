@@ -61,7 +61,19 @@ export default function TxnItem({ item, className = "" }) {
           )}
           {item.category?.name}
         </div>
-        <div className="col text-truncate">{item.accountName}</div>
+        <div className="col-1">
+          <span
+            style={{
+              backgroundColor: item.accountColor,
+              fontSize: "small",
+              padding: "1px 10px",
+              borderRadius: "5px",
+              fontWeight: "bold",
+            }}>
+            <Icon inline className="me-2" icon="bi:credit-card-fill" />
+            {item.accountName?.[0]}
+          </span>
+        </div>
         <div
           title={moment.tz(item.timestamp, "America/New_York").format("llll")}
           className="col-2 d-flex flex-row-reverse">

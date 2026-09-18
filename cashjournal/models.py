@@ -85,6 +85,7 @@ class Account(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text)
+    color = db.Column(db.Text)
     balance = db.Column(db.Numeric(10, 2))
     transactions = db.relationship(
         "Transaction", lazy="dynamic", order_by="desc(Transaction.timestamp)"
@@ -129,6 +130,7 @@ class Account(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "color": self.color,
             "balance": str(sum([i.amount for i in txns if not i.pending])),
             "balancePending": str(sum([i.amount for i in txns])),
             "transactions": sorted(
@@ -212,6 +214,7 @@ class Transaction(db.Model):
             "accountId": self.account_id,
             "category": self.category.to_dict() if self.category else None,
             "accountName": self.account.name if self.account else None,
+            "accountColor": self.account.color if self.account else None,
         }
 
 

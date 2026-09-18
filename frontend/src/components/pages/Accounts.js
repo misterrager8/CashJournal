@@ -39,6 +39,9 @@ export default function Accounts({ className = "" }) {
   const [accountName, setAccountName] = useState("");
   const onChangeAccountName = (e) => setAccountName(e.target.value);
 
+  const [accountColor, setAccountColor] = useState("");
+  const onChangeAccountColor = (e) => setAccountColor(e.target.value);
+
   const [filter, setFilter] = useState(null);
   const [showBudgets, setShowBudgets] = useState(false);
   const [total, setTotal] = useState(0);
@@ -83,6 +86,7 @@ export default function Accounts({ className = "" }) {
       {
         id: selectedAccount?.id,
         name: accountName,
+        color: accountColor,
       },
       (data) => {
         setSelectedAccount(data.account);
@@ -199,6 +203,7 @@ export default function Accounts({ className = "" }) {
 
   useEffect(() => {
     setAccountName(selectedAccount?.name);
+    setAccountColor(selectedAccount?.color);
     setSelectedTxn(null);
     // getTxns(selectedAccount?.id);
   }, [selectedAccount]);
@@ -395,6 +400,12 @@ export default function Accounts({ className = "" }) {
                       </div>
                     ) : (
                       <form onSubmit={(e) => editAccount(e)}>
+                        <Input
+                          type_="color"
+                          className="border-0"
+                          value={accountColor}
+                          onChange={onChangeAccountColor}
+                        />
                         <Input
                           className="border-0"
                           style={{ fontSize: "1.5rem", textAlign: "center" }}
