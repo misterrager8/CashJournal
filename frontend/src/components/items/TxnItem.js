@@ -45,9 +45,19 @@ export default function TxnItem({ item, className = "" }) {
             currency: "USD",
           })}
         </div>
-        <div className="col-1">
+        <div className="col-2 d-flex">
           <div className={txnTypes.find((x) => x.value === item.type_)?.color}>
-            <Icon icon={txnTypes.find((x) => x.value === item.type_)?.icon} />
+            <Icon
+              inline
+              icon={txnTypes.find((x) => x.value === item.type_)?.icon}
+            />
+          </div>
+          <div className="ms-2">
+            {item.recurring && (
+              <>
+                <Icon className="" inline icon="bi:arrow-clockwise" />
+              </>
+            )}
           </div>
         </div>
         <div className="col text-truncate mx-1 small my-auto">

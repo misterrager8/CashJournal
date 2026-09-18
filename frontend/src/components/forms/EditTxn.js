@@ -33,6 +33,7 @@ export default function EditTxn() {
   const [netBalance, setNetBalance] = useState(0);
 
   const [pending, setPending] = useState(false);
+  const [recurring, setRecurring] = useState(false);
   const [splitting, setSplitting] = useState(false);
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function EditTxn() {
       setDescription(accountCtx.selectedTxn?.description);
       setAccountType(accountCtx.selectedTxn?.type_);
       setPending(accountCtx.selectedTxn?.pending);
+      setRecurring(accountCtx.selectedTxn?.recurring);
 
       setTimestamp(
         moment
@@ -81,6 +83,7 @@ export default function EditTxn() {
         timestamp: timestamp,
         pending: pending,
         amount: amount,
+        recurring: recurring,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -147,6 +150,7 @@ export default function EditTxn() {
     description !== accountCtx.selectedTxn?.description ||
     accountType !== accountCtx.selectedTxn?.type_ ||
     pending !== accountCtx.selectedTxn?.pending ||
+    recurring !== accountCtx.selectedTxn?.recurring ||
     amount !== accountCtx.selectedTxn?.amount ||
     timestamp !==
       moment
@@ -252,6 +256,14 @@ export default function EditTxn() {
                 />
               </div>
             </div>
+            <Button
+              active={recurring}
+              className="mb-3"
+              border={false}
+              text="Recurring"
+              onClick={() => setRecurring(!recurring)}
+              icon={"bi:arrow-clockwise"}
+            />
             <Button
               active={pending}
               className="mb-3"

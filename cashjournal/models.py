@@ -151,6 +151,7 @@ class Transaction(db.Model):
     merchant = db.Column(db.Text)
     type_ = db.Column(db.Text)
     pending = db.Column(db.Boolean)
+    recurring = db.Column(db.Boolean)
     account_id = db.Column(db.Integer, db.ForeignKey("accounts.id"))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
@@ -211,6 +212,7 @@ class Transaction(db.Model):
             "merchant": self.merchant,
             "type_": self.type_,
             "pending": self.pending,
+            "recurring": self.recurring,
             "accountId": self.account_id,
             "category": self.category.to_dict() if self.category else None,
             "accountName": self.account.name if self.account else None,

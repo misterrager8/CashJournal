@@ -417,6 +417,7 @@ def add_txn():
             ),
             type_=type_,
             pending=request.json.get("pending"),
+            recurring=False,
         )
         new_txn.create()
 
@@ -580,6 +581,7 @@ def edit_txn():
         txn.description = request.json.get("description")
         txn.amount = decimal.Decimal(request.json.get("amount"))
         txn.pending = request.json.get("pending")
+        txn.recurring = request.json.get("recurring")
         txn.timestamp = request.json.get("timestamp")
 
         txn.edit()
