@@ -147,7 +147,6 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime)
     description = db.Column(db.Text)
     merchant = db.Column(db.Text)
-    memo = db.Column(db.Text)
     type_ = db.Column(db.Text)
     pending = db.Column(db.Boolean)
     account_id = db.Column(db.Integer, db.ForeignKey("accounts.id"))
@@ -208,7 +207,6 @@ class Transaction(db.Model):
             ),
             "description": self.description,
             "merchant": self.merchant,
-            "memo": self.memo,
             "type_": self.type_,
             "pending": self.pending,
             "accountId": self.account_id,

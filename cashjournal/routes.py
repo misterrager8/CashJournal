@@ -683,7 +683,6 @@ def duplicate_txn():
             timestamp=datetime.datetime.now(),
             description=txn_.description,
             merchant=txn_.merchant,
-            memo=txn_.memo,
             account_id=txn_.account_id,
             user=current_user.id,
             category_id=txn_.category_id,
