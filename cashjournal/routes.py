@@ -623,6 +623,11 @@ def search_txns():
             i.to_dict()
             for i in current_user.txns
             if request.json.get("search").lower() in i.merchant.lower()
+            or (
+                request.json.get("search").lower() in i.description.lower()
+                if i.description
+                else None
+            )
         ]
 
     except Exception as e:

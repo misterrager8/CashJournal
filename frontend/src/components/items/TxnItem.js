@@ -38,7 +38,7 @@ export default function TxnItem({ item, className = "" }) {
           " txn-item w-100 text-truncate " +
           (accountCtx.selectedTxns.includes(item) ? " active" : "")
         }>
-        <div className="col text-truncate">{item.merchant}</div>
+        <div className="col-3 text-truncate">{item.merchant}</div>
         <div className={"col" + (item.amount < 0 ? " red" : " green")}>
           {parseFloat(item.amount).toLocaleString("en-US", {
             style: "currency",
@@ -52,10 +52,17 @@ export default function TxnItem({ item, className = "" }) {
               icon={txnTypes.find((x) => x.value === item.type_)?.icon}
             />
           </div>
-          <div className="ms-2">
+          <div className="mx-2">
             {item.recurring && (
               <>
                 <Icon className="red" inline icon="at-icons:arrow-clockwise" />
+              </>
+            )}
+          </div>
+          <div className="">
+            {item.description && (
+              <>
+                <Icon className="" inline icon="bxs:comment-detail" />
               </>
             )}
           </div>
