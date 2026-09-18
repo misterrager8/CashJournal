@@ -64,13 +64,6 @@ export default function Nav({ className = "" }) {
               icon="bi:credit-card-fill"
             />
             <Button
-              active={ctx.currentPage === "bills"}
-              onClick={() => ctx.setCurrentPage("bills")}
-              text="Bills"
-              border={false}
-              icon="bi:calendar-day"
-            />
-            <Button
               active={ctx.currentPage === "stats"}
               onClick={() => ctx.setCurrentPage("stats")}
               text="Stats"

@@ -160,9 +160,11 @@ def get_accounts():
     msg = ""
 
     accounts = []
+    bills = []
 
     try:
         accounts = [i.to_dict() for i in current_user.accounts]
+        bills = [i.to_dict() for i in current_user.bills]
 
     except Exception as e:
         success = False
@@ -171,6 +173,7 @@ def get_accounts():
         "success": success,
         "msg": msg,
         "accounts": accounts,
+        "bills": bills,
     }
 
 

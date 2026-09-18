@@ -488,4 +488,12 @@ tspan {
   .dropdown-item {
     font-size: 1.1rem;
   }
+
+  .between.my-2 {
+    flex-direction: column;
+  }
+
+  .between.my-2 > * {
+    margin: 5px;
+  }
 }

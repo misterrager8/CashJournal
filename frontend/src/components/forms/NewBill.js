@@ -3,9 +3,11 @@ import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
+import { AccountContext } from "../pages/Accounts";
 
 export default function NewBill({ className = "" }) {
   const multiCtx = useContext(Context);
+  const accountCtx = useContext(AccountContext);
 
   const [name, setName] = useState("");
   const [amount, setAmount] = useState(0.01);
@@ -21,7 +23,7 @@ export default function NewBill({ className = "" }) {
   }, [multiCtx.accounts]);
 
   const getAccount = () => {
-    return multiCtx.accounts.find((x) => x.id == accountId);
+    return accountCtx.accounts.find((x) => x.id == accountId);
   };
 
   return (
@@ -34,21 +36,24 @@ export default function NewBill({ className = "" }) {
       }}
       className={className + " d-flex"}>
       <Input
+        onFocus={(e) => e.target.select()}
         className=""
         onChange={onChangeName}
         value={name}
         placeholder="New Bill"
       />
       <input
+        onFocus={(e) => e.target.select()}
         style={{ width: "100px" }}
         autoComplete="off"
         onChange={onChangeAmount}
         type="number"
         step={0.01}
-        className="form-control mx-1"
+        className="form-control form-control-sm mx-1"
         value={amount}
       />
       <input
+        onFocus={(e) => e.target.select()}
         style={{ width: "100px" }}
         autoComplete="off"
         max={31}
@@ -56,11 +61,14 @@ export default function NewBill({ className = "" }) {
         onChange={onChangeDayOfMonth}
         type="number"
         step={1}
-        className="form-control me-1"
+        className="form-control form-control-sm me-1"
         value={dayOfMonth}
       />
-      <Dropdown icon="bi:piggy-bank-fill" size={null} text={getAccount()?.name}>
-        {multiCtx.accounts.map((x) => (
+      <Dropdown
+        classNameBtn="text-truncate"
+        icon="bi:credit-card-fill"
+        text={getAccount()?.id}>
+        {accountCtx.accounts.map((x) => (
           <div
             className="dropdown-item"
             key={x.id}

@@ -13,6 +13,8 @@ import Icon from "../atoms/Icon";
 import Budgets from "../sections/Budgets";
 import GetMonth from "../forms/GetMonth";
 import SearchTxns from "../forms/SearchTxns";
+import BillItem from "../items/BillItem";
+import NewBill from "../forms/NewBill";
 
 export const AccountContext = createContext();
 
@@ -44,6 +46,7 @@ export default function Accounts({ className = "" }) {
 
   const [filter, setFilter] = useState(null);
   const [showBudgets, setShowBudgets] = useState(false);
+  const [showBills, setShowBills] = useState(false);
   const [total, setTotal] = useState(0);
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
@@ -53,6 +56,7 @@ export default function Accounts({ className = "" }) {
     ctx.setLoading(true);
     api("get_accounts", {}, (data) => {
       setAccounts(data.accounts);
+      ctx.setBills(data.bills);
       ctx.setLoading(false);
     });
   };
@@ -547,11 +551,30 @@ export default function Accounts({ className = "" }) {
                   </div>
                   <GetMonth />
                 </div>
-                <SearchTxns className="my-2" />
+                <SearchTxns className="mt-2" />
 
-                <div className="txn-scroll mt-3">
+                <div className="txn-scroll ">
                   {!showBudgets ? (
                     <>
+                      <div className="between my-2 pe-1">
+                        <Button
+                          className=""
+                          onClick={() => setShowBills(!showBills)}
+                          icon="at-icons:arrow-clockwise"
+                          border={false}
+                          text={`${showBills ? "Hide" : "Show"} Bills`}
+                          active={showBills}
+                        />
+                        {showBills && <NewBill className="" />}
+                      </div>
+
+                      {showBills && (
+                        <div className="my-3">
+                          {ctx.bills.map((x) => (
+                            <BillItem key={x.id} item={x} />
+                          ))}
+                        </div>
+                      )}
                       {(searchResults.length > 0 ? searchResults : filteredTxns)
                         .sort((x, y) => y.pending - x.pending)
                         .map((item) => (
