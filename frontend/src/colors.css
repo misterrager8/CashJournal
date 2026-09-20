@@ -1,12 +1,12 @@
 :root,
 html[data-theme="light"] {
-  --primary-bg: #cccccc;
+  --primary-bg: #9a9ba0;
   --primary-txt: #1a1a1a;
 
-  --secondary-color: #b6b2b2;
+  --secondary-color: #76777b;
 
   --btn-color: #2c2b2b;
-  --btn-hover-txt: #cccccc;
+  --btn-hover-txt: #9a9ba0;
 
   --red: #79061b;
   --orange: #793c06;
@@ -18,13 +18,13 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] {
-  --primary-bg: #1a1a1a;
+  --primary-bg: #181e27;
   --primary-txt: #cccccc;
 
-  --secondary-color: #2b2b2b;
+  --secondary-color: #202936;
 
   --btn-color: #cccccc;
-  --btn-hover-txt: #1a1a1a;
+  --btn-hover-txt: #181e27;
 
   --red: #f98688;
   --orange: #f9c386;
@@ -198,13 +198,13 @@ html[data-theme="ice-nebula"] {
 }
 
 html[data-theme="sky-lavender"] {
-  --primary-bg: #3c3249;
+  --primary-bg: #31283c;
   --primary-txt: #bfd9d0;
 
   --secondary-color: #625176;
 
   --btn-color: #61e0a7;
-  --btn-hover-txt: #3c3249;
+  --btn-hover-txt: #31283c;
 
   --red: #f9869f;
   --orange: #f9c986;
@@ -234,13 +234,13 @@ html[data-theme="blood-marigold"] {
 }
 
 html[data-theme="pumpkin-ocean"] {
-  --primary-bg: #45495f;
+  --primary-bg: #35394b;
   --primary-txt: #d0d3c5;
 
   --secondary-color: #656c8b;
 
   --btn-color: #d69261;
-  --btn-hover-txt: #45495f;
+  --btn-hover-txt: #35394b;
 
   --red: #f98693;
   --orange: #f9cb86;
@@ -288,13 +288,13 @@ html[data-theme="citrus-blueberry"] {
 }
 
 html[data-theme="butter-wine"] {
-  --primary-bg: #634b52;
+  --primary-bg: #513c42;
   --primary-txt: #c8c2d6;
 
   --secondary-color: #8e6b77;
 
   --btn-color: #d39c64;
-  --btn-hover-txt: #634b52;
+  --btn-hover-txt: #513c42;
 
   --red: #f98697;
   --orange: #f9b286;
@@ -324,13 +324,13 @@ html[data-theme="lilac-sapphire"] {
 }
 
 html[data-theme="lemon-lavender"] {
-  --primary-bg: #464059;
+  --primary-bg: #383348;
   --primary-txt: #d7c1cb;
 
   --secondary-color: #6a6085;
 
   --btn-color: #d0c48b;
-  --btn-hover-txt: #464059;
+  --btn-hover-txt: #383348;
 
   --red: #f98693;
   --orange: #f9cd86;
@@ -343,7 +343,7 @@ html[data-theme="lemon-lavender"] {
 
 html[data-theme="blueberry-crimson"] {
   --primary-bg: #2b2726;
-  --primary-txt: #c4c6d4;
+  --primary-txt: #7e86bf;
 
   --secondary-color: #544d4a;
 

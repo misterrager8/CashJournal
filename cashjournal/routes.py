@@ -160,9 +160,11 @@ def get_accounts():
     msg = ""
 
     accounts = []
+    bills = []
 
     try:
         accounts = [i.to_dict() for i in current_user.accounts]
+        bills = [i.to_dict() for i in current_user.bills]
 
     except Exception as e:
         success = False
@@ -171,6 +173,7 @@ def get_accounts():
         "success": success,
         "msg": msg,
         "accounts": accounts,
+        "bills": bills,
     }
 
 
@@ -187,6 +190,7 @@ def edit_account():
         account = Account.get(request.json.get("id"))
 
         account.name = request.json.get("name")
+        account.color = request.json.get("color")
         account.edit()
 
         accounts = [i.to_dict() for i in current_user.accounts]
@@ -416,6 +420,7 @@ def add_txn():
             ),
             type_=type_,
             pending=request.json.get("pending"),
+            recurring=False,
         )
         new_txn.create()
 
@@ -445,6 +450,50 @@ def add_txn():
     }
 
 
+@current_app.post("/split_txn")
+@login_required
+def split_txn():
+    success = True
+    msg = ""
+    txn_ = None
+    txns = []
+
+    try:
+        txn_ = Transaction.get(int(request.json.get("txnId")))
+        new_txn = Transaction(
+            # amount=decimal.Decimal(request.json.get("amount")),
+            timestamp=txn_.timestamp,
+            merchant=request.json.get("merchant"),
+            account_id=txn_.account_id,
+            user=current_user.id,
+            type_="expense" if request.json.get("isCharge") else "income",
+        )
+
+        is_charge = -1 if request.json.get("isCharge") else 1
+
+        txn_.amount = txn_.amount - (
+            decimal.Decimal(request.json.get("amount")) * is_charge
+        )
+        new_txn.amount = decimal.Decimal(request.json.get("amount")) * is_charge
+
+        txn_.edit()
+        new_txn.create()
+        txns = [
+            i.to_dict()
+            for i in current_user.get_txns(
+                txn_.timestamp.month,
+                txn_.timestamp.year,
+            )
+        ]
+        txn_ = txn_.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+
+    return {"success": success, "msg": msg, "txn": txn_, "txns": txns}
+
+
 @current_app.post("/get_all_txns")
 @login_required
 def get_all_txns():
@@ -452,14 +501,21 @@ def get_all_txns():
     msg = ""
 
     txns = []
+    accounts = []
 
     try:
         txns = [i.to_dict() for i in current_user.txns]
+        accounts = [i.to_dict() for i in current_user.accounts]
 
     except Exception as e:
         success = False
         msg = str(e)
-    return {"success": success, "msg": msg, "txns": txns}
+    return {
+        "success": success,
+        "msg": msg,
+        "txns": txns,
+        "accounts": accounts,
+    }
 
 
 @current_app.post("/get_txns")
@@ -535,9 +591,8 @@ def edit_txn():
         txn.description = request.json.get("description")
         txn.amount = decimal.Decimal(request.json.get("amount"))
         txn.pending = request.json.get("pending")
+        txn.recurring = request.json.get("recurring")
         txn.timestamp = request.json.get("timestamp")
-
-        click.secho(request.json.get("timestamp"), fg="blue")
 
         txn.edit()
 
@@ -559,6 +614,36 @@ def edit_txn():
         "accounts": accounts,
         "txns": txns,
         "txn": txn,
+    }
+
+
+@current_app.post("/search_txns")
+@login_required
+def search_txns():
+    success = True
+    msg = ""
+
+    txns = []
+
+    try:
+        txns = [
+            i.to_dict()
+            for i in current_user.txns
+            if request.json.get("search").lower() in i.merchant.lower()
+            or (
+                request.json.get("search").lower() in i.description.lower()
+                if i.description
+                else None
+            )
+        ]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "txns": txns,
     }
 
 
@@ -616,7 +701,6 @@ def duplicate_txn():
             timestamp=datetime.datetime.now(),
             description=txn_.description,
             merchant=txn_.merchant,
-            memo=txn_.memo,
             account_id=txn_.account_id,
             user=current_user.id,
             category_id=txn_.category_id,
@@ -888,14 +972,6 @@ def edit_budget():
             decimal.Decimal(request.json.get("maximum"))
             if request.json.get("maximum")
             else 0
-        )
-        click.secho(
-            (
-                decimal.Decimal(request.json.get("maximum"))
-                if request.json.get("maximum")
-                else 0
-            ),
-            fg="blue",
         )
 
         budget.edit()

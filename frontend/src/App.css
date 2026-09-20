@@ -1,7 +1,8 @@
 @import "./colors.css";
 
 * {
-  font-family: "Roboto";
+  font-family: "Montserrat";
+  /* font-family: "JetBrains Mono"; */
 }
 
 body {
@@ -156,7 +157,7 @@ body {
 }
 
 .txn-scroll {
-  height: 45vh;
+  height: 42vh;
   overflow-y: auto;
   border-bottom: 0.5px solid var(--btn-color);
 }
@@ -414,9 +415,14 @@ tspan {
     display: none;
   }
 
-  .nav-custom .btn,
   .txn-menu .btn {
     font-size: 1.1rem;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .nav-custom .btn {
+    font-size: 1.35rem;
     padding-left: 10px;
     padding-right: 10px;
   }
@@ -445,7 +451,7 @@ tspan {
   }
 
   .txn-scroll {
-    height: 41vh;
+    height: 37vh;
   }
 
   .bills-scroll {
@@ -481,5 +487,13 @@ tspan {
 
   .dropdown-item {
     font-size: 1.1rem;
+  }
+
+  .between.my-2 {
+    flex-direction: column;
+  }
+
+  .between.my-2 > * {
+    margin: 5px;
   }
 }

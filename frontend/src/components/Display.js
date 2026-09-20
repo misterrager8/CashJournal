@@ -21,10 +21,6 @@ export default function Display({ className = "" }) {
       component: <Accounts />,
     },
     {
-      value: "bills",
-      component: <Bills />,
-    },
-    {
       value: "stats",
       component: <Stats />,
     },

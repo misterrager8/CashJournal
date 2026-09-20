@@ -35,16 +35,38 @@ export default function TxnItem({ item, className = "" }) {
         onClick={() => accountCtx.setSelectedTxn(item)}
         className={
           className +
-          " txn-item w-100 text-truncate" +
+          " txn-item w-100 text-truncate " +
           (accountCtx.selectedTxns.includes(item) ? " active" : "")
         }>
-        <div className="col text-truncate">{item.merchant}</div>
+        <div className="col-3 text-truncate">{item.merchant}</div>
         <div className={"col" + (item.amount < 0 ? " red" : " green")}>
-          {item.amount}
+          {parseFloat(item.amount).toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
         </div>
-        <div className="col-1">
+        <div className="col-2 d-flex">
           <div className={txnTypes.find((x) => x.value === item.type_)?.color}>
-            <Icon icon={txnTypes.find((x) => x.value === item.type_)?.icon} />
+            <Icon
+              inline
+              icon={txnTypes.find((x) => x.value === item.type_)?.icon}
+            />
+          </div>
+          <div className="mx-2">
+            {item.recurring && (
+              <>
+                <Icon className="red" inline icon="at-icons:arrow-clockwise" />
+              </>
+            )}
+          </div>
+          <div className="">
+            {item.description && (
+              <Icon
+                className="opacity-50"
+                inline
+                icon="fluent:text-description-16-filled"
+              />
+            )}
           </div>
         </div>
         <div className="col text-truncate mx-1 small my-auto">
@@ -58,11 +80,25 @@ export default function TxnItem({ item, className = "" }) {
           )}
           {item.category?.name}
         </div>
-        <div className="col text-truncate">{item.accountName}</div>
+        <div className="col-1">
+          <span
+            style={{
+              backgroundColor: item.accountColor,
+              fontSize: "small",
+              padding: "1px 10px",
+              borderRadius: "5px",
+              fontWeight: "bold",
+            }}>
+            <Icon inline className="me-2" icon="bi:credit-card-fill" />
+            {item.accountName?.[0]}
+          </span>
+        </div>
         <div
           title={moment.tz(item.timestamp, "America/New_York").format("llll")}
-          className="col-1 d-flex flex-row-reverse">
-          {moment.tz(item.timestamp, "America/New_York").format("M/D")}
+          className="col-2 d-flex flex-row-reverse">
+          {moment
+            .tz(item.timestamp, "America/New_York")
+            .format(accountCtx.searchResults.length > 0 ? "M/D/Y" : "M/D")}
         </div>
       </div>
     </div>

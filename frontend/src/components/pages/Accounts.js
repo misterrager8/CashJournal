@@ -11,6 +11,10 @@ import EditTxn from "../forms/EditTxn";
 import Dropdown from "../atoms/Dropdown";
 import Icon from "../atoms/Icon";
 import Budgets from "../sections/Budgets";
+import GetMonth from "../forms/GetMonth";
+import SearchTxns from "../forms/SearchTxns";
+import BillItem from "../items/BillItem";
+import NewBill from "../forms/NewBill";
 
 export const AccountContext = createContext();
 
@@ -27,6 +31,7 @@ export default function Accounts({ className = "" }) {
   const [selectedBudgets, setSelectedBudgets] = useState([]);
 
   const [txns, setTxns] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [sort, setSort] = useState("date");
   const [descending, setDescending] = useState(true);
 
@@ -36,32 +41,22 @@ export default function Accounts({ className = "" }) {
   const [accountName, setAccountName] = useState("");
   const onChangeAccountName = (e) => setAccountName(e.target.value);
 
+  const [accountColor, setAccountColor] = useState("");
+  const onChangeAccountColor = (e) => setAccountColor(e.target.value);
+
   const [filter, setFilter] = useState(null);
   const [showBudgets, setShowBudgets] = useState(false);
+  const [showBills, setShowBills] = useState(false);
   const [total, setTotal] = useState(0);
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
   const getAccounts = () => {
     ctx.setLoading(true);
     api("get_accounts", {}, (data) => {
       setAccounts(data.accounts);
+      ctx.setBills(data.bills);
       ctx.setLoading(false);
     });
   };
@@ -95,6 +90,7 @@ export default function Accounts({ className = "" }) {
       {
         id: selectedAccount?.id,
         name: accountName,
+        color: accountColor,
       },
       (data) => {
         setSelectedAccount(data.account);
@@ -119,14 +115,6 @@ export default function Accounts({ className = "" }) {
     );
   };
 
-  const currentMonthSelected = () => {
-    let today = new Date();
-    return (
-      currentMonth === today.getMonth() + 1 &&
-      currentYear === today.getFullYear()
-    );
-  };
-
   const toggleSelect = (item_) => {
     if (selectedTxns.includes(item_)) {
       setSelectedTxns([...selectedTxns].filter((x) => x !== item_));
@@ -143,6 +131,15 @@ export default function Accounts({ className = "" }) {
 
   const deselectAll = () => {
     setSelectedTxns([]);
+  };
+
+  const searchTxns = (e, search) => {
+    e.preventDefault();
+    ctx.setLoading(true);
+    api("search_txns", { search: search }, (data) => {
+      setSearchResults(data.txns);
+      ctx.setLoading(false);
+    });
   };
 
   const filteredTxns = txns
@@ -210,6 +207,7 @@ export default function Accounts({ className = "" }) {
 
   useEffect(() => {
     setAccountName(selectedAccount?.name);
+    setAccountColor(selectedAccount?.color);
     setSelectedTxn(null);
     // getTxns(selectedAccount?.id);
   }, [selectedAccount]);
@@ -258,6 +256,9 @@ export default function Accounts({ className = "" }) {
     toggleSelect: toggleSelect,
 
     unpend: unpend,
+    searchTxns: searchTxns,
+    searchResults: searchResults,
+    setSearchResults: setSearchResults,
   };
 
   const sorts = [
@@ -285,9 +286,7 @@ export default function Accounts({ className = "" }) {
     let txns_ = [...txns];
     if (sort === "amount") {
       txns_.sort(
-        (x, y) =>
-          Math.abs((descending ? y : x).amount) -
-          Math.abs((descending ? x : y).amount),
+        (x, y) => (descending ? y : x).amount - (descending ? x : y).amount,
       );
     } else if (sort === "date") {
       txns_.sort(
@@ -406,6 +405,12 @@ export default function Accounts({ className = "" }) {
                     ) : (
                       <form onSubmit={(e) => editAccount(e)}>
                         <Input
+                          type_="color"
+                          className="border-0"
+                          value={accountColor}
+                          onChange={onChangeAccountColor}
+                        />
+                        <Input
                           className="border-0"
                           style={{ fontSize: "1.5rem", textAlign: "center" }}
                           value={accountName}
@@ -414,7 +419,7 @@ export default function Accounts({ className = "" }) {
                         <Button type_="submit" className="d-none" />
                       </form>
                     )}
-                    <div style={{ fontSize: "3.5rem" }}>
+                    <div style={{ fontSize: "3.5rem", letterSpacing: "4px" }}>
                       {parseFloat(
                         selectedAccount
                           ? selectedAccount?.balance
@@ -487,7 +492,7 @@ export default function Accounts({ className = "" }) {
                       className="abbreviate"
                       icon={
                         !showBudgets
-                          ? "uis:graph-bar"
+                          ? "akar-icons:tag"
                           : "streamline-plump:credit-card-5-solid"
                       }
                       active={showBudgets}
@@ -544,50 +549,33 @@ export default function Accounts({ className = "" }) {
                       </div>
                     </Dropdown>
                   </div>
-                  <div className="d-flex text-truncate">
-                    <Button
-                      border={false}
-                      icon="bi:caret-left-fill"
-                      onClick={() => {
-                        if (currentMonth === 1) {
-                          setCurrentMonth(12);
-                          setCurrentYear(currentYear - 1);
-                        } else {
-                          setCurrentMonth(currentMonth - 1);
-                        }
-                      }}
-                    />
-                    <Button
-                      className="text-truncate"
-                      active={!currentMonthSelected()}
-                      onClick={() => {
-                        if (!currentMonthSelected()) {
-                          setCurrentMonth(new Date().getMonth() + 1);
-                          setCurrentYear(new Date().getFullYear());
-                        }
-                      }}
-                      border={false}
-                      text={`${months[currentMonth - 1]} '${currentYear.toString().substring(2)}`}
-                    />
-                    <Button
-                      className={currentMonthSelected() ? "invisible" : ""}
-                      border={false}
-                      icon="bi:caret-right-fill"
-                      onClick={() => {
-                        if (currentMonth === 12) {
-                          setCurrentMonth(1);
-                          setCurrentYear(currentYear + 1);
-                        } else {
-                          setCurrentMonth(currentMonth + 1);
-                        }
-                      }}
-                    />
-                  </div>
+                  <GetMonth />
                 </div>
-                <div className="txn-scroll mt-3">
+                <SearchTxns className="mt-2" />
+
+                <div className="txn-scroll ">
                   {!showBudgets ? (
                     <>
-                      {filteredTxns
+                      <div className="between my-2 pe-1">
+                        <Button
+                          className=""
+                          onClick={() => setShowBills(!showBills)}
+                          icon="at-icons:arrow-clockwise"
+                          border={false}
+                          text={`${showBills ? "Hide" : "Show"} Bills`}
+                          active={showBills}
+                        />
+                        {showBills && <NewBill className="" />}
+                      </div>
+
+                      {showBills && (
+                        <div className="my-3">
+                          {ctx.bills.map((x) => (
+                            <BillItem key={x.id} item={x} />
+                          ))}
+                        </div>
+                      )}
+                      {(searchResults.length > 0 ? searchResults : filteredTxns)
                         .sort((x, y) => y.pending - x.pending)
                         .map((item) => (
                           <TxnItem key={item.id} item={item} />
@@ -622,20 +610,22 @@ export default function Accounts({ className = "" }) {
                           currency: "USD",
                         })}
                       </div>
-                      <div className="my-auto">
-                        <Icon
-                          name="material-symbols:hourglass-arrow-down-outline"
-                          className="me-2"
-                        />
-                        {parseFloat(
-                          txns
-                            .filter((x) => x.pending)
-                            .reduce((y, z) => z.amount + y, 0),
-                        ).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </div>
+                      {txns.filter((a) => a.pending).length > 0 && (
+                        <div className="my-auto">
+                          <Icon
+                            name="material-symbols:hourglass-arrow-down-outline"
+                            className="me-2"
+                          />
+                          {parseFloat(
+                            txns
+                              .filter((x) => x.pending)
+                              .reduce((y, z) => y + parseFloat(z.amount), 0),
+                          ).toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                          })}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div>

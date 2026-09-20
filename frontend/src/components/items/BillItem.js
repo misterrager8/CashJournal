@@ -3,9 +3,12 @@ import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import { Context } from "../../Context";
 import moment from "moment";
+import { Icon } from "@iconify/react";
+import { AccountContext } from "../pages/Accounts";
 
 export default function BillItem({ item, className = "" }) {
   const multiCtx = useContext(Context);
+  const accountCtx = useContext(AccountContext);
   const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -18,6 +21,15 @@ export default function BillItem({ item, className = "" }) {
   const onChangeAmount = (e) => setAmount(e.target.value);
   const onChangeDayOfMonth = (e) => setDayOfMonth(e.target.value);
   const onChangeAccountId = (e) => setAccountId(e.target.value);
+
+  const datePassed = () => {
+    let today = moment().startOf("day");
+    let payDate = moment().startOf("day");
+
+    payDate.date(item.day_of_month);
+
+    return payDate < today;
+  };
 
   return (
     <form
@@ -56,7 +68,7 @@ export default function BillItem({ item, className = "" }) {
             value={accountId}
             onChange={onChangeAccountId}
             required>
-            {multiCtx.accounts.map((x) => (
+            {accountCtx.accounts.map((x) => (
               <option key={x.id} value={x.id}>
                 {x.name}
               </option>
@@ -64,13 +76,28 @@ export default function BillItem({ item, className = "" }) {
           </select>
         </>
       ) : (
-        <div className="d-flex w-100">
-          <div className="w-25 fw-bold text-truncate">{name}</div>
-          <div className="w-50">
-            {moment().format("MMMM")} {dayOfMonth}
+        <>
+          {datePassed() && (
+            <Icon className="my-auto me-2 green" inline icon="bi:check-lg" />
+          )}
+          <div
+            className="d-flex w-100"
+            style={{
+              textDecoration: datePassed() ? "line-through" : null,
+              opacity: datePassed() ? "50%" : null,
+            }}>
+            <div className="w-25 fw-bold text-truncate">{name}</div>
+            <div className="w-50">
+              {moment().format("MMMM")} {dayOfMonth}
+            </div>
+            <div className="w-25">
+              {parseFloat(amount).toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              })}
+            </div>
           </div>
-          <div className="w-25">{amount}</div>
-        </div>
+        </>
       )}
       <Button
         onClick={() => setEditing(!editing)}

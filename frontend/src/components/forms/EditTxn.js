@@ -6,6 +6,7 @@ import Icon from "../atoms/Icon";
 import Dropdown from "../atoms/Dropdown";
 import { Context } from "../../Context";
 import moment from "moment-timezone";
+import SplitTxn from "./SplitTxn";
 
 export default function EditTxn() {
   const accountCtx = useContext(AccountContext);
@@ -32,6 +33,8 @@ export default function EditTxn() {
   const [netBalance, setNetBalance] = useState(0);
 
   const [pending, setPending] = useState(false);
+  const [recurring, setRecurring] = useState(false);
+  const [splitting, setSplitting] = useState(false);
 
   useEffect(() => {
     if (accountCtx.selectedTxn) {
@@ -40,6 +43,7 @@ export default function EditTxn() {
       setDescription(accountCtx.selectedTxn?.description);
       setAccountType(accountCtx.selectedTxn?.type_);
       setPending(accountCtx.selectedTxn?.pending);
+      setRecurring(accountCtx.selectedTxn?.recurring);
 
       setTimestamp(
         moment
@@ -79,6 +83,7 @@ export default function EditTxn() {
         timestamp: timestamp,
         pending: pending,
         amount: amount,
+        recurring: recurring,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -145,6 +150,8 @@ export default function EditTxn() {
     description !== accountCtx.selectedTxn?.description ||
     accountType !== accountCtx.selectedTxn?.type_ ||
     pending !== accountCtx.selectedTxn?.pending ||
+    recurring !== accountCtx.selectedTxn?.recurring ||
+    amount !== accountCtx.selectedTxn?.amount ||
     timestamp !==
       moment
         .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
@@ -167,11 +174,23 @@ export default function EditTxn() {
         )}
         <div className="d-flex">
           <Button
+            // text="Duplicate"
             size="lg"
             border={false}
             icon="bi:arrow-clockwise"
             onClick={() => duplicateTxn()}
           />
+
+          {!accountCtx.selectedTxn.pending && (
+            <Button
+              border={false}
+              size="lg"
+              icon="boxicons:split"
+              onClick={() => setSplitting(!splitting)}
+              // text="Split"
+              active={splitting}
+            />
+          )}
           {deleting && (
             <Button
               size="lg"
@@ -190,6 +209,8 @@ export default function EditTxn() {
           />
         </div>
       </div>
+
+      {splitting && <SplitTxn className="my-4" />}
       <form onSubmit={(e) => editTxn(e)} className="mt-3">
         {isChanged() && (
           <Button
@@ -201,7 +222,6 @@ export default function EditTxn() {
         )}
         <input
           placeholder="0.01"
-          // min={0.01}
           type="number"
           step={0.01}
           autoComplete="off"
@@ -236,6 +256,14 @@ export default function EditTxn() {
                 />
               </div>
             </div>
+            <Button
+              active={recurring}
+              className="mb-3"
+              border={false}
+              text="Recurring"
+              onClick={() => setRecurring(!recurring)}
+              icon={"bi:arrow-clockwise"}
+            />
             <Button
               active={pending}
               className="mb-3"
@@ -282,17 +310,6 @@ export default function EditTxn() {
         <div className="mt-3 w-50 mx-auto">
           <div className="d-flex">
             <div className="mx-auto">
-              {/* <div
-                style={{
-                  color: accountCtx.selectedTxn.category?.color,
-                }}>
-                <Icon
-                  name={
-                    accountCtx.selectedTxn.category?.icon || "uis:graph-bar"
-                  }
-                  className="my-auto me-2"
-                />
-              </div> */}
               <Dropdown
                 icon={accountCtx.selectedTxn.category?.icon || "uis:graph-bar"}
                 border={false}

@@ -20,12 +20,17 @@ import moment from "moment";
 import Dropdown from "../atoms/Dropdown";
 import Button from "../atoms/Button";
 import CategoryStatItem from "../items/CategoryStatItem";
+import Input from "../atoms/Input";
 
 export const StatsContext = createContext();
 
 export default function Stats({ className = "" }) {
-  const { setLoading, merchants, setMerchants } = useContext(Context);
+  const { setLoading, merchants, setMerchants, setAccounts, accounts } =
+    useContext(Context);
+
   const [charges, setCharges] = useState([]);
+  const [filteredCharges, setFilteredCharges] = useState([]);
+
   const [deposits, setDeposits] = useState([]);
   const [nets, setNets] = useState([]);
   const [balances, setBalances] = useState([]);
@@ -34,13 +39,15 @@ export default function Stats({ className = "" }) {
 
   const [merchantFilter, setMerchantFilter] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
+  const [accountFilter, setAccountFilter] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const onChangeSearch = (e) => setSearch(e.target.value);
 
   const getAllTxns = () => {
     setLoading(true);
     api("get_all_txns", {}, (data) => {
-      let charges_ = [...data.txns].filter((x) =>
-        ["expense", "adjustment"].includes(x.type_),
-      );
+      let charges_ = [...data.txns].filter((x) => x.type_ === "expense");
       let deposits_ = [...data.txns].filter((x) => x.type_ === "income");
       let nets = [];
       let all_txns = [...data.txns];
@@ -137,13 +144,82 @@ export default function Stats({ className = "" }) {
       );
       setMerchantGroups(merchantGroups_);
       setCategoryGroups(categoryGroups_);
+      setAccounts(data.accounts);
       setLoading(false);
     });
   };
 
   useEffect(() => {
+    if (merchantFilter) {
+      setCategoryFilter(null);
+      setAccountFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => c.merchant === merchantFilter);
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
+  }, [merchantFilter]);
+
+  useEffect(() => {
+    if (categoryFilter) {
+      setMerchantFilter(null);
+      setAccountFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => {
+          return c.category?.name === categoryFilter;
+        });
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
+  }, [categoryFilter]);
+
+  useEffect(() => {
+    if (accountFilter) {
+      setMerchantFilter(null);
+      setCategoryFilter(null);
+      let x = charges.reduce((a, b) => {
+        let filtered_ = b.txns.filter((c) => {
+          return c.accountName === accountFilter;
+        });
+        a.push({
+          ...b,
+          total: filtered_.reduce((c, d) => c + Math.abs(d.amount), 0),
+          txns: filtered_,
+        });
+        return a;
+      }, []);
+      setFilteredCharges(x);
+    }
+  }, [accountFilter]);
+
+  useEffect(() => {
     getAllTxns();
   }, []);
+
+  const expenseAverage = () =>
+    (merchantFilter || categoryFilter || accountFilter
+      ? filteredCharges
+      : charges
+    ).reduce((x, y) => x + parseFloat(y.total), 0) /
+    (merchantFilter || categoryFilter || accountFilter
+      ? filteredCharges
+      : charges
+    ).length;
+
+  const incomeAverage = () =>
+    deposits.reduce((x, y) => x + parseFloat(y.total), 0) / deposits.length;
 
   const contextValue = {
     charges: charges,
@@ -157,19 +233,74 @@ export default function Stats({ className = "" }) {
             <div className="text-truncate" style={{ fontSize: "2rem" }}>
               Monthly Expenses
             </div>
-            <div className="my-auto d-flex">
+          </div>
+          <div className="d-flex flex-row-reverse my-2">
+            <div className="d-flex">
               <Dropdown
+                active={accountFilter}
+                text={accountFilter || "Accounts"}
+                icon="bi:credit-card-fill"
+                target="filter-accounts">
+                <div className="">
+                  <div>
+                    {accounts.map((x) => (
+                      <a
+                        onClick={() => setAccountFilter(x.name)}
+                        className={
+                          "dropdown-item" +
+                          (x.name === accountFilter ? " active" : "")
+                        }>
+                        {x.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Dropdown>
+              {accountFilter && (
+                <Button
+                  icon="bi:x-lg"
+                  onClick={() => setAccountFilter(null)}
+                  border={false}
+                />
+              )}
+              <Dropdown
+                active={merchantFilter}
                 text={merchantFilter || "Merchants"}
                 icon="tdesign:store-filled"
+                classNameBtn="ms-1"
                 target="filter-merchants">
-                <div style={{ height: "300px", overflowY: "auto" }}>
-                  {merchants.map((x) => (
-                    <a
-                      onClick={() => setMerchantFilter(x)}
-                      className="dropdown-item">
-                      {x}
-                    </a>
-                  ))}
+                <div className="">
+                  <div className="d-flex p-2">
+                    {search !== "" && (
+                      <Button
+                        icon="bi:x-lg"
+                        border={false}
+                        onClick={() => setSearch("")}
+                      />
+                    )}
+                    <Input
+                      onChange={onChangeSearch}
+                      value={search}
+                      placeholder="Search"
+                      className=""
+                    />
+                  </div>
+                  <div style={{ height: "300px", overflowY: "auto" }}>
+                    {merchants
+                      .filter((w) =>
+                        w.toLowerCase().includes(search.toLowerCase()),
+                      )
+                      .map((x) => (
+                        <a
+                          onClick={() => setMerchantFilter(x)}
+                          className={
+                            "dropdown-item" +
+                            (x === merchantFilter ? " active" : "")
+                          }>
+                          {x}
+                        </a>
+                      ))}
+                  </div>
                 </div>
               </Dropdown>
               {merchantFilter && (
@@ -180,14 +311,39 @@ export default function Stats({ className = "" }) {
                 />
               )}
               <Dropdown
-                classNameBtn="ms-3"
-                text="Categories"
-                // icon="tdesign:store-filled"
-                target="filter-categories"></Dropdown>
+                icon="akar-icons:tag"
+                active={categoryFilter}
+                classNameBtn="ms-1"
+                text={categoryFilter || "Categories"}
+                target="filter-categories">
+                {categoryGroups.map((x) => (
+                  <a
+                    onClick={() => setCategoryFilter(x.category)}
+                    className={
+                      "dropdown-item" +
+                      (x.category === categoryFilter ? " active" : "")
+                    }>
+                    {x.category}
+                  </a>
+                ))}
+              </Dropdown>
+              {categoryFilter && (
+                <Button
+                  icon="bi:x-lg"
+                  onClick={() => setCategoryFilter(null)}
+                  border={false}
+                />
+              )}
             </div>
           </div>
           <ResponsiveContainer height={250}>
-            <BarChart margin={{ left: 20, top: 30 }} data={charges}>
+            <BarChart
+              margin={{ left: 20, top: 30 }}
+              data={
+                merchantFilter || categoryFilter || accountFilter
+                  ? filteredCharges
+                  : charges
+              }>
               <Bar fill="#ff5b5b" radius={10} dataKey="total" />
               <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
               <YAxis
@@ -210,6 +366,17 @@ export default function Stats({ className = "" }) {
               />
             </BarChart>
           </ResponsiveContainer>
+          <div className="p-5">
+            <div>
+              <div className="h3">Monthly Average</div>
+              <div className="h5">
+                {expenseAverage().toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="col-12 mb-5">
           <div className="" style={{ fontSize: "2rem" }}>
@@ -239,6 +406,17 @@ export default function Stats({ className = "" }) {
               />
             </BarChart>
           </ResponsiveContainer>
+          <div className="p-5">
+            <div>
+              <div className="h3">Monthly Average</div>
+              <div className="h5">
+                {incomeAverage().toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                })}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="col-12 mb-5">
           <div className="" style={{ fontSize: "2rem" }}>
