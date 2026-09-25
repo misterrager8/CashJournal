@@ -1,8 +1,11 @@
 @import "./colors.css";
 
 * {
-  font-family: "Montserrat";
-  /* font-family: "JetBrains Mono"; */
+  /* font-family: "Inter"; */
+  font-family: "IBM Plex Sans";
+  /* font-family: "Manrope"; */
+  /* font-family: "DM Sans"; */
+  /* font-family: "Plus Jakarta Sans"; */
 }
 
 body {
