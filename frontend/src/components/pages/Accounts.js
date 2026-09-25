@@ -4,7 +4,7 @@ import TxnItem from "../items/TxnItem";
 import NewAccount from "../forms/NewAccount";
 import NewTxn from "../forms/NewTxn";
 import { Context } from "../../Context";
-import { api, moment_ as moment } from "../../util";
+import { api, moment_ as moment, months } from "../../util";
 import Button from "../atoms/Button";
 import Input from "../atoms/Input";
 import EditTxn from "../forms/EditTxn";
@@ -15,6 +15,7 @@ import GetMonth from "../forms/GetMonth";
 import SearchTxns from "../forms/SearchTxns";
 import BillItem from "../items/BillItem";
 import NewBill from "../forms/NewBill";
+import NewTransfer from "../forms/NewTransfer";
 
 export const AccountContext = createContext();
 
@@ -36,6 +37,7 @@ export default function Accounts({ className = "" }) {
   const [descending, setDescending] = useState(true);
 
   const [editing, setEditing] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const [accountName, setAccountName] = useState("");
@@ -133,10 +135,22 @@ export default function Accounts({ className = "" }) {
     setSelectedTxns([]);
   };
 
-  const searchTxns = (e, search) => {
+  const searchTxns = (e, search, startDate, endDate) => {
     e.preventDefault();
     ctx.setLoading(true);
-    api("search_txns", { search: search }, (data) => {
+    api(
+      "search_txns",
+      { search: search, startDate: startDate, endDate: endDate },
+      (data) => {
+        setSearchResults(data.txns);
+        ctx.setLoading(false);
+      },
+    );
+  };
+
+  const getBookmarks = () => {
+    ctx.setLoading(true);
+    api("get_bookmarks", {}, (data) => {
       setSearchResults(data.txns);
       ctx.setLoading(false);
     });
@@ -340,6 +354,120 @@ export default function Accounts({ className = "" }) {
               })}
             </div>
           </div>
+          <div className="divider hide-on-mobile my-3"></div>
+          <div
+            style={{ fontSize: "1.3rem" }}
+            className="text-center mb-3">{`${months[currentMonth - 1]} '${currentYear.toString().substring(2)}`}</div>
+          <div className="d-flex flex-column" style={{ fontSize: "1.3rem" }}>
+            {!showBudgets ? (
+              <div className="">
+                <div className="green between">
+                  <span>
+                    <Icon name="bi:plus-lg" className="me-2" />
+                    Income
+                  </span>
+                  {incomeTotal.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+                <div className="red between">
+                  <span>
+                    <Icon name="bi:dash-lg" className="me-2" />
+                    Expenses
+                  </span>
+                  {expenseTotal.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+                <div className="orange between">
+                  <span>
+                    <Icon name="fluent-mdl2:total" className="me-2" />
+                    Net
+                  </span>
+                  {monthlyNet.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+                {txns.filter((a) => a.pending).length > 0 && (
+                  <div className="between">
+                    <span>
+                      <Icon
+                        name="material-symbols:hourglass-arrow-down-outline"
+                        className="me-2"
+                      />
+                      Pending
+                    </span>
+                    {parseFloat(
+                      txns
+                        .filter((x) => x.pending)
+                        .reduce((y, z) => y + parseFloat(z.amount), 0),
+                    ).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className="orange between">
+                  <span>
+                    <Icon name="fluent-mdl2:total" className="me-2" />
+                    Total
+                  </span>
+                  {selectedBudgets
+                    .reduce(
+                      (x, y) =>
+                        x + y.txns.reduce((z, a) => z + Math.abs(a.amount), 0),
+                      0,
+                    )
+                    .toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })}
+                </div>
+              </div>
+            )}
+            {!showBudgets && (
+              <>
+                <div className="divider my-3"></div>
+                <div className="between">
+                  <div>
+                    <Button
+                      text="Select All"
+                      border={false}
+                      icon="bi:check-square"
+                      onClick={() => selectAll()}
+                    />
+                    {selectedTxns.length > 0 && (
+                      <Button
+                        text="Clear"
+                        border={false}
+                        icon="bi:square"
+                        onClick={() => deselectAll()}
+                      />
+                    )}
+                  </div>
+                  <span
+                    className={
+                      "" + (!selectedTxns.length > 0 ? " opacity-50" : "")
+                    }>
+                    <Icon
+                      name="streamline-plump:credit-card-5-solid"
+                      className="me-2"
+                    />
+
+                    {selectedTxns.length > 0
+                      ? selectedTxns.length
+                      : txns.length}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
         <div className="divider hide-on-mobile"></div>
         <div className="col-67">
@@ -350,50 +478,73 @@ export default function Accounts({ className = "" }) {
               <>
                 <div className="text-center">
                   <div className="show-on-mobile">
-                    <Dropdown
-                      active={selectedAccount}
-                      classNameMenu="w-95"
-                      icon="bi:credit-card-fill"
-                      border={false}>
-                      {accounts.map((x) => (
+                    <div className="d-flex mx-auto">
+                      {selectedAccount && (
+                        <Button
+                          className="mx-1"
+                          onClick={() => setSelectedAccount(null)}
+                          icon="bi:arrow-left"
+                          border={false}
+                        />
+                      )}
+                      <Dropdown
+                        iconColor={selectedAccount?.color}
+                        active={selectedAccount}
+                        classNameMenu="w-95"
+                        icon="bi:credit-card-fill"
+                        border={false}>
+                        <div className="p-2 mb-2">
+                          <NewAccount />
+                        </div>
+                        {accounts.map((x) => (
+                          <a
+                            onClick={() => setSelectedAccount(x)}
+                            style={{ fontSize: "1rem" }}
+                            className={
+                              "dropdown-item between" +
+                              (selectedAccount?.id === x.id ? " active" : "")
+                            }>
+                            <div>
+                              <Icon
+                                style={{ color: x.color }}
+                                name="bi:credit-card-fill"
+                              />
+                              <span className="ms-3 fw-bold">{x.name}</span>
+                            </div>
+                            <span className="font-monospace">
+                              {parseFloat(x.balance).toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                              })}
+                            </span>
+                          </a>
+                        ))}
+
                         <a
-                          onClick={() => setSelectedAccount(x)}
+                          onClick={() => setSelectedAccount(null)}
                           style={{ fontSize: "1rem" }}
                           className={
                             "dropdown-item between" +
-                            (selectedAccount?.id === x.id ? " active" : "")
+                            (!selectedAccount ? " active" : "")
                           }>
-                          <span className="fw-bold">{x.name}</span>
+                          <div>
+                            <Icon name="fluent-mdl2:total" />
+                            <span className="ms-3 fw-bold">All Accounts</span>
+                          </div>
                           <span className="font-monospace">
-                            {parseFloat(x.balance).toLocaleString("en-US", {
+                            {parseFloat(
+                              accounts.reduce(
+                                (x, y) => x + parseFloat(y.balance),
+                                0,
+                              ),
+                            ).toLocaleString("en-US", {
                               style: "currency",
                               currency: "USD",
                             })}
                           </span>
                         </a>
-                      ))}
-
-                      <a
-                        onClick={() => setSelectedAccount(null)}
-                        style={{ fontSize: "1rem" }}
-                        className={
-                          "dropdown-item between" +
-                          (!selectedAccount ? " active" : "")
-                        }>
-                        <span className="fw-bold">All Accounts</span>
-                        <span className="font-monospace">
-                          {parseFloat(
-                            accounts.reduce(
-                              (x, y) => x + parseFloat(y.balance),
-                              0,
-                            ),
-                          ).toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          })}
-                        </span>
-                      </a>
-                    </Dropdown>
+                      </Dropdown>
+                    </div>
                   </div>
                   <>
                     {!editing ? (
@@ -456,34 +607,47 @@ export default function Accounts({ className = "" }) {
                     )}
                   </>
                 </div>
-                <div
-                  className={"d-flex" + (selectedAccount ? "" : " invisible")}>
-                  <div className="mx-auto">
+                <div className={"d-flex"}>
+                  <div className="d-flex mx-auto">
                     <Button
                       border={false}
-                      active={editing}
-                      icon="tdesign:edit-2-filled"
-                      onClick={() => setEditing(!editing)}
+                      active={transferring}
+                      icon="rivet-icons:transfer"
+                      onClick={() => setTransferring(!transferring)}
                     />
-                    {deleting && (
+                    <div className={selectedAccount ? "" : " d-none"}>
+                      <Button
+                        border={false}
+                        active={editing}
+                        icon="tdesign:edit-2-filled"
+                        onClick={() => setEditing(!editing)}
+                      />
+                      {deleting && (
+                        <Button
+                          border={false}
+                          className="red"
+                          icon="bi:question-lg"
+                          onClick={() => {
+                            ctx.deleteAccount(selectedAccount?.id);
+                            setSelectedAccount(null);
+                          }}
+                        />
+                      )}
                       <Button
                         border={false}
                         className="red"
-                        icon="bi:question-lg"
-                        onClick={() => {
-                          ctx.deleteAccount(selectedAccount?.id);
-                          setSelectedAccount(null);
-                        }}
+                        icon="bi:x-lg"
+                        onClick={() => setDeleting(!deleting)}
                       />
-                    )}
-                    <Button
-                      border={false}
-                      className="red"
-                      icon="bi:x-lg"
-                      onClick={() => setDeleting(!deleting)}
-                    />
+                    </div>
                   </div>
                 </div>
+
+                {transferring && (
+                  <div className="d-flex mt-3">
+                    <NewTransfer className="mx-auto" />
+                  </div>
+                )}
                 <NewTxn className="my-2" />
                 <div className="between txn-menu">
                   <div className="d-flex ">
@@ -548,6 +712,11 @@ export default function Accounts({ className = "" }) {
                         ))}
                       </div>
                     </Dropdown>
+                    <Button
+                      border={false}
+                      onClick={() => getBookmarks()}
+                      icon="bi:bookmark-fill"
+                    />
                   </div>
                   <GetMonth />
                 </div>
@@ -582,11 +751,11 @@ export default function Accounts({ className = "" }) {
                         ))}
                     </>
                   ) : (
-                    <Budgets />
+                    <Budgets className="mt-2" />
                   )}
                 </div>
 
-                <div className="between mt-2 small">
+                <div className="between mt-2 small show-on-mobile">
                   {!showBudgets ? (
                     <div className="between w-75">
                       <div className="green my-auto">

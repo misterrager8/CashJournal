@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AccountContext } from "../pages/Accounts";
 import { Context } from "../../Context";
 import Button from "../atoms/Button";
+import { months } from "../../util";
 
 export default function GetMonth() {
   const { currentMonth, setCurrentMonth, setCurrentYear, currentYear } =
@@ -15,21 +16,6 @@ export default function GetMonth() {
   const onChangeYearInput = (e) => setYearInput(e.target.value);
 
   const [jumpingToMonth, setJumpingToMonth] = useState(false);
-
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
 
   const currentMonthSelected = () => {
     let today = new Date();

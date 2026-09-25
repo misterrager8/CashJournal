@@ -157,7 +157,7 @@ body {
 }
 
 .txn-scroll {
-  height: 42vh;
+  height: 46vh;
   overflow-y: auto;
   border-bottom: 0.5px solid var(--btn-color);
 }
@@ -407,6 +407,10 @@ tspan {
     width: 95%;
   }
 
+  .dropdown-item {
+    font-size: 1.1rem;
+  }
+
   .btn.abbreviate > span {
     display: none;
   }
@@ -478,15 +482,11 @@ tspan {
   }
 
   .show-on-mobile {
-    display: unset;
+    display: flex;
   }
 
   .progress-bar-custom {
     flex-direction: column;
-  }
-
-  .dropdown-item {
-    font-size: 1.1rem;
   }
 
   .between.my-2 {

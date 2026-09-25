@@ -1,17 +1,16 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { Context } from "../../Context";
-import moment from "moment";
 import { AccountContext } from "../pages/Accounts";
 import Input from "../atoms/Input";
 import { Icon } from "@iconify/react";
+import TxnItem from "./TxnItem";
 
 export default function BudgetItem({ item, className = "" }) {
   const multiCtx = useContext(Context);
   const accountCtx = useContext(AccountContext);
   const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [showTxns, setShowTxns] = useState(false);
 
   const [name, setName] = useState(item.name);
   const onChangeName = (e) => setName(e.target.value);
@@ -128,27 +127,7 @@ export default function BudgetItem({ item, className = "" }) {
           )}
         </div>
         <div className="d-flex my-auto">
-          {item.maximum && (
-            <div
-              className={
-                "mx-2" +
-                (item.maximum <
-                item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0)
-                  ? " red"
-                  : "")
-              }>
-              <Icon
-                inline
-                icon={
-                  item.maximum <
-                  item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0)
-                    ? "material-symbols:warning-rounded"
-                    : "mdi:piggy-bank"
-                }
-              />
-            </div>
-          )}
-          <div>
+          <div className="font-monospace my-auto">
             {parseFloat(
               item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0),
             ).toLocaleString("en-US", {
@@ -175,73 +154,14 @@ export default function BudgetItem({ item, className = "" }) {
         </div>
       </div>
       {item.id === accountCtx.selectedBudget?.id && item.txns.length > 0 && (
-        <>
-          {Math.round(
-            (item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0) /
-              item.maximum) *
-              100,
-          ) > 0 &&
-            item.maximum && (
-              <>
-                {/* <div className="show-on-mobile">
-                <Icon
-                  inline
-                  icon={item.icon || "uis:graph-bar"}
-                  className="me-2"
-                />
-                <span>{item.name}</span>
-              </div> */}
-                <div
-                  className="progress-div my-3"
-                  style={{
-                    width: `${Math.round(
-                      (item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0) /
-                        item.maximum) *
-                        100,
-                    )}%`,
-                    backgroundColor: item.color,
-                  }}>
-                  <div className="text-center small">
-                    {`${Math.round(
-                      item.txns?.reduce((y, z) => y + Math.abs(z.amount), 0),
-                    )} / ${Math.round(item.maximum)}  (${
-                      Math.round(
-                        (item.txns?.reduce(
-                          (y, z) => y + Math.abs(z.amount),
-                          0,
-                        ) /
-                          item.maximum) *
-                          100,
-                      ) > 5
-                        ? `${Math.round(
-                            (item.txns?.reduce(
-                              (y, z) => y + Math.abs(z.amount),
-                              0,
-                            ) /
-                              item.maximum) *
-                              100,
-                          )}%`
-                        : "\u00A0"
-                    })`}
-                  </div>
-                </div>
-              </>
-            )}
-          <div className="px-5 py-2 small">
-            {item.txns.toReversed().map((x) => (
-              <div className="row py-1" style={{ borderBottom: ".5px solid" }}>
-                <div className="col-3">
-                  {parseFloat(x.amount).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </div>
-                <div className="col-8">{x.merchant}</div>
-                <div className="col-1">{moment(x.timestamp).format("M/D")}</div>
-              </div>
-            ))}
-          </div>
-        </>
+        <div className="px-5 py-2 small">
+          {item.txns.length > 0 && (
+            <div className="text-center mb-2">{`${item.txns.length} transaction${item.txns.length === 1 ? "" : "s"}`}</div>
+          )}
+          {item.txns.toReversed().map((x) => (
+            <TxnItem item={x} />
+          ))}
+        </div>
       )}
     </>
   );

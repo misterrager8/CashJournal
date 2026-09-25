@@ -168,12 +168,22 @@ export default function NewTxn({ className = "" }) {
           ))}
         </div> */}
           <Dropdown
+            iconColor={account?.color}
             classNameBtn="border-0"
             target="choose-account"
             icon="bi:credit-card-fill"
             text={account?.name}>
             {accountCtx.accounts.map((item) => (
-              <div onClick={() => setAccount(item)} className="dropdown-item">
+              <div
+                onClick={() => setAccount(item)}
+                className={
+                  "dropdown-item" + (account?.id === item.id ? " active" : "")
+                }>
+                <Icon
+                  style={{ color: item.color }}
+                  className="me-2"
+                  icon="bi:credit-card-fill"
+                />
                 {item.name}
               </div>
             ))}

@@ -18,7 +18,11 @@ export default function AccountItem({ item, className = "" }) {
         (accountCtx.selectedAccount?.id === item.id ? " active" : "")
       }>
       <div className="fw-bold">
-        <Icon className="me-3" name="bi:credit-card-fill" />
+        <Icon
+          style={{ color: item.color }}
+          className="me-3"
+          name="bi:credit-card-fill"
+        />
         {item.name}
       </div>
       <div className="font-monospace">

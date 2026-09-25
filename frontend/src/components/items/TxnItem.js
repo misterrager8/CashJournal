@@ -53,19 +53,15 @@ export default function TxnItem({ item, className = "" }) {
             />
           </div>
           <div className="mx-2">
-            {item.recurring && (
+            {item.billName && (
               <>
                 <Icon className="red" inline icon="at-icons:arrow-clockwise" />
               </>
             )}
           </div>
           <div className="">
-            {item.description && (
-              <Icon
-                className="opacity-50"
-                inline
-                icon="fluent:text-description-16-filled"
-              />
+            {item.bookmarked && (
+              <Icon className="opacity-50" inline icon="bi:bookmark-fill" />
             )}
           </div>
         </div>

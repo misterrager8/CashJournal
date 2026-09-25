@@ -6,12 +6,12 @@ import click
 from flask import current_app, request, send_from_directory
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
+from . import db
 
 from cashjournal.models import (
     Account,
     Bill,
     Category,
-    ShoppingListItem,
     Transaction,
     User,
 )
@@ -420,14 +420,13 @@ def add_txn():
             ),
             type_=type_,
             pending=request.json.get("pending"),
-            recurring=False,
         )
         new_txn.create()
 
         accounts = [i.to_dict() for i in current_user.accounts]
         txns = [i.to_dict() for i in current_user.get_txns()]
 
-        for i in Category.all():
+        for i in current_user.budgets:
             budgets.append(
                 {
                     "id": i.id,
@@ -450,6 +449,51 @@ def add_txn():
     }
 
 
+@current_app.post("/add_transfer")
+@login_required
+def add_transfer():
+    success = True
+    msg = ""
+
+    accounts = []
+    txns = []
+
+    try:
+        source = Transaction(
+            amount=decimal.Decimal(request.json.get("amount")) * -1,
+            timestamp=datetime.datetime.now(),
+            merchant=f"to: {request.json.get("destMerchant")}",
+            account_id=int(request.json.get("sourceId")),
+            user=current_user.id,
+            type_="transfer",
+        )
+
+        dest = Transaction(
+            amount=decimal.Decimal(request.json.get("amount")),
+            timestamp=datetime.datetime.now(),
+            merchant=f"from: {request.json.get("sourceMerchant")}",
+            account_id=int(request.json.get("destId")),
+            user=current_user.id,
+            type_="transfer",
+        )
+
+        db.session.add_all([source, dest])
+        db.session.commit()
+
+        txns = [i.to_dict() for i in current_user.get_txns()]
+        accounts = [i.to_dict() for i in current_user.accounts]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "accounts": accounts,
+        "txns": txns,
+    }
+
+
 @current_app.post("/split_txn")
 @login_required
 def split_txn():
@@ -462,10 +506,15 @@ def split_txn():
         txn_ = Transaction.get(int(request.json.get("txnId")))
         new_txn = Transaction(
             # amount=decimal.Decimal(request.json.get("amount")),
-            timestamp=txn_.timestamp,
+            timestamp=request.json.get("timestamp"),
             merchant=request.json.get("merchant"),
             account_id=txn_.account_id,
             user=current_user.id,
+            category_id=(
+                int(request.json.get("category"))
+                if request.json.get("category")
+                else None
+            ),
             type_="expense" if request.json.get("isCharge") else "income",
         )
 
@@ -548,8 +597,7 @@ def get_txns():
 
         # Sort transactions by timestamp
         txns.sort(key=lambda x: x["timestamp"], reverse=True)
-        # budgets = [i.to_dict() for i in Category.all()]
-        for i in Category.all():
+        for i in current_user.budgets:
             budgets.append(
                 {
                     "id": i.id,
@@ -573,6 +621,23 @@ def get_txns():
     return {"success": success, "msg": msg, "txns": txns, "budgets": budgets}
 
 
+@current_app.post("/get_bookmarks")
+@login_required
+def get_bookmarks():
+    success = True
+    msg = ""
+
+    txns = []
+
+    try:
+        txns = [i.to_dict() for i in current_user.txns if i.bookmarked]
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {"success": success, "msg": msg, "txns": txns}
+
+
 @current_app.post("/edit_txn")
 @login_required
 def edit_txn():
@@ -591,7 +656,7 @@ def edit_txn():
         txn.description = request.json.get("description")
         txn.amount = decimal.Decimal(request.json.get("amount"))
         txn.pending = request.json.get("pending")
-        txn.recurring = request.json.get("recurring")
+        txn.bookmarked = request.json.get("bookmarked")
         txn.timestamp = request.json.get("timestamp")
 
         txn.edit()
@@ -617,6 +682,33 @@ def edit_txn():
     }
 
 
+@current_app.post("/attach_bill")
+@login_required
+def attach_bill():
+    success = True
+    msg = ""
+
+    txn = None
+
+    try:
+        txn = Transaction.get(request.json.get("id"))
+
+        txn.bill_id = (
+            int(request.json.get("billId")) if request.json.get("billId") else None
+        )
+        txn.edit()
+        txn = txn.to_dict()
+
+    except Exception as e:
+        success = False
+        msg = str(e)
+    return {
+        "success": success,
+        "msg": msg,
+        "txn": txn,
+    }
+
+
 @current_app.post("/search_txns")
 @login_required
 def search_txns():
@@ -629,12 +721,18 @@ def search_txns():
         txns = [
             i.to_dict()
             for i in current_user.txns
-            if request.json.get("search").lower() in i.merchant.lower()
-            or (
-                request.json.get("search").lower() in i.description.lower()
-                if i.description
-                else None
+            if (
+                request.json.get("search").lower() in i.merchant.lower()
+                or (
+                    request.json.get("search").lower() in i.description.lower()
+                    if i.description
+                    else None
+                )
             )
+            and i.timestamp
+            >= datetime.datetime.strptime(request.json.get("startDate"), "%Y-%m-%d")
+            and i.timestamp
+            <= datetime.datetime.strptime(request.json.get("endDate"), "%Y-%m-%d")
         ]
 
     except Exception as e:
@@ -790,126 +888,6 @@ def delete_txn():
     }
 
 
-@current_app.post("/add_shopping_item")
-@login_required
-def add_shopping_item():
-    success = True
-    msg = ""
-
-    new_sli = None
-    slis = []
-
-    try:
-        name = request.json.get("name")
-        estimate = float(request.json.get("estimate"))
-
-        new_sli = ShoppingListItem(
-            name=name,
-            estimate=estimate,
-            date_added=datetime.datetime.now(),
-            user=current_user.id,
-        )
-        new_sli.create()
-
-        new_sli = new_sli.to_dict()
-        slis = [i.to_dict() for i in current_user.shopping_list]
-
-    except Exception as e:
-        success = False
-        msg = str(e)
-    return {"success": success, "msg": msg, "slis": slis}
-
-
-@current_app.post("/get_shopping_list")
-@login_required
-def get_shopping_list():
-    success = True
-    msg = ""
-
-    shopping_list = []
-
-    try:
-        shopping_list = [i.to_dict() for i in current_user.shopping_list]
-
-    except Exception as e:
-        success = False
-        msg = str(e)
-    return {
-        "success": success,
-        "msg": msg,
-        "shoppingList": shopping_list,
-    }
-
-
-@current_app.post("/edit_shopping_item")
-@login_required
-def edit_shopping_item():
-    success = True
-    msg = ""
-
-    shopping_list = []
-
-    try:
-        sli = ShoppingListItem.get(int(request.json.get("id")))
-
-        sli.name = request.json.get("name")
-        sli.estimate = float(request.json.get("estimate"))
-
-        sli.edit()
-
-        shopping_list = [i.to_dict() for i in current_user.shopping_list]
-
-    except Exception as e:
-        success = False
-        msg = str(e)
-    return {"success": success, "msg": msg, "shoppingList": shopping_list}
-
-
-@current_app.post("/toggle_bought")
-@login_required
-def toggle_bought():
-    success = True
-    msg = ""
-
-    shopping_list = []
-
-    try:
-        sli = ShoppingListItem.get(int(request.json.get("id")))
-        sli.toggle_bought()
-
-        shopping_list = [i.to_dict() for i in current_user.shopping_list]
-
-    except Exception as e:
-        success = False
-        msg = str(e)
-    return {"success": success, "msg": msg, "shoppingList": shopping_list}
-
-
-@current_app.post("/delete_shopping_item")
-@login_required
-def delete_shopping_item():
-    success = True
-    msg = ""
-
-    sli = None
-    slis = []
-
-    try:
-        sli = ShoppingListItem.get(int(request.json.get("id")))
-        sli.delete()
-
-        slis = [i.to_dict() for i in current_user.shopping_list]
-
-    except Exception as e:
-        success = False
-        msg = str(e)
-    return {
-        "success": success,
-        "msg": msg,
-        "shoppingList": slis,
-    }
-
-
 @current_app.post("/add_budget")
 @login_required
 def add_budget():
@@ -925,7 +903,7 @@ def add_budget():
         budget.create()
 
         budget = budget.to_dict()
-        for i in Category.all():
+        for i in current_user.budgets:
             budgets.append(
                 {
                     "id": i.id,
@@ -976,7 +954,7 @@ def edit_budget():
 
         budget.edit()
 
-        for i in Category.all():
+        for i in current_user.budgets:
             budgets.append(
                 {
                     "id": i.id,
@@ -1003,7 +981,7 @@ def delete_budget():
         budget = Category.get(int(request.json.get("id")))
         budget.delete()
 
-        for i in Category.all():
+        for i in current_user.budgets:
             budgets.append(
                 {
                     "id": i.id,

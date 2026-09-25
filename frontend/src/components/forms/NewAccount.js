@@ -1,10 +1,10 @@
 import { useContext, useState } from "react";
 import Input from "../atoms/Input";
 import { api } from "../../util";
-import { Context } from "../../Context";
+import { AccountContext } from "../pages/Accounts";
 
 export default function NewAccount({ className = "" }) {
-  const { setAccounts } = useContext(Context);
+  const { setAccounts } = useContext(AccountContext);
   const [name, setName] = useState("");
   const onChangeName = (e) => setName(e.target.value);
 
@@ -12,6 +12,7 @@ export default function NewAccount({ className = "" }) {
     e.preventDefault();
     api("add_account", { name: name }, (data) => {
       setAccounts(data.accounts);
+      setName("");
     });
   };
 
@@ -19,7 +20,7 @@ export default function NewAccount({ className = "" }) {
     <form
       onSubmit={(e) => addAccount(e)}
       className={className + " input-group"}>
-      <Input placeholder="Name" value={name} onChange={onChangeName} />
+      <Input placeholder="New Account" value={name} onChange={onChangeName} />
     </form>
   );
 }

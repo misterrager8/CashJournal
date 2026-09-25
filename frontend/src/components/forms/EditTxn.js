@@ -33,7 +33,7 @@ export default function EditTxn() {
   const [netBalance, setNetBalance] = useState(0);
 
   const [pending, setPending] = useState(false);
-  const [recurring, setRecurring] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
   const [splitting, setSplitting] = useState(false);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function EditTxn() {
       setDescription(accountCtx.selectedTxn?.description);
       setAccountType(accountCtx.selectedTxn?.type_);
       setPending(accountCtx.selectedTxn?.pending);
-      setRecurring(accountCtx.selectedTxn?.recurring);
+      setBookmarked(accountCtx.selectedTxn?.bookmarked);
 
       setTimestamp(
         moment
@@ -82,8 +82,8 @@ export default function EditTxn() {
         type_: accountType,
         timestamp: timestamp,
         pending: pending,
+        bookmarked: bookmarked,
         amount: amount,
-        recurring: recurring,
         month: accountCtx.currentMonth,
         year: accountCtx.currentYear,
       },
@@ -112,6 +112,19 @@ export default function EditTxn() {
         accountCtx.setSelectedTxn(data.txn);
         setSaved(true);
         setTimeout(() => setSaved(false), 1000);
+      },
+    );
+  };
+
+  const attachBill = (id) => {
+    api(
+      "attach_bill",
+      {
+        id: accountCtx.selectedTxn?.id,
+        billId: id,
+      },
+      (data) => {
+        accountCtx.setSelectedTxn(data.txn);
       },
     );
   };
@@ -150,7 +163,7 @@ export default function EditTxn() {
     description !== accountCtx.selectedTxn?.description ||
     accountType !== accountCtx.selectedTxn?.type_ ||
     pending !== accountCtx.selectedTxn?.pending ||
-    recurring !== accountCtx.selectedTxn?.recurring ||
+    bookmarked !== accountCtx.selectedTxn?.bookmarked ||
     amount !== accountCtx.selectedTxn?.amount ||
     timestamp !==
       moment
@@ -257,12 +270,12 @@ export default function EditTxn() {
               </div>
             </div>
             <Button
-              active={recurring}
+              active={bookmarked}
               className="mb-3"
               border={false}
-              text="Recurring"
-              onClick={() => setRecurring(!recurring)}
-              icon={"bi:arrow-clockwise"}
+              text="Bookmarked"
+              onClick={() => setBookmarked(!bookmarked)}
+              icon={"bi:bookmark" + (bookmarked ? "-fill" : "")}
             />
             <Button
               active={pending}
@@ -272,6 +285,25 @@ export default function EditTxn() {
               onClick={() => setPending(!pending)}
               icon={"bi:" + (pending ? "check-square-fill" : "square")}
             />
+            <Dropdown
+              border={false}
+              classNameBtn="mb-3"
+              text={accountCtx.selectedTxn?.billName || "Select Bill"}
+              target="bills">
+              <a
+                onClick={() => attachBill()}
+                className={
+                  "dropdown-item" +
+                  (!accountCtx.selectedTxn?.billName ? " active" : "")
+                }>
+                No Bill
+              </a>
+              {ctx.bills.map((x) => (
+                <a onClick={() => attachBill(x.id)} className="dropdown-item">
+                  {x.name}
+                </a>
+              ))}
+            </Dropdown>
 
             <div className="d-flex">
               <div className="mx-auto">

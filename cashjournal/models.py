@@ -19,9 +19,6 @@ class User(UserMixin, db.Model):
         "Transaction", lazy="dynamic", order_by="desc(Transaction.timestamp)"
     )
     bills = db.relationship("Bill", lazy="dynamic", order_by="Bill.day_of_month")
-    shopping_list = db.relationship(
-        "ShoppingListItem", lazy="dynamic", order_by="ShoppingListItem.bought"
-    )
     budgets = db.relationship("Category", lazy="dynamic")
 
     def __init__(self, **kwargs):
@@ -64,8 +61,6 @@ class User(UserMixin, db.Model):
         for i in self.txns.all():
             db.session.delete(i)
         for i in self.bills.all():
-            db.session.delete(i)
-        for i in self.shopping_list.all():
             db.session.delete(i)
 
         db.session.delete(self)
@@ -151,12 +146,14 @@ class Transaction(db.Model):
     merchant = db.Column(db.Text)
     type_ = db.Column(db.Text)
     pending = db.Column(db.Boolean)
-    recurring = db.Column(db.Boolean)
+    bookmarked = db.Column(db.Boolean, default=False)
     account_id = db.Column(db.Integer, db.ForeignKey("accounts.id"))
+    bill_id = db.Column(db.Integer, db.ForeignKey("bills.id"))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     account = db.relationship("Account")
     category = db.relationship("Category")
+    bill = db.relationship("Bill")
 
     def __init__(self, **kwargs):
         """Initialize a new transaction with the provided attributes."""
@@ -212,9 +209,10 @@ class Transaction(db.Model):
             "merchant": self.merchant,
             "type_": self.type_,
             "pending": self.pending,
-            "recurring": self.recurring,
+            "bookmarked": self.bookmarked,
             "accountId": self.account_id,
             "category": self.category.to_dict() if self.category else None,
+            "billName": self.bill.name if self.bill else None,
             "accountName": self.account.name if self.account else None,
             "accountColor": self.account.color if self.account else None,
         }
@@ -228,6 +226,7 @@ class Bill(db.Model):
     day_of_month = db.Column(db.Integer)
     amount = db.Column(db.Numeric(10, 2))
     user = db.Column(db.Integer, db.ForeignKey("users.id"))
+    txns = db.relationship("Transaction")
     account = db.Column(db.Integer, db.ForeignKey("accounts.id"))
 
     def __init__(self, **kwargs):
@@ -294,60 +293,7 @@ class Bill(db.Model):
             "name": self.name,
             "day_of_month": str(self.day_of_month),
             "amount": str(self.amount),
-        }
-
-
-class ShoppingListItem(db.Model):
-    __tablename__ = "shopping_list_items"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text)
-    estimate = db.Column(db.Numeric(10, 2))
-    date_added = db.Column(db.DateTime)
-    bought = db.Column(db.Boolean, default=False)
-    user = db.Column(db.Integer, db.ForeignKey("users.id"))
-
-    def __init__(self, **kwargs):
-        """Initialize a new shopping list item with the provided attributes."""
-        super(ShoppingListItem, self).__init__(**kwargs)
-
-    @classmethod
-    def all(cls):
-        """Return all shopping list items."""
-        return ShoppingListItem.query.order_by(ShoppingListItem.bought).all()
-
-    @classmethod
-    def get(cls, id):
-        """Return a shopping list item by its ID."""
-        return ShoppingListItem.query.get(id)
-
-    def create(self):
-        """Create and persist the shopping list item."""
-        db.session.add(self)
-        db.session.commit()
-
-    def edit(self):
-        """Persist changes to the shopping list item."""
-        db.session.commit()
-
-    def toggle_bought(self):
-        """Toggle the bought state of the shopping list item and persist it."""
-        self.bought = not self.bought
-        db.session.commit()
-
-    def delete(self):
-        """Delete the shopping list item."""
-        db.session.delete(self)
-        db.session.commit()
-
-    def to_dict(self):
-        """Return the shopping list item as a dictionary."""
-        return {
-            "id": self.id,
-            "name": self.name,
-            "estimate": str(self.estimate),
-            "date_added": self.date_added.isoformat() if self.date_added else None,
-            "bought": self.bought,
+            "txns": [i.to_dict() for i in self.txns],
         }
 
 

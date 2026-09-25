@@ -13,6 +13,7 @@ export default function Dropdown({
   classNameBtn = "",
   classNameMenu = "",
   className = "",
+  iconColor = null,
 }) {
   return (
     <div className={className}>
@@ -28,7 +29,13 @@ export default function Dropdown({
           (border ? "" : " border-0") +
           (active ? " active" : "")
         }>
-        {icon && <Icon name={icon} className={text ? " me-2" : ""} />}
+        {icon && (
+          <Icon
+            style={{ color: iconColor }}
+            name={icon}
+            className={text ? " me-2" : ""}
+          />
+        )}
         <span>{text}</span>
       </a>
       <div id={target} className={classNameMenu + " dropdown-menu"}>

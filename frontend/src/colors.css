@@ -18,13 +18,13 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] {
-  --primary-bg: #181e27;
+  --primary-bg: #212121;
   --primary-txt: #cccccc;
 
-  --secondary-color: #202936;
+  --secondary-color: #313030;
 
   --btn-color: #cccccc;
-  --btn-hover-txt: #181e27;
+  --btn-hover-txt: #212121;
 
   --red: #f98688;
   --orange: #f9c386;

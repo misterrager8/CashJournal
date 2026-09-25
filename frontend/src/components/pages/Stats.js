@@ -21,12 +21,19 @@ import Dropdown from "../atoms/Dropdown";
 import Button from "../atoms/Button";
 import CategoryStatItem from "../items/CategoryStatItem";
 import Input from "../atoms/Input";
+import Spinner from "../atoms/Spinner";
 
 export const StatsContext = createContext();
 
 export default function Stats({ className = "" }) {
-  const { setLoading, merchants, setMerchants, setAccounts, accounts } =
-    useContext(Context);
+  const {
+    loading,
+    setLoading,
+    merchants,
+    setMerchants,
+    setAccounts,
+    accounts,
+  } = useContext(Context);
 
   const [charges, setCharges] = useState([]);
   const [filteredCharges, setFilteredCharges] = useState([]);
@@ -227,317 +234,337 @@ export default function Stats({ className = "" }) {
 
   return (
     <div className={className}>
-      <div className="row" style={{ height: "80vh", overflowY: "auto" }}>
-        <div className="col-12 mb-5">
-          <div className="between">
-            <div className="text-truncate" style={{ fontSize: "2rem" }}>
-              Monthly Expenses
+      {!loading ? (
+        <div className="row" style={{ height: "80vh", overflowY: "auto" }}>
+          <div className="col-12 mb-5">
+            <div className="between">
+              <div className="text-truncate" style={{ fontSize: "2rem" }}>
+                Monthly Expenses
+              </div>
             </div>
-          </div>
-          <div className="d-flex flex-row-reverse my-2">
-            <div className="d-flex">
-              <Dropdown
-                active={accountFilter}
-                text={accountFilter || "Accounts"}
-                icon="bi:credit-card-fill"
-                target="filter-accounts">
-                <div className="">
-                  <div>
-                    {accounts.map((x) => (
-                      <a
-                        onClick={() => setAccountFilter(x.name)}
-                        className={
-                          "dropdown-item" +
-                          (x.name === accountFilter ? " active" : "")
-                        }>
-                        {x.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </Dropdown>
-              {accountFilter && (
-                <Button
-                  icon="bi:x-lg"
-                  onClick={() => setAccountFilter(null)}
-                  border={false}
-                />
-              )}
-              <Dropdown
-                active={merchantFilter}
-                text={merchantFilter || "Merchants"}
-                icon="tdesign:store-filled"
-                classNameBtn="ms-1"
-                target="filter-merchants">
-                <div className="">
-                  <div className="d-flex p-2">
-                    {search !== "" && (
-                      <Button
-                        icon="bi:x-lg"
-                        border={false}
-                        onClick={() => setSearch("")}
-                      />
-                    )}
-                    <Input
-                      onChange={onChangeSearch}
-                      value={search}
-                      placeholder="Search"
-                      className=""
-                    />
-                  </div>
-                  <div style={{ height: "300px", overflowY: "auto" }}>
-                    {merchants
-                      .filter((w) =>
-                        w.toLowerCase().includes(search.toLowerCase()),
-                      )
-                      .map((x) => (
+            <div className="d-flex flex-row-reverse my-2">
+              <div className="d-flex">
+                <Dropdown
+                  active={accountFilter}
+                  text={accountFilter || "Accounts"}
+                  icon="bi:credit-card-fill"
+                  target="filter-accounts">
+                  <div className="">
+                    <div>
+                      {accounts.map((x) => (
                         <a
-                          onClick={() => setMerchantFilter(x)}
+                          onClick={() => setAccountFilter(x.name)}
                           className={
                             "dropdown-item" +
-                            (x === merchantFilter ? " active" : "")
+                            (x.name === accountFilter ? " active" : "")
                           }>
-                          {x}
+                          {x.name}
                         </a>
                       ))}
+                    </div>
                   </div>
-                </div>
-              </Dropdown>
-              {merchantFilter && (
-                <Button
-                  icon="bi:x-lg"
-                  onClick={() => setMerchantFilter(null)}
-                  border={false}
-                />
-              )}
-              <Dropdown
-                icon="akar-icons:tag"
-                active={categoryFilter}
-                classNameBtn="ms-1"
-                text={categoryFilter || "Categories"}
-                target="filter-categories">
-                {categoryGroups.map((x) => (
-                  <a
-                    onClick={() => setCategoryFilter(x.category)}
-                    className={
-                      "dropdown-item" +
-                      (x.category === categoryFilter ? " active" : "")
-                    }>
-                    {x.category}
-                  </a>
-                ))}
-              </Dropdown>
-              {categoryFilter && (
-                <Button
-                  icon="bi:x-lg"
-                  onClick={() => setCategoryFilter(null)}
-                  border={false}
-                />
-              )}
-            </div>
-          </div>
-          <ResponsiveContainer height={250}>
-            <BarChart
-              margin={{ left: 20, top: 30 }}
-              data={
-                merchantFilter || categoryFilter || accountFilter
-                  ? filteredCharges
-                  : charges
-              }>
-              <Bar fill="#ff5b5b" radius={10} dataKey="total" />
-              <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
-              <YAxis
-                tickFormatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-                domain={["auto", "auto"]}
-                type="number"
-              />
-              <Tooltip
-                formatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="p-5">
-            <div>
-              <div className="h3">Monthly Average</div>
-              <div className="h5">
-                {expenseAverage().toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
+                </Dropdown>
+                {accountFilter && (
+                  <Button
+                    icon="bi:x-lg"
+                    onClick={() => setAccountFilter(null)}
+                    border={false}
+                  />
+                )}
+                <Dropdown
+                  active={merchantFilter}
+                  text={merchantFilter || "Merchants"}
+                  icon="tdesign:store-filled"
+                  classNameBtn="ms-1"
+                  target="filter-merchants">
+                  <div className="">
+                    <div className="d-flex p-2">
+                      {search !== "" && (
+                        <Button
+                          icon="bi:x-lg"
+                          border={false}
+                          onClick={() => setSearch("")}
+                        />
+                      )}
+                      <Input
+                        onChange={onChangeSearch}
+                        value={search}
+                        placeholder="Search"
+                        className=""
+                      />
+                    </div>
+                    <div style={{ height: "300px", overflowY: "auto" }}>
+                      {merchants
+                        .filter((w) =>
+                          w.toLowerCase().includes(search.toLowerCase()),
+                        )
+                        .map((x) => (
+                          <a
+                            onClick={() => setMerchantFilter(x)}
+                            className={
+                              "dropdown-item" +
+                              (x === merchantFilter ? " active" : "")
+                            }>
+                            {x}
+                          </a>
+                        ))}
+                    </div>
+                  </div>
+                </Dropdown>
+                {merchantFilter && (
+                  <Button
+                    icon="bi:x-lg"
+                    onClick={() => setMerchantFilter(null)}
+                    border={false}
+                  />
+                )}
+                <Dropdown
+                  icon="akar-icons:tag"
+                  active={categoryFilter}
+                  classNameBtn="ms-1"
+                  text={categoryFilter || "Categories"}
+                  target="filter-categories">
+                  {categoryGroups.map((x) => (
+                    <a
+                      onClick={() => setCategoryFilter(x.category)}
+                      className={
+                        "dropdown-item" +
+                        (x.category === categoryFilter ? " active" : "")
+                      }>
+                      {x.category}
+                    </a>
+                  ))}
+                </Dropdown>
+                {categoryFilter && (
+                  <Button
+                    icon="bi:x-lg"
+                    onClick={() => setCategoryFilter(null)}
+                    border={false}
+                  />
+                )}
               </div>
             </div>
-          </div>
-        </div>
-        <div className="col-12 mb-5">
-          <div className="" style={{ fontSize: "2rem" }}>
-            Monthly Income
-          </div>
-          <ResponsiveContainer height={250}>
-            <BarChart margin={{ left: 20, top: 30 }} data={deposits}>
-              <Bar fill="#3c803c" radius={10} dataKey="total" />
-              <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
-              <YAxis
-                tickFormatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-                domain={["auto", "auto"]}
-                type="number"
-              />
-              <Tooltip
-                formatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-              />
-            </BarChart>
-          </ResponsiveContainer>
-          <div className="p-5">
-            <div>
-              <div className="h3">Monthly Average</div>
-              <div className="h5">
-                {incomeAverage().toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-12 mb-5">
-          <div className="" style={{ fontSize: "2rem" }}>
-            Net Savings
-          </div>
-          <ResponsiveContainer height={250}>
-            <BarChart margin={{ left: 20, top: 30 }} data={nets}>
-              <ReferenceLine strokeDasharray="4 4" strokeWidth={2} y={0} />
-              <Bar radius={10} dataKey="net">
-                {nets.map((entry, index) => {
-                  // Condition: Red for negative values, Green for positive values
-                  const color = entry.net < 0 ? "#ff5b5b" : "#3c803c";
-                  return <Cell key={`cell-${index}`} fill={color} />;
-                })}
-              </Bar>
-              <XAxis reversed domain={["dataMin", "dataMax"]} dataKey="month" />
-              <YAxis
-                tickFormatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-                domain={["auto", "auto"]}
-                type="number"
-              />
-              <Tooltip
-                formatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="col-12 mb-5">
-          <div className="" style={{ fontSize: "2rem" }}>
-            Total Balance
-          </div>
-          <ResponsiveContainer height={250}>
-            <LineChart margin={{ left: 30, top: 30 }} data={balances}>
-              <CartesianGrid vertical={false} />
-              <ReferenceLine strokeDasharray="4 4" strokeWidth={2} y={0} />
-              <Line
-                type="basis"
-                strokeWidth={5}
-                dot={false}
-                dataKey="balance"
-              />
-              <XAxis
-                tickFormatter={(x) => moment(x).format("M/D")}
-                tickMargin={10}
-                reversed
-                domain={["dataMin", "dataMax"]}
-                dataKey="timestamp"
-              />
-              <YAxis
-                tickFormatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-                domain={["auto", "auto"]}
-                type="number"
-              />
-              <Tooltip
-                formatter={(x) =>
-                  parseFloat(x).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })
-                }
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="d-flex mt-4">
-          <div className="w-50 px-4">
-            {merchantGroups
-              .sort(
-                (v, w) =>
-                  v.txns.reduce((y, z) => y + Number(z.amount), 0) -
-                  w.txns.reduce((y, z) => y + Number(z.amount), 0),
-              )
-              .map((x) => (
-                <div className="row" style={{ borderBottom: ".5px solid" }}>
-                  <div
-                    className="col text-truncate"
-                    title={x.merchant}
-                    style={{ fontSize: "1.5rem" }}>
-                    {x.merchant}
-                  </div>
-                  <div className="col my-auto" style={{ fontSize: "1rem" }}>
-                    {parseFloat(
-                      x.txns.reduce((y, z) => y + Number(z.amount), 0),
-                    ).toLocaleString("en-US", {
+            <ResponsiveContainer height={250}>
+              <BarChart
+                margin={{ left: 20, top: 30 }}
+                data={
+                  merchantFilter || categoryFilter || accountFilter
+                    ? filteredCharges
+                    : charges
+                }>
+                <Bar fill="#ff5b5b" radius={10} dataKey="total" />
+                <XAxis
+                  reversed
+                  domain={["dataMin", "dataMax"]}
+                  dataKey="month"
+                />
+                <YAxis
+                  tickFormatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
                       style: "currency",
                       currency: "USD",
-                    })}
-                  </div>
+                    })
+                  }
+                  domain={["auto", "auto"]}
+                  type="number"
+                />
+                <Tooltip
+                  formatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="p-5">
+              <div>
+                <div className="h3">Monthly Average</div>
+                <div className="h5">
+                  {expenseAverage().toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
                 </div>
-              ))}
+              </div>
+            </div>
           </div>
-          <StatsContext.Provider value={contextValue}>
+          <div className="col-12 mb-5">
+            <div className="" style={{ fontSize: "2rem" }}>
+              Monthly Income
+            </div>
+            <ResponsiveContainer height={250}>
+              <BarChart margin={{ left: 20, top: 30 }} data={deposits}>
+                <Bar fill="#3c803c" radius={10} dataKey="total" />
+                <XAxis
+                  reversed
+                  domain={["dataMin", "dataMax"]}
+                  dataKey="month"
+                />
+                <YAxis
+                  tickFormatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                  domain={["auto", "auto"]}
+                  type="number"
+                />
+                <Tooltip
+                  formatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="p-5">
+              <div>
+                <div className="h3">Monthly Average</div>
+                <div className="h5">
+                  {incomeAverage().toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 mb-5">
+            <div className="" style={{ fontSize: "2rem" }}>
+              Net Savings
+            </div>
+            <ResponsiveContainer height={250}>
+              <BarChart margin={{ left: 20, top: 30 }} data={nets}>
+                <ReferenceLine strokeDasharray="4 4" strokeWidth={2} y={0} />
+                <Bar radius={10} dataKey="net">
+                  {nets.map((entry, index) => {
+                    // Condition: Red for negative values, Green for positive values
+                    const color = entry.net < 0 ? "#ff5b5b" : "#3c803c";
+                    return <Cell key={`cell-${index}`} fill={color} />;
+                  })}
+                </Bar>
+                <XAxis
+                  reversed
+                  domain={["dataMin", "dataMax"]}
+                  dataKey="month"
+                />
+                <YAxis
+                  tickFormatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                  domain={["auto", "auto"]}
+                  type="number"
+                />
+                <Tooltip
+                  formatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="col-12 mb-5">
+            <div className="" style={{ fontSize: "2rem" }}>
+              Total Balance
+            </div>
+            <ResponsiveContainer height={250}>
+              <LineChart margin={{ left: 30, top: 30 }} data={balances}>
+                <CartesianGrid vertical={false} />
+                <ReferenceLine strokeDasharray="4 4" strokeWidth={2} y={0} />
+                <Line
+                  type="basis"
+                  strokeWidth={5}
+                  dot={false}
+                  dataKey="balance"
+                />
+                <XAxis
+                  tickFormatter={(x) => moment(x).format("M/D")}
+                  tickMargin={10}
+                  reversed
+                  domain={["dataMin", "dataMax"]}
+                  dataKey="timestamp"
+                />
+                <YAxis
+                  tickFormatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                  domain={["auto", "auto"]}
+                  type="number"
+                />
+                <Tooltip
+                  formatter={(x) =>
+                    parseFloat(x).toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    })
+                  }
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="d-flex mt-4">
             <div className="w-50 px-4">
-              {categoryGroups
+              {merchantGroups
                 .sort(
                   (v, w) =>
                     v.txns.reduce((y, z) => y + Number(z.amount), 0) -
                     w.txns.reduce((y, z) => y + Number(z.amount), 0),
                 )
                 .map((x) => (
-                  <CategoryStatItem key={uuidv4()} item={x} />
+                  <div className="row" style={{ borderBottom: ".5px solid" }}>
+                    <div
+                      className="col text-truncate"
+                      title={x.merchant}
+                      style={{ fontSize: "1.5rem" }}>
+                      {x.merchant}
+                    </div>
+                    <div className="col my-auto" style={{ fontSize: "1rem" }}>
+                      {parseFloat(
+                        x.txns.reduce((y, z) => y + Number(z.amount), 0),
+                      ).toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </div>
+                  </div>
                 ))}
             </div>
-          </StatsContext.Provider>
+            <StatsContext.Provider value={contextValue}>
+              <div className="w-50 px-4">
+                {categoryGroups
+                  .sort(
+                    (v, w) =>
+                      v.txns.reduce((y, z) => y + Number(z.amount), 0) -
+                      w.txns.reduce((y, z) => y + Number(z.amount), 0),
+                  )
+                  .map((x) => (
+                    <CategoryStatItem key={uuidv4()} item={x} />
+                  ))}
+              </div>
+            </StatsContext.Provider>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="d-flex">
+          <div className="m-auto" style={{ fontSize: "20rem" }}>
+            <Spinner />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

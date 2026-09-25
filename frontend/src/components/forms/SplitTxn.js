@@ -6,6 +6,7 @@ import { AccountContext } from "../pages/Accounts";
 import Dropdown from "../atoms/Dropdown";
 import { api } from "../../util";
 import { Icon } from "@iconify/react";
+import moment from "moment-timezone";
 
 export default function SplitTxn({ className = "" }) {
   const ctx = useContext(Context);
@@ -16,10 +17,24 @@ export default function SplitTxn({ className = "" }) {
   const [isDeposit, setIsDeposit] = useState(false);
 
   const [parsedInput, setParsedInput] = useState(null);
+  const [category, setCategory] = useState(null);
+
+  const [timestamp, setTimestamp] = useState(
+    moment
+      .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
+      .format("YYYY-MM-DD HH:mm:ss"),
+  );
+  const onChangeTimestamp = (e) => setTimestamp(e.target.value);
 
   const resetAll = () => {
     setQuickInput("");
     setParsedInput(null);
+    setTimestamp(
+      moment
+        .tz(accountCtx.selectedTxn?.timestamp, "America/New_York")
+        .format("YYYY-MM-DD HH:mm:ss"),
+    );
+    setCategory(null);
   };
 
   const splitTxn = (e) => {
@@ -33,6 +48,8 @@ export default function SplitTxn({ className = "" }) {
         merchant: parsedInput[2],
         txnId: accountCtx.selectedTxn?.id,
         isCharge: !isDeposit,
+        timestamp: timestamp,
+        category: category,
       },
       (data) => {
         accountCtx.setSelectedTxn(data.txn);
@@ -82,7 +99,51 @@ export default function SplitTxn({ className = "" }) {
             <Icon className="my-auto mx-1" icon="bi:at" />
             <div className="my-auto">{parsedInput[2]}?</div>
 
-            <div className="ms-3">
+            <div className="d-flex ms-3">
+              <input
+                max={moment
+                  .tz(new Date(), "America/New_York")
+                  .format("YYYY-MM-DD")}
+                type="datetime-local"
+                value={timestamp}
+                onChange={onChangeTimestamp}
+                autoComplete="off"
+                className="form-control border-0"
+              />
+              <Dropdown
+                icon={
+                  ctx.budgets.find((x) => x.id === category)?.icon ||
+                  "uis:graph-bar"
+                }
+                border={false}
+                classNameBtn="w-100"
+                text={
+                  ctx.budgets.find((x) => x.id === category)?.name ||
+                  "No Budget"
+                }
+                target="budgets">
+                <a onClick={() => setCategory(null)} className="dropdown-item">
+                  No Budget
+                </a>
+                {ctx.budgets.map((x) => (
+                  <a
+                    onClick={() => setCategory(x.id)}
+                    className={
+                      "dropdown-item" + (x.id === category ? " active" : "")
+                    }>
+                    <span
+                      style={{
+                        color: x.color,
+                      }}>
+                      <Icon
+                        className="me-2"
+                        name={x?.icon || "uis:graph-bar"}
+                      />
+                    </span>
+                    {x.name}
+                  </a>
+                ))}
+              </Dropdown>
               <Button
                 onClick={() => resetAll()}
                 className="red mx-1"
